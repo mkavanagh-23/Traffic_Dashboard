@@ -13,7 +13,7 @@
 //
 // Incorporate JSON and XML/RSS parsing
 // Learn how to incorporate API key safely into project (perhaps sourced from ENV)?
-// Stream videos from an m3u8 playlist (obtained vis REST API)
+// Source videos via API
 // Mapping coordinates to regions and markets
 // Severity coding
 // Embed Goole Maps objects
@@ -36,10 +36,36 @@ int main(int argc, char** argv)
   // Create a media player to play the object
   auto player = VLC::MediaPlayer(media);
 
-  // Test media playback for 10 seconds
+  // Begin media playback
   player.play();
-  std::this_thread::sleep_for( std::chrono::seconds( 10 ) );
-  player.stop();
+  bool isPlaying{true};
+
+  // Playback loop
+  while(isPlaying) {
+    std::this_thread::sleep_for(std::chrono::seconds(5));   // Check every 5 seconds
+
+    if(!player.isPlaying()) {
+      std::cout << "Stream disconnected. Attempting reconnect...\n";
+      
+      player.stop();
+      player.play();
+
+      short connectAttempts{0};
+      while(!player.isPlaying() && connectAttempts < 5) {    // Attempt to reconnect 5 times 
+        std::cout << "[Attempt " << connectAttempts + 1 << "] failed. Retrying...\n";
+        std::this_thread::sleep_for(std::chrono::seconds(5)); // Wait for 5 seconds before trying again
+        player.stop();
+        player.play();
+        ++connectAttempts;
+      }
+
+      if(!player.isPlaying()) {
+        std::cerr << "Reconnection attempt failed. Exiting program...\n";
+        isPlaying = false;
+      }
+    }
+  }
+
   
   return 0;
 }
