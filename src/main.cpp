@@ -2,26 +2,27 @@
 #include <thread>
 #include <iostream>
 
-int main(int ac, char** av)
+int main(int argc, char** argv)
 {
-    if (ac < 2)
-    {
-        std::cerr << "usage: " << av[0] << " <file to play>" << std::endl;
-        return 1;
-    }
-    auto instance = VLC::Instance(0, nullptr);
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
-    auto media = VLC::Media(av[1], VLC::Media::FromPath);
-    auto mp = VLC::MediaPlayer(instance, media);
-#else
-    auto media = VLC::Media(instance, av[1], VLC::Media::FromPath);
-    auto mp = VLC::MediaPlayer(media);
-#endif
-    mp.play();
-    std::this_thread::sleep_for( std::chrono::seconds( 10 ) );
-#if LIBVLC_VERSION_INT >= LIBVLC_VERSION(4, 0, 0, 0)
-    mp.stopAsync();
-#else
-    mp.stop();
-#endif
+  // Check for valid arguments
+  if (argc < 2) {
+    std::cerr << "usage: " << argv[0] << " <file to play>" << std::endl;
+    return 1;
+  }
+
+  // Create a VLC instance
+  auto instance = VLC::Instance(0, nullptr);
+  
+  // Create a media object from the filepath
+  auto media = VLC::Media(instance, argv[1], VLC::Media::FromPath);
+
+  // Create a media player to play the object
+  auto player = VLC::MediaPlayer(media);
+
+  // Test media playback for 10 seconds
+  player.play();
+  std::this_thread::sleep_for( std::chrono::seconds( 10 ) );
+  player.stop();
+  
+  return 0;
 }
