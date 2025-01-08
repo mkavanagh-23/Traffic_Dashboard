@@ -1,6 +1,7 @@
 #include "vlcpp/vlc.hpp"
 #include <thread>
 #include <iostream>
+#include <chrono>
 
 // Parse and store information from NYSDOT REST API
 // Parse and store information for MCNY RSS feed
@@ -22,15 +23,15 @@ int main(int argc, char** argv)
 {
   // Check for valid arguments
   if (argc < 2) {
-    std::cerr << "usage: " << argv[0] << " <file to play>" << std::endl;
+    std::cerr << "usage: " << argv[0] << " <URL to .m3u8 stream>" << std::endl;
     return 1;
   }
 
   // Create a VLC instance
   auto instance = VLC::Instance(0, nullptr);
   
-  // Create a media object from the filepath
-  auto media = VLC::Media(instance, argv[1], VLC::Media::FromPath);
+  // Create a media object from the remote stream
+  auto media = VLC::Media(instance, argv[1], VLC::Media::FromLocation);
 
   // Create a media player to play the object
   auto player = VLC::MediaPlayer(media);
