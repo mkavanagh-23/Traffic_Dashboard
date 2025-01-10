@@ -6,7 +6,7 @@
 VLC::Instance Video::m_instance(0, nullptr);
 
 Video::Video(const std::string& videoSource, VLC::Media::FromType fromType)
-  : source{videoSource}, type{fromType}, m_media(m_instance, source, type), m_player(m_media)
+  : m_source{videoSource}, m_type{fromType}, m_media(m_instance, m_source, m_type), m_player(m_media)
 {}
 
 void Video::play() {

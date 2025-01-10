@@ -28,10 +28,12 @@ int main(int argc, char** argv)
   }
 
   // Create the video object from the stream URL
-  Video video(argv[1], VLC::Media::FromLocation);
+  Video video(argv[1], VLC::Media::FromPath);
 
   // Play the video
   video.play();
+  std::cout << "Now playing video: " << video.getSource() << '\n';
+  std::cout << "Type: " << video.getTypeStr() << '\n';
 
   // Play for 15 seconds to test proper playback
   std::this_thread::sleep_for(std::chrono::seconds(15));
@@ -39,37 +41,5 @@ int main(int argc, char** argv)
   // Stop media playback
   video.stop();
 
-/*
-  // Begin media playback
-  player.play();
-  bool isPlaying{true};
-
-  // Playback loop
-  while(isPlaying) {
-    std::this_thread::sleep_for(std::chrono::seconds(5));   // Check every 5 seconds
-
-    if(!player.isPlaying()) {
-      std::cout << "Stream disconnected. Attempting reconnect...\n";
-      
-      player.stop();
-      player.play();
-
-      short connectAttempts{0};
-      while(!player.isPlaying() && connectAttempts < 5) {    // Attempt to reconnect 5 times 
-        std::cout << "[Attempt " << connectAttempts + 1 << "] failed. Retrying...\n";
-        std::this_thread::sleep_for(std::chrono::seconds(5)); // Wait for 5 seconds before trying again
-        player.stop();
-        player.play();
-        ++connectAttempts;
-      }
-
-      if(!player.isPlaying()) {
-        std::cerr << "Reconnection attempt failed. Exiting program...\n";
-        isPlaying = false;
-      }
-    }
-  }
-*/
-  
   return 0;
 }
