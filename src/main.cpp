@@ -1,4 +1,4 @@
-#include "vlcpp/vlc.hpp"
+#include "Video.h"
 #include <thread>
 #include <iostream>
 #include <chrono>
@@ -27,15 +27,19 @@ int main(int argc, char** argv)
     return 1;
   }
 
-  // Create a VLC instance
-  auto instance = VLC::Instance(0, nullptr);
-  
-  // Create a media object from the remote stream
-  auto media = VLC::Media(instance, argv[1], VLC::Media::FromLocation);
+  // Create the video object from the stream URL
+  Video video(argv[1], VLC::Media::FromLocation);
 
-  // Create a media player to play the object
-  auto player = VLC::MediaPlayer(media);
+  // Play the video
+  video.play();
 
+  // Play for 15 seconds to test proper playback
+  std::this_thread::sleep_for(std::chrono::seconds(15));
+
+  // Stop media playback
+  video.stop();
+
+/*
   // Begin media playback
   player.play();
   bool isPlaying{true};
@@ -65,7 +69,7 @@ int main(int argc, char** argv)
       }
     }
   }
-
+*/
   
   return 0;
 }
