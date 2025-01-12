@@ -5,3 +5,4 @@ SDL2.dll
 lib*
 curl
 json*
+.env

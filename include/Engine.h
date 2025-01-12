@@ -7,7 +7,7 @@ class Engine {
 public:
   Engine();
   ~Engine();
-public:
+private:
   bool init();
   void close();
 };

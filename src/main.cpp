@@ -1,5 +1,6 @@
 #include "Video.h"
 #include <SDL2/SDL.h>
+#include <dotenv.h>
 #include <iostream>
 
 #ifdef _WIN32
@@ -31,6 +32,13 @@ int main(int argc, char** argv)
 
   // Create the video object from the stream URL
   Video video(argv[1], VLC::Media::FromPath);
+
+  // Test environment variable parsing from .env
+  std::cout << "Testing environment variable parsing:\n";
+  dotenv::init();
+
+  std::cout << std::getenv("DATABASE_USERNAME") << std::endl;
+  std::cout << std::getenv("DATABASE_PASSWORD") << std::endl;
 
   return 0;
 }
