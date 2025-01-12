@@ -37,8 +37,8 @@ class Video {
     VLC::Media::FromType getType(){ return m_type; }
     std::string_view getTypeStr(){ return (m_type == VLC::Media::FromLocation) ? "Stream" : "File"; }
 
-    void play();
-    void stop();
+    void play();    // Start playback
+    void stop();    // End playback
 };
 
 #endif
