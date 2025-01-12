@@ -1,5 +1,6 @@
 #include "Video.h"
 #include <SDL2/SDL.h>
+#include <curl/curl.h>
 #include <thread>
 #include <iostream>
 #include <chrono>
@@ -24,7 +25,7 @@ int main(int argc, char** argv)
 {
   // Check for valid arguments
   if (argc < 2) {
-    std::cerr << "usage: " << argv[0] << " <URL to .m3u8 stream>" << std::endl;
+    std::cerr << "usage: " << argv[0] << " <video source stream/url>" << std::endl;
     return 1;
   }
 
@@ -38,6 +39,28 @@ int main(int argc, char** argv)
 
   // Create the video object from the stream URL
   Video video(argv[1], VLC::Media::FromPath);
+
+  CURL *curl;
+  CURLcode res;
+
+  std::cout << "Begin libcurl debug test:\n";
+ 
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+    /* example.com is redirected, so we tell libcurl to follow redirection */
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+ 
+    /* Perform the request, res gets the return code */
+    res = curl_easy_perform(curl);
+    /* Check for errors */
+    if(res != CURLE_OK)
+      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+              curl_easy_strerror(res));
+ 
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+  }
 
   // Play the video
   video.play();

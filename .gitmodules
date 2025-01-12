@@ -4,3 +4,6 @@
 [submodule "external/sdl2"]
 	path = external/sdl2
 	url = https://github.com/libsdl-org/SDL.git
+[submodule "external/curl"]
+	path = external/curl
+	url = https://github.com/curl/curl.git

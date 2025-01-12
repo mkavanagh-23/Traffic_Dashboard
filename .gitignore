@@ -3,3 +3,4 @@ build/
 Traffic_Dashboard*
 SDL2.dll
 lib*
+curl
