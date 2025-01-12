@@ -29,18 +29,8 @@ int main(int argc, char** argv)
     return 1;
   }
 
-  if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-    std::cerr << "Failed to initialize SDL" << std::endl;
-    return 1;
-  }
-  else {
-    std::cout << "SDL Initialized Successfully!\n";
-  }
-
   // Create the video object from the stream URL
   Video video(argv[1], VLC::Media::FromPath);
-
-  SDL_Quit();
 
   return 0;
 }

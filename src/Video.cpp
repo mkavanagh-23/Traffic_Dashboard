@@ -7,7 +7,9 @@ VLC::Instance Video::m_instance(0, nullptr);
 
 Video::Video(const std::string& videoSource, VLC::Media::FromType fromType)
   : m_source{videoSource}, m_type{fromType}, m_media(m_instance, m_source, m_type), m_player(m_media)
-{}
+{
+  std::cout << "Successfully created media object from provided source\n";
+}
 
 void Video::play() {
   if (!m_media.isValid()) {
