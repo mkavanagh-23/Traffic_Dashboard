@@ -10,10 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 # Enable CMake to generate the compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(SOURCES
-    src/main.cpp
-    src/Video.cpp
-)
+file(GLOB SOURCES "src/*.cpp")
 
 # Output final executable in project root
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
