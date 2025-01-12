@@ -30,6 +30,7 @@ target_include_directories(${PROJECT_NAME}
 # Add third-party libraries
 add_subdirectory(external/sdl2)
 add_subdirectory(external/curl)
+add_subdirectory(external/jsoncpp)
 
 # Find and link system libraries
 find_package(PkgConfig REQUIRED)
@@ -39,6 +40,7 @@ target_link_libraries(${PROJECT_NAME}
   PRIVATE ${LIBVLC_LIBRARIES}
   PRIVATE SDL2
   PRIVATE CURL::libcurl
+  PRIVATE jsoncpp
 )
 
 # Set rpath for SDL2 libraries on macOS
@@ -53,19 +55,33 @@ if(WIN32)
   )
 endif()
 
-# Copy runtime DLLs to the output directory
-add_custom_command(
-  TARGET ${PROJECT_NAME} POST_BUILD COMMAND
-  ${CMAKE_COMMAND} -E copy_if_different
-    "$<TARGET_FILE:SDL2>"
-    "$<TARGET_FILE_DIR:Traffic_Dashboard>"
-  VERBATIM
-)
+# Copy runtime DLLs to the output directory for dynamic libraries
+if(TARGET SDL2)
+  add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD COMMAND
+    ${CMAKE_COMMAND} -E copy_if_different
+      "$<TARGET_FILE:SDL2>"
+      "$<TARGET_FILE_DIR:Traffic_Dashboard>"
+    VERBATIM
+  )
+endif()
 
-add_custom_command(
-  TARGET ${PROJECT_NAME} POST_BUILD COMMAND
-  ${CMAKE_COMMAND} -E copy_if_different
-    "$<TARGET_FILE:CURL::libcurl>"
-    "$<TARGET_FILE_DIR:Traffic_Dashboard>"
-  VERBATIM
-)
+if(TARGET CURL::libcurl)
+  add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD COMMAND
+    ${CMAKE_COMMAND} -E copy_if_different
+      "$<TARGET_FILE:CURL::libcurl>"
+      "$<TARGET_FILE_DIR:Traffic_Dashboard>"
+    VERBATIM
+  )
+endif()
+
+if(TARGET jsoncpp)
+  add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD COMMAND
+    ${CMAKE_COMMAND} -E copy_if_different
+      "$<TARGET_FILE:jsoncpp>"
+      "$<TARGET_FILE_DIR:Traffic_Dashboard>"
+    VERBATIM
+  )
+endif()
