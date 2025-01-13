@@ -15,7 +15,6 @@
 // Do we want to display embedded video feed, or just keyframes?
 //
 // Incorporate JSON and XML/RSS parsing
-// Learn how to incorporate API key safely into project (perhaps sourced from ENV)?
 // Source videos via API - libcurl successfully installed
 // Mapping coordinates to regions and markets
 // Severity coding
@@ -37,8 +36,7 @@ int main(int argc, char** argv)
   std::cout << "Testing environment variable parsing:\n";
   dotenv::init();
 
-  std::cout << std::getenv("DATABASE_USERNAME") << std::endl;
-  std::cout << std::getenv("DATABASE_PASSWORD") << std::endl;
+  std::cout << "API Key: " << std::getenv("NYSDOT_API_KEY") << std::endl;
 
   return 0;
 }
