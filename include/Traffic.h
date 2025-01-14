@@ -53,14 +53,6 @@ namespace Traffic {
     std::vector<std::string> m_ActiveDays;
     std::string m_Impact;
   };
-  
-  namespace NYSDOT {
-  
-  }
-
-  namespace MCNY {
-
-  }
 }
 
 #endif

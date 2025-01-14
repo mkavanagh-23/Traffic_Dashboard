@@ -1,7 +1,12 @@
+#include "Data.h"
+#include "Traffic.h"
 #include "Video.h"
 #include <SDL2/SDL.h>
+#include <chrono>
+#include <cstdlib>
 #include <dotenv.h>
 #include <iostream>
+#include <thread>
 
 #ifdef _WIN32
     #define JSON_DLL
@@ -31,12 +36,20 @@ int main(int argc, char** argv)
 
   // Create the video object from the stream URL
   Video video(argv[1], VLC::Media::FromPath);
+  video.play();
+  std::this_thread::sleep_for(std::chrono::seconds(5));
+  video.stop();
 
   // Test environment variable parsing from .env
-  std::cout << "Testing environment variable parsing:\n";
   dotenv::init();
+  std::string NYSDOT_API = std::getenv("NYSDOT_API_KEY");
 
-  std::cout << "API Key: " << std::getenv("NYSDOT_API_KEY") << std::endl;
+  // Test cURL parsing
+  std::string url = "https://511ny.org/api/getevents/?format=json&key=";
+  url += NYSDOT_API;
+  std::string responseStr = cURL::getData(url);
+  std::this_thread::sleep_for(std::chrono::seconds(5));
+  std::cout << responseStr;
 
   return 0;
 }
