@@ -1,17 +1,6 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-/******* TODO *******
-
- - Spawn each new video on its own thread?
- - Allow for creation of multiplexed stream rather than single streams?
- - More advanced playback functionality API
- - Manage player size dynamically
- - Logic to determine whether type is a stream or a file
- - Likely need to include some kind of regex for this
-
-*/
-
 #include <vlcpp/vlc.hpp>
 #include <string>
 #include <string_view>

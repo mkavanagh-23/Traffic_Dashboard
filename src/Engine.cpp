@@ -4,10 +4,10 @@
 Engine engine;
 
 Engine::Engine() {
-  //if(init())
-  //  std::cout << "SDL initialized successfully!\n";
-  //else
-  //  std::cerr << "SDL failed to initialize!\n";
+  if(init())
+    std::cout << "SDL initialized successfully!\n";
+  else
+    std::cerr << "SDL failed to initialize!\n";
 }
 
 Engine::~Engine() {

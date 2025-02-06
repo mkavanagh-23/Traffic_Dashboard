@@ -1,5 +1,4 @@
 #include "Data.h"
-
 #include <string>
 #include <curl/curl.h>
 
