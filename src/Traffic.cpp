@@ -50,8 +50,8 @@ bool processEvent(const Json::Value& parsedEvent) {
   if(eventRegion == "Central Syracuse Utica Area") {
 
     // Construct an event object
-    Event event(parsedEvent);
-    eventMap.insert_or_assign(eventID, std::move(event));
+    //Event event(parsedEvent);
+    eventMap.insert_or_assign(eventID, parsedEvent);
     
     /* TODO:
      * Move the constructed object onto the map
