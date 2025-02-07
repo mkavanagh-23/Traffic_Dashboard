@@ -5,9 +5,9 @@ Engine engine;
 
 Engine::Engine() {
   if(init())
-    std::cout << "SDL initialized successfully!\n";
+    std::cout << "\033[32m[SDL] Successfully initialized rendering backend.\033[0m\n";
   else
-    std::cerr << "SDL failed to initialize!\n";
+    std::cerr << "\033[31m[SDL] Failed to initialize!\033[0m\n";
 }
 
 Engine::~Engine() {
