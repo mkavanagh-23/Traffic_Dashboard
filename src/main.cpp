@@ -39,7 +39,7 @@ int main(int argc, char** argv)
   // Create the video object from the stream URL
   Video video(argv[1], VLC::Media::FromLocation);
   //video.play();
-  //std::this_thread::sleep_for(std::chrono::seconds(5));
+  std::this_thread::sleep_for(std::chrono::seconds(2));
   //video.stop();
 
   // Test environment variable parsing from .env
@@ -47,8 +47,10 @@ int main(int argc, char** argv)
   Traffic::NYSDOT::API_KEY = std::getenv("NYSDOT_API_KEY");
 
   // Test cURL parsing
-  std::string url = "https://511ny.org/api/getevents/?format=json&key=" + Traffic::NYSDOT::API_KEY;
-  std::string responseStr = cURL::getData(url);
+  std::cout << "Testing cURL parsing:\n";
+  std::this_thread::sleep_for(std::chrono::seconds(2));
+  std::string url{ "https://511ny.org/api/getevents/?format=json&key=" + Traffic::NYSDOT::API_KEY };
+  std::string responseStr{ cURL::getData(url) };
   std::cout << responseStr;
 
   // Test JSON Parsing

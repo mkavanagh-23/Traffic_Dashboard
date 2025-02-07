@@ -1,6 +1,9 @@
 #include "Traffic.h"
 
 #include <string>
+#include <json/json.h>
+#include <ostream>
+#include <sstream>
 
 namespace Traffic {
 
@@ -10,6 +13,28 @@ namespace NYSDOT {
 
 std::string API_KEY;
 EventMap<Event> events; // Key = "ID"
+
+// Parse events from a Json data stream onto the global event map
+bool parseEvents(const std::string& jsonData) {
+  // Track any parsing failures
+  bool success{ true };
+
+  // Set up Json parsing objects
+  Json::CharReaderBuilder builder;
+  Json::Value root;                 // Root node of the parsed objects
+  std::istringstream data(jsonData);
+  std::string errs;                 // Hold errors in a string
+
+  // Parse the string into the root Value object
+  Json::parseFromStream(builder, data, &root, &errs);
+
+  // Process each event from the root object
+  // Check each Event ID against the map to see if it already exists to determine update or new
+  // Process the event and continue or create an event store on the map
+  
+  // Return if any failures occurred
+  return success;
+}
 
 // Overload operator<< to print an event object
 std::ostream &operator<<(std::ostream &out, const Event &event) {
