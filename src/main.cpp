@@ -12,20 +12,21 @@
 #define JSON_DLL
 #endif
 
-/* TODO: Parse and store information from NYSDOT REST API
- * Parse and store information for MCNY RSS feed
- * GUI Window with a top bar that allows for picking between markets
- * Left sidebar contains a selectable list of currently active incidents
- * Incidents are refreshed every one minute
- * Main content pane contains a "Details" view that contains expanded details
- * include an embedded video stream (if available) and an embedded map 
- * Do we want to display embedded video feed, or just keyframes?
- * Incorporate JSON and XML/RSS parsing
- * Source videos via API - libcurl successfully installed
- * Mapping coordinates to regions and markets
- * Severity coding
- * Embed Goole Maps objects
- * Create a dynamic graphical interface
+/* TODO: 
+ *  Parse and store information from NYSDOT REST API
+ *  Parse and store information for MCNY RSS feed
+ *  GUI Window with a top bar that allows for picking between markets
+ *  Left sidebar contains a selectable list of currently active incidents
+ *  Incidents are refreshed every one minute
+ *  Main content pane contains a "Details" view that contains expanded details
+ *  include an embedded video stream (if available) and an embedded map 
+ *  Do we want to display embedded video feed, or just keyframes?
+ *  Incorporate JSON and XML/RSS parsing
+ *  Source videos via API - libcurl successfully installed
+ *  Mapping coordinates to regions and markets
+ *  Severity coding
+ *  Embed Goole Maps objects
+ *  Create a dynamic graphical interface
  */
 
 int main(int argc, char** argv)
@@ -55,8 +56,8 @@ int main(int argc, char** argv)
 
   // Test JSON Parsing
   /* TODO:
-   * Pass responseStr into json parsing function
-   * Print each formatted json object from the map
+   *    Pass responseStr into json parsing function
+   *    Print each formatted json object from the map
    */
 
   return 0;

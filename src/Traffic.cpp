@@ -2,6 +2,7 @@
 
 #include <string>
 #include <json/json.h>
+#include <iostream>
 #include <ostream>
 #include <sstream>
 
@@ -26,11 +27,16 @@ bool parseEvents(const std::string& jsonData) {
   std::string errs;                 // Hold errors in a string
 
   // Parse the string into the root Value object
-  Json::parseFromStream(builder, data, &root, &errs);
+  if(!Json::parseFromStream(builder, data, &root, &errs)) {
+    // If initial parsing fails, send an error message and return without processing
+    std::cerr << "[NYSDOT] Error parsing JSON (is it a valid stream?): " << errs << std::endl;
+    return false;
+  }
 
-  // Process each event from the root object
-  // Check each Event ID against the map to see if it already exists to determine update or new
-  // Process the event and continue or create an event store on the map
+  // TODO:  
+  //    Process each event from the root object
+  //    Check each Event ID against the map to see if it already exists to determine update or new
+  //    Process the event and continue or create an event store on the map
   
   // Return if any failures occurred
   return success;
