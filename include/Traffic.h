@@ -21,7 +21,7 @@ extern std::string API_KEY;
 // Define a NYSDOT::Event object
 class Event {
 private:    // Define all private members
-  std::string ID;            // A unique identifier.
+  std::string ID;            // UNIQUE KEY
   std::string RegionName;          // The region where the event occurred.
   std::string CountyName;          // The county where the event occurred.
   std::string Severity{"Unknown"}; // Severity of the event
@@ -88,7 +88,7 @@ namespace MCNY {
 // Define a MCNY::Event object
 class Event {
 private:
-  std::string ID;
+  std::string ID;   // UNIQUE KEY
   std::string Title;
   std::string Link;
   std::string PubDate;
