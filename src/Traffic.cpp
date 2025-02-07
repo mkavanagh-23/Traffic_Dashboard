@@ -16,16 +16,36 @@ EventMap<Event> eventMap; // Key = "ID"
 bool parseEvents(const Json::Value& events){
   // Iterate through each event
   for(const auto& parsedEvent : events) {
+    // Check if event is a valid object
     if(!parsedEvent.isObject()) {
       std::cerr << "\033[31m[NYSDOT] Failed parsing event (is the JSON valid?)\033[0m\n";
       return false;
     }
-    /* TODO:  
-     *    Check each Event ID against the map to see if it already exists to determine update or new
-     *    Process the event and continue or create an event store on the map
-     */
+    // Store the event on the map
+    if(processEvent(parsedEvent)) {
+      std::cout << "[NYSDOT] Stored event " << parsedEvent["ID"].asString() << '\n'
+                << parsedEvent["RegionName"].asString() << "  |  " << parsedEvent["RoadwayName"].asString() << '\n';
+    }
   }
   return true;
+}
+
+/* TODO:  
+ *    Check each Event ID against the map to see if it already exists to determine update or new
+ *    Process the event and continue or create an event store on the map
+ */
+
+bool processEvent(const Json::Value& parsedEvent) {
+  // Extract the event ID
+  std::string eventID{ parsedEvent["ID"].asString() };
+  // Extract the region
+  std::string eventRegion{ parsedEvent["RegionName"].asString() };
+
+  // Check against matching region(s)
+  if(eventRegion == "Central Syracuse Utica Area") {
+    return true;
+  }
+  return false;
 }
 
 // Overload operator<< to print an event object

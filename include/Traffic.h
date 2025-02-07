@@ -75,6 +75,7 @@ public:
 extern EventMap<Event> eventMap; // Index into the map via "ID"
 // And a function to parse events and store on the map
 bool parseEvents(const Json::Value& events);
+bool processEvent(const Json::Value& parsedEvent); 
 } // namespace NYSDOT
 
 
