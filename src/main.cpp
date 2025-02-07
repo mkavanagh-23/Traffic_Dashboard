@@ -2,9 +2,9 @@
 #include "Traffic.h"
 #include "Video.h"
 #include <SDL2/SDL.h>
+#include <dotenv.h>
 #include <chrono>
 #include <cstdlib>
-#include <dotenv.h>
 #include <iostream>
 #include <thread>
 
@@ -41,35 +41,10 @@ int main(int argc, char** argv)
   video.play();
   std::this_thread::sleep_for(std::chrono::seconds(2));
   video.stop();
-
-  // Test environment variable parsing from .env
-  dotenv::init();
-  Traffic::NYSDOT::API_KEY = std::getenv("NYSDOT_API_KEY");
-  if(Traffic::NYSDOT::API_KEY.empty()) {
-    std::cerr << "\033[31m[dotEnv] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have defined it in '.env'.\n"
-              << "Exiting program.\033[0m\n";
-    return 1;
-  }
-  std::cout << "\033[32m[dotEnv] Successfully sourced API key from local environment.\033[0m\n";
-
-  // Test cURL parsing
-  std::string url{ "https://511ny.org/api/getevents/?format=json&key=" + Traffic::NYSDOT::API_KEY };
-  std::string responseStr{ cURL::getData(url) };
-  if(responseStr.empty()) {
-    std::cerr << "\033[31mExiting program.\033[0m\n";
-    return 1;
-  }
-  std::cout << "\033[32m[cURL] Successfully retrieved JSON from 511ny.\033[0m\n";
-
-  // Test JSON Parsing
-  if(!Traffic::NYSDOT::parseEvents(JSON::parseData(responseStr))) {
-    std::cerr << "\033[31m[EVENT] Error parsing root tree.\n"
-              << "Exiting program.\033[0m\n";
-    return 1;
-  }
-  std::cout << "\033[32m[EVENT] Successfully parsed root tree.\033[0m\n";
-
-  // Test event filtering and printing
+  
+  // Test Event Parsing
+  dotenv::init();   // Initialize environment sourcing for API key
+  Traffic::NYSDOT::getEvents();
   Traffic::NYSDOT::printEvents();
 
   return 0;

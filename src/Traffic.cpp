@@ -1,7 +1,9 @@
 #include "Traffic.h"
+#include "Data.h"
 
 #include <string>
 #include <iostream>
+#include <dotenv.h>
 
 namespace Traffic {
 
@@ -21,6 +23,34 @@ namespace NYSDOT {
 
 std::string API_KEY;
 EventMap<Event> eventMap; // Key = "ID"
+
+bool getEvents(){
+  // Source API key from local environment
+  API_KEY = std::getenv("NYSDOT_API_KEY");
+  if(API_KEY.empty()) {
+    std::cerr << "\033[31m[dotEnv] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have defined it in '.env'.\033[0m\n";
+    return false;
+  }
+  std::cout << "\033[32m[dotEnv] Successfully sourced API key from local environment.\033[0m\n";
+  
+  // Parse Events Data from API
+  std::string url{ "https://511ny.org/api/getevents/?format=json&key=" + API_KEY };
+  std::string responseStr{ cURL::getData(url) };
+  if(responseStr.empty()) {
+    std::cerr << "\033[31m[dotEnv] Failed to retrieve JSON from 511ny.\033[0m\n";
+    return false;
+  }
+  std::cout << "\033[32m[cURL] Successfully retrieved JSON from 511ny.\033[0m\n";
+  
+  // Test JSON Parsing
+  if(!parseEvents(JSON::parseData(responseStr))) {
+    std::cerr << "\033[31m[EVENT] Error parsing root tree.\033[0m\n";
+    return false;
+  }
+  std::cout << "\033[32m[EVENT] Successfully parsed root tree.\033[0m\n";
+
+  return true;
+}
 
 // Parse events from the root events object
 bool parseEvents(const Json::Value& events){
