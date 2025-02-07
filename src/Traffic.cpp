@@ -6,12 +6,23 @@
 namespace Traffic {
 
 /********************* NYSDOT Traffic Data (511ny.org) ************************/
+/* TODO:
+ *  - Add checks for each key before assignment
+ *  - Clean up events once they are cleared
+ *  - Error handling - try/catch
+ *  - Get camera data
+ *      - cURL request should be implemented here rather than in main
+ *      - i.e. getEvents() and getCameras()
+ *      - Multithreading and loop structure - updates in the backend
+ *  - Logging
+ */
 
 namespace NYSDOT {
 
 std::string API_KEY;
 EventMap<Event> eventMap; // Key = "ID"
 
+// Parse events from the root events object
 bool parseEvents(const Json::Value& events){
   // Iterate through each event
   for(const auto& parsedEvent : events) {
@@ -20,12 +31,13 @@ bool parseEvents(const Json::Value& events){
       std::cerr << "\033[31m[NYSDOT] Failed parsing event (is the JSON valid?)\033[0m\n";
       return false;
     }
-    // Store the event on the map
+    // Process the event for storage
     processEvent(parsedEvent);
   }
   return true;
 }
 
+// Check the event against filter value and store on the map
 bool processEvent(const Json::Value& parsedEvent) {
   // Check against matching region(s)
   if( parsedEvent["RegionName"].asString()  == "Central Syracuse Utica Area") {
@@ -36,6 +48,7 @@ bool processEvent(const Json::Value& parsedEvent) {
   return false;
 }
 
+// Print the event map
 void printEvents() {
   for(const auto& [key, event] : eventMap) {
     std::cout << event << '\n';
@@ -69,9 +82,7 @@ Event::Event(const Json::Value &parsedEvent)
   PlannedEndDate{ parsedEvent["PlannedEndDate"].asString() },
   Reported{ parsedEvent["Reported"].asString() },
   StartDate{ parsedEvent["StartDate"].asString() } 
-{
-  std::cout << "[NYSDOT] Constructed new event object\n";
-}
+{}
 
 // Define the move constructor
 Event::Event(Event&& other) noexcept 
@@ -98,9 +109,7 @@ Event::Event(Event&& other) noexcept
   PlannedEndDate(std::move(other.PlannedEndDate)),
   Reported(std::move(other.Reported)),
   StartDate(std::move(other.StartDate))
-{
-  std::cout << "[NYSDOT::EVENT] Invoked the move constructor.\n";
-}
+{}
 
 // Define the move assignment operator
 Event& Event::operator=(Event&& other) noexcept {
@@ -130,7 +139,6 @@ Event& Event::operator=(Event&& other) noexcept {
     Reported = std::move(other.Reported);
     StartDate = std::move(other.StartDate);
   }
-  std::cout << "[NYSDOT::EVENT] Invoked move assignment.\n";
   return *this;
 }
 
@@ -147,10 +155,4 @@ std::ostream &operator<<(std::ostream &out, const Event &event) {
   return out;
 }
 } // namespace NYSDOT
-
-/************************ Monroe County Dispatch Feed *************************/
-
-namespace MCNY {
-
-} // namespace MCNY
 } // namespace Traffic

@@ -13,16 +13,15 @@
 #endif
 
 /* TODO: 
- *  Parse and store information from NYSDOT REST API
  *  Parse and store information for MCNY RSS feed
+ *  Add methods for accessing cameras from NYSDOT API
  *  GUI Window with a top bar that allows for picking between markets
  *  Left sidebar contains a selectable list of currently active incidents
  *  Incidents are refreshed every one minute
  *  Main content pane contains a "Details" view that contains expanded details
  *  include an embedded video stream (if available) and an embedded map 
  *  Do we want to display embedded video feed, or just keyframes?
- *  Incorporate JSON and XML/RSS parsing
- *  Source videos via API - libcurl successfully installed
+ *  Incorporate XML/RSS parsing
  *  Mapping coordinates to regions and markets
  *  Severity coding
  *  Embed Goole Maps objects
@@ -39,9 +38,9 @@ int main(int argc, char** argv)
 
   // Create the video object from the stream URL
   Video video(argv[1], VLC::Media::FromLocation);
-  //video.play();
-  //std::this_thread::sleep_for(std::chrono::seconds(2));
-  //video.stop();
+  video.play();
+  std::this_thread::sleep_for(std::chrono::seconds(2));
+  video.stop();
 
   // Test environment variable parsing from .env
   dotenv::init();
@@ -70,7 +69,7 @@ int main(int argc, char** argv)
   }
   std::cout << "\033[32m[EVENT] Successfully parsed root tree.\033[0m\n";
 
-  // Test event filtering
+  // Test event filtering and printing
   Traffic::NYSDOT::printEvents();
 
   return 0;
