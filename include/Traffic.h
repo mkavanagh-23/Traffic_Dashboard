@@ -72,6 +72,44 @@ bool parseEvents(const Json::Value& events);
 bool processEvent(const Json::Value& parsedEvent);
 void printEvents();
 } // namespace NYSDOT
+
+
+/************************ Monroe County Dispatch Feed *************************/
+
+namespace MCNY {
+
+// Define a MCNY::Event object
+class Event {
+private:
+  std::string ID;   // UNIQUE KEY
+  std::string Title;
+  std::string Link;
+  std::string PubDate;
+  std::string Status;
+  /*One of: WAITING, DISPATCHED, ENROUTE, ONSCENE*/
+
+  std::string GUID;
+  double Latitude;
+  double Longitude;
+
+public:
+  // Constructors
+  // Construct an event from an XML object
+  // Move constructor
+  // Move assignment operator
+
+  // Overload the ostream operator
+  friend std::ostream &operator<<(std::ostream &out, const Event &event);
+
+public:
+  // Accessots (Getters)
+  // Modifiers (Setters)
+};
+
+// Declare a hashmap to store MCNY::Event objects
+extern EventMap<Event> eventMap; // Index into the map via "ID"
+
+} // namespace MCNY
 } // namespace Traffic
 
 #endif
