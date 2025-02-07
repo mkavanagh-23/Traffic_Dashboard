@@ -1,4 +1,3 @@
-#include "Data.h"
 #include "Traffic.h"
 #include "Video.h"
 #include <SDL2/SDL.h>
