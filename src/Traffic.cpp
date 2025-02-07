@@ -51,6 +51,7 @@ bool processEvent(const Json::Value& parsedEvent) {
 
     // Construct an event object
     Event event(parsedEvent);
+    eventMap.insert_or_assign(eventID, std::move(event));
     
     /* TODO:
      * Move the constructed object onto the map
@@ -95,6 +96,67 @@ void Event::update(const Json::Value &parsedEvent) {
   PlannedEndDate = parsedEvent["PlannedEndDate"].asString();
   Reported = parsedEvent["Reported"].asString();
   StartDate = parsedEvent["StartDate"].asString();
+}
+
+// Define the move constructor
+Event::Event(Event&& other) noexcept 
+: ID(std::move(other.ID)),
+  RegionName(std::move(other.RegionName)),
+  CountyName(std::move(other.CountyName)),
+  Severity(std::move(other.Severity)),
+  RoadwayName(std::move(other.RoadwayName)),
+  DirectionOfTravel(std::move(other.DirectionOfTravel)),
+  Description(std::move(other.Description)),
+  Location(std::move(other.Location)),
+  LanesAffected(std::move(other.LanesAffected)),
+  LanesStatus(std::move(other.LanesStatus)),
+  PrimaryLocation(std::move(other.PrimaryLocation)),
+  SecondaryLocation(std::move(other.SecondaryLocation)),
+  FirstArticleCity(std::move(other.FirstArticleCity)),
+  SecondCity(std::move(other.SecondCity)),
+  EventType(std::move(other.EventType)),
+  EventSubType(std::move(other.EventSubType)),
+  MapEncodedPolyline(std::move(other.MapEncodedPolyline)),
+  LastUpdated(std::move(other.LastUpdated)),
+  Latitude(other.Latitude), // primitives can be copied directly
+  Longitude(other.Longitude),
+  PlannedEndDate(std::move(other.PlannedEndDate)),
+  Reported(std::move(other.Reported)),
+  StartDate(std::move(other.StartDate))
+{
+  std::cout << "[NYSDOT::EVENT] Invoked the move constructor.\n";
+}
+
+// Define the move assignment operator
+Event& Event::operator=(Event&& other) noexcept {
+  // Check for self assignment
+  if (this != &other) {
+    ID = std::move(other.ID);
+    RegionName = std::move(other.RegionName);
+    CountyName = std::move(other.CountyName);
+    Severity = std::move(other.Severity);
+    RoadwayName = std::move(other.RoadwayName);
+    DirectionOfTravel = std::move(other.DirectionOfTravel);
+    Description = std::move(other.Description);
+    Location = std::move(other.Location);
+    LanesAffected = std::move(other.LanesAffected);
+    LanesStatus = std::move(other.LanesStatus);
+    PrimaryLocation = std::move(other.PrimaryLocation);
+    SecondaryLocation = std::move(other.SecondaryLocation);
+    FirstArticleCity = std::move(other.FirstArticleCity);
+    SecondCity = std::move(other.SecondCity);
+    EventType = std::move(other.EventType);
+    EventSubType = std::move(other.EventSubType);
+    MapEncodedPolyline = std::move(other.MapEncodedPolyline);
+    LastUpdated = std::move(other.LastUpdated);
+    Latitude = other.Latitude; // primitive types can be directly copied
+    Longitude = other.Longitude;
+    PlannedEndDate = std::move(other.PlannedEndDate);
+    Reported = std::move(other.Reported);
+    StartDate = std::move(other.StartDate);
+  }
+  std::cout << "[NYSDOT::EVENT] Invoked move assignment.\n";
+  return *this;
 }
 
 // Overload operator<< to print an event object
