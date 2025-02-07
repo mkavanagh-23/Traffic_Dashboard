@@ -70,5 +70,8 @@ int main(int argc, char** argv)
   }
   std::cout << "\033[32m[EVENT] Successfully parsed root tree.\033[0m\n";
 
+  // Test event filtering
+  Traffic::NYSDOT::printEvents();
+
   return 0;
 }

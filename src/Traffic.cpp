@@ -12,7 +12,6 @@ namespace NYSDOT {
 std::string API_KEY;
 EventMap<Event> eventMap; // Key = "ID"
 
-
 bool parseEvents(const Json::Value& events){
   // Iterate through each event
   for(const auto& parsedEvent : events) {
@@ -22,80 +21,56 @@ bool parseEvents(const Json::Value& events){
       return false;
     }
     // Store the event on the map
-    if(processEvent(parsedEvent)) {
-      std::cout << "[NYSDOT] Stored event " << parsedEvent["ID"].asString() << '\n'
-                << parsedEvent["RegionName"].asString() << "  |  " << parsedEvent["RoadwayName"].asString() << '\n';
-    }
+    processEvent(parsedEvent);
   }
   return true;
 }
 
 bool processEvent(const Json::Value& parsedEvent) {
-  // Extract the event ID
-  std::string eventID{ parsedEvent["ID"].asString() };
-
-  /* TODO:
-   * Check eventID against objects on the map
-   * IF (eventMap.find(eventID) != eventMap.end() THEN
-   *    Check LastUpdated to see if it has changed
-   *    IF it has changed THEN
-   *        eventMap[eventID].update(parsedEvent)
-   * ELSE continue on below
-   */
-
-  // Extract the region
-  std::string eventRegion{ parsedEvent["RegionName"].asString() };
-
   // Check against matching region(s)
-  if(eventRegion == "Central Syracuse Utica Area") {
-
-    // Construct an event object
-    //Event event(parsedEvent);
-    eventMap.insert_or_assign(eventID, parsedEvent);
-    
-    /* TODO:
-     * Move the constructed object onto the map
-     */
-
+  if( parsedEvent["RegionName"].asString()  == "Central Syracuse Utica Area") {
+    // Construct an event object on the map
+    eventMap.insert_or_assign(parsedEvent["ID"].asString(), parsedEvent);
     return true;
   }
   return false;
+}
+
+void printEvents() {
+  for(const auto& [key, event] : eventMap) {
+    std::cout << event << '\n';
+  }
 }
 
 /****** NYSDOT::EVENT ******/
 
 // Construct an event from a parsed Json Event
 Event::Event(const Json::Value &parsedEvent)
-: ID { parsedEvent["ID"].asString() } 
+: ID{ parsedEvent["ID"].asString() },
+  RegionName{ parsedEvent["RegionName"].asString() },
+  CountyName{ parsedEvent["CountyName"].asString() },
+  Severity{ parsedEvent["Severity"].asString() },
+  RoadwayName{ parsedEvent["RoadwayName"].asString() },
+  DirectionOfTravel{ parsedEvent["DirectionOfTravel"].asString() },
+  Description{ parsedEvent["Description"].asString() },
+  Location{ parsedEvent["Location"].asString() },
+  LanesAffected{ parsedEvent["LanesAffected"].asString() },
+  LanesStatus{ parsedEvent["LanesStatus"].asString() },
+  PrimaryLocation{ parsedEvent["PrimaryLocation"].asString() },
+  SecondaryLocation{ parsedEvent["SecondaryLocation"].asString() },
+  FirstArticleCity{ parsedEvent["FirstArticleCity"].asString() },
+  SecondCity{ parsedEvent["SecondCity"].asString() },
+  EventType{ parsedEvent["EventType"].asString() },
+  EventSubType{ parsedEvent["EventSubType"].asString() },
+  MapEncodedPolyline{ parsedEvent["MapEncodedPolyline"].asString() },
+  LastUpdated{ parsedEvent["LastUpdated"].asString() },
+  Latitude{ parsedEvent["Latitude"].asDouble() },
+  Longitude{ parsedEvent["Longitude"].asDouble() },
+  PlannedEndDate{ parsedEvent["PlannedEndDate"].asString() },
+  Reported{ parsedEvent["Reported"].asString() },
+  StartDate{ parsedEvent["StartDate"].asString() } 
 {
-  update(parsedEvent);
   std::cout << "[NYSDOT] Constructed new event object\n";
-}
-
-// Update all data members
-void Event::update(const Json::Value &parsedEvent) {
-  RegionName = parsedEvent["RegionName"].asString();
-  CountyName = parsedEvent["CountyName"].asString();
-  Severity = parsedEvent["Severity"].asString();
-  RoadwayName = parsedEvent["RoadwayName"].asString();
-  DirectionOfTravel = parsedEvent["DirectionOfTravel"].asString();
-  Description = parsedEvent["Description"].asString();
-  Location = parsedEvent["Location"].asString();
-  LanesAffected = parsedEvent["LanesAffected"].asString();
-  LanesStatus = parsedEvent["LanesStatus"].asString();
-  PrimaryLocation = parsedEvent["PrimaryLocation"].asString();
-  SecondaryLocation = parsedEvent["SecondaryLocation"].asString();
-  FirstArticleCity = parsedEvent["FirstArticleCity"].asString();
-  SecondCity = parsedEvent["SecondCity"].asString();
-  EventType = parsedEvent["EventType"].asString();
-  EventSubType = parsedEvent["EventSubType"].asString();
-  MapEncodedPolyline = parsedEvent["MapEncodedPolyline"].asString();
-  LastUpdated = parsedEvent["LastUpdated"].asString();
-  Latitude = parsedEvent["Latitude"].asDouble();
-  Longitude = parsedEvent["Longitude"].asDouble();
-  PlannedEndDate = parsedEvent["PlannedEndDate"].asString();
-  Reported = parsedEvent["Reported"].asString();
-  StartDate = parsedEvent["StartDate"].asString();
 }
 
 // Define the move constructor
@@ -172,10 +147,6 @@ std::ostream &operator<<(std::ostream &out, const Event &event) {
   return out;
 }
 } // namespace NYSDOT
-
-
-
-
 
 /************************ Monroe County Dispatch Feed *************************/
 

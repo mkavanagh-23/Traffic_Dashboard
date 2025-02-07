@@ -66,16 +66,14 @@ public:
 public:
   // Accessors (Getters)
   std::string getLastUpdated() const { return LastUpdated; }
-
-  // Modifiers (Setters)
-  void update(const Json::Value& parsedEvent);
 };
 
 // Declare a hashmap to store NYSDOT::Event objects
 extern EventMap<Event> eventMap; // Index into the map via "ID"
 // And a function to parse events and store on the map
 bool parseEvents(const Json::Value& events);
-bool processEvent(const Json::Value& parsedEvent); 
+bool processEvent(const Json::Value& parsedEvent);
+void printEvents();
 } // namespace NYSDOT
 
 
