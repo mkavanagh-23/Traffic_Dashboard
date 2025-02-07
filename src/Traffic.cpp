@@ -41,7 +41,7 @@ bool processEvent(const Json::Value& parsedEvent) {
    *    IF it has changed THEN
    *        eventMap[eventID].update(parsedEvent)
    * ELSE continue on below
-   */    
+   */
 
   // Extract the region
   std::string eventRegion{ parsedEvent["RegionName"].asString() };
@@ -49,14 +49,52 @@ bool processEvent(const Json::Value& parsedEvent) {
   // Check against matching region(s)
   if(eventRegion == "Central Syracuse Utica Area") {
 
+    // Construct an event object
+    Event event(parsedEvent);
+    
     /* TODO:
-     * Construct an event object
      * Move the constructed object onto the map
      */
 
     return true;
   }
   return false;
+}
+
+/****** NYSDOT::EVENT ******/
+
+// Construct an event from a parsed Json Event
+Event::Event(const Json::Value &parsedEvent)
+: ID { parsedEvent["ID"].asString() } 
+{
+  update(parsedEvent);
+  std::cout << "[NYSDOT] Constructed new event object\n";
+}
+
+// Update all data members
+void Event::update(const Json::Value &parsedEvent) {
+  RegionName = parsedEvent["RegionName"].asString();
+  CountyName = parsedEvent["CountyName"].asString();
+  Severity = parsedEvent["Severity"].asString();
+  RoadwayName = parsedEvent["RoadwayName"].asString();
+  DirectionOfTravel = parsedEvent["DirectionOfTravel"].asString();
+  Description = parsedEvent["Description"].asString();
+  Location = parsedEvent["Location"].asString();
+  LanesAffected = parsedEvent["LanesAffected"].asString();
+  LanesStatus = parsedEvent["LanesStatus"].asString();
+  PrimaryLocation = parsedEvent["PrimaryLocation"].asString();
+  SecondaryLocation = parsedEvent["SecondaryLocation"].asString();
+  FirstArticleCity = parsedEvent["FirstArticleCity"].asString();
+  SecondCity = parsedEvent["SecondCity"].asString();
+  EventType = parsedEvent["EventType"].asString();
+  EventSubType = parsedEvent["EventSubType"].asString();
+  MapEncodedPolyline = parsedEvent["MapEncodedPolyline"].asString();
+  LastUpdated = parsedEvent["LastUpdated"].asString();
+  Latitude = parsedEvent["Latitude"].asDouble();
+  Longitude = parsedEvent["Longitude"].asDouble();
+  PlannedEndDate = parsedEvent["PlannedEndDate"].asString();
+  Reported = parsedEvent["Reported"].asString();
+  StartDate = parsedEvent["StartDate"].asString();
 }
 
 // Overload operator<< to print an event object
