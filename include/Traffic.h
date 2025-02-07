@@ -73,9 +73,6 @@ public:
 
 // Declare a hashmap to store NYSDOT::Event objects
 extern EventMap<Event> events; // Index into the map via "ID"
-
-// Parse a JsonData stream
-Json::Value parseEvents(const std::string& jsonData);
 } // namespace NYSDOT
 
 

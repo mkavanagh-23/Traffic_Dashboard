@@ -54,7 +54,6 @@ int main(int argc, char** argv)
   std::cout << "\033[32m[dotEnv] Successfully sourced API key from local environment.\033[0m\n";
 
   // Test cURL parsing
-  //std::cout << "Testing cURL parsing:\n";
   std::string url{ "https://511ny.org/api/getevents/?format=json&key=" + Traffic::NYSDOT::API_KEY };
   std::string responseStr{ cURL::getData(url) };
   if(responseStr.empty()) {
@@ -64,7 +63,7 @@ int main(int argc, char** argv)
   std::cout << "\033[32m[cURL] Successfully retrieved JSON from 511ny.\033[0m\n";
 
   // Test JSON Parsing
-  Traffic::NYSDOT::parseEvents(responseStr);
+  JSON::parseData(responseStr);
 
   return 0;
 }
