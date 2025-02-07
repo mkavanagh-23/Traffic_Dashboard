@@ -16,10 +16,7 @@ std::string API_KEY;
 EventMap<Event> events; // Key = "ID"
 
 // Parse events from a Json data stream onto the global event map
-bool parseEvents(const std::string& jsonData) {
-  // Track any parsing failures
-  bool success{ true };
-
+Json::Value parseEvents(const std::string& jsonData) {
   // Set up Json parsing objects
   Json::CharReaderBuilder builder;
   Json::Value root;                 // Root node of the parsed objects
@@ -28,19 +25,20 @@ bool parseEvents(const std::string& jsonData) {
 
   // Parse the string into the root Value object
   if(!Json::parseFromStream(builder, data, &root, &errs)) {
-    // If initial parsing fails, send an error message and return without processing
-    std::cerr << "[NYSDOT] Error parsing JSON (is it a valid stream?): " << errs << std::endl;
-    return false;
+    // If initial parsing fails, send an error message
+    std::cerr << "\033[31m[NYSDOT] Error parsing JSON (is it a valid stream?): " << errs << ".\033[0m\n";
+    // TODO: Throw an exception if we do not parse from stream
+    // Should also throw an exception in the underlying/preceding curl function
   }
+  std::cout << "\033[32m[NYSDOT] Successfully parsed events from JSON stream.\033[0m\n";
+  return root;
+}
+
 
   // TODO:  
   //    Process each event from the root object
   //    Check each Event ID against the map to see if it already exists to determine update or new
   //    Process the event and continue or create an event store on the map
-  
-  // Return if any failures occurred
-  return success;
-}
 
 // Overload operator<< to print an event object
 std::ostream &operator<<(std::ostream &out, const Event &event) {

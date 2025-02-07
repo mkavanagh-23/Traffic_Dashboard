@@ -33,32 +33,38 @@ int main(int argc, char** argv)
 {
   // Check for valid arguments
   if (argc < 2) {
-    std::cerr << "usage: " << argv[0] << " <video source stream/url>" << std::endl;
+    std::cerr << "\033[31musage: " << argv[0] << " <video source stream/url>\033[0m" << std::endl;
     return 1;
   }
 
   // Create the video object from the stream URL
   Video video(argv[1], VLC::Media::FromLocation);
   //video.play();
-  std::this_thread::sleep_for(std::chrono::seconds(2));
+  //std::this_thread::sleep_for(std::chrono::seconds(2));
   //video.stop();
 
   // Test environment variable parsing from .env
   dotenv::init();
   Traffic::NYSDOT::API_KEY = std::getenv("NYSDOT_API_KEY");
+  if(Traffic::NYSDOT::API_KEY.empty()) {
+    std::cerr << "\033[31m[dotEnv] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have defined it in '.env'.\n"
+              << "Exiting program.\033[0m\n";
+    return 1;
+  }
+  std::cout << "\033[32m[dotEnv] Successfully sourced API key from local environment.\033[0m\n";
 
   // Test cURL parsing
-  std::cout << "Testing cURL parsing:\n";
-  std::this_thread::sleep_for(std::chrono::seconds(2));
+  //std::cout << "Testing cURL parsing:\n";
   std::string url{ "https://511ny.org/api/getevents/?format=json&key=" + Traffic::NYSDOT::API_KEY };
   std::string responseStr{ cURL::getData(url) };
-  std::cout << responseStr;
+  if(responseStr.empty()) {
+    std::cerr << "\033[31mExiting program.\033[0m\n";
+    return 1;
+  }
+  std::cout << "\033[32m[cURL] Successfully retrieved JSON from 511ny.\033[0m\n";
 
   // Test JSON Parsing
-  /* TODO:
-   *    Pass responseStr into json parsing function
-   *    Print each formatted json object from the map
-   */
+  Traffic::NYSDOT::parseEvents(responseStr);
 
   return 0;
 }
