@@ -10,14 +10,23 @@ namespace Traffic {
 namespace NYSDOT {
 
 std::string API_KEY;
-EventMap<Event> events; // Key = "ID"
+EventMap<Event> eventMap; // Key = "ID"
 
 
-
-  // TODO:  
-  //    Process each event from the root object
-  //    Check each Event ID against the map to see if it already exists to determine update or new
-  //    Process the event and continue or create an event store on the map
+bool parseEvents(const Json::Value& events){
+  // Iterate through each event
+  for(const auto& parsedEvent : events) {
+    if(!parsedEvent.isObject()) {
+      std::cerr << "\033[31m[NYSDOT] Failed parsing event (is the JSON valid?)\033[0m\n";
+      return false;
+    }
+    /* TODO:  
+     *    Check each Event ID against the map to see if it already exists to determine update or new
+     *    Process the event and continue or create an event store on the map
+     */
+  }
+  return true;
+}
 
 // Overload operator<< to print an event object
 std::ostream &operator<<(std::ostream &out, const Event &event) {

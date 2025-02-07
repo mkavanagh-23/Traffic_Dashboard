@@ -63,7 +63,12 @@ int main(int argc, char** argv)
   std::cout << "\033[32m[cURL] Successfully retrieved JSON from 511ny.\033[0m\n";
 
   // Test JSON Parsing
-  JSON::parseData(responseStr);
+  if(!Traffic::NYSDOT::parseEvents(JSON::parseData(responseStr))) {
+    std::cerr << "\033[31m[EVENT] Error parsing root tree.\n"
+              << "Exiting program.\033[0m\n";
+    return 1;
+  }
+  std::cout << "\033[32m[EVENT] Successfully parsed root tree.\033[0m\n";
 
   return 0;
 }

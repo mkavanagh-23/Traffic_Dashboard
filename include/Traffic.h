@@ -72,7 +72,9 @@ public:
 };
 
 // Declare a hashmap to store NYSDOT::Event objects
-extern EventMap<Event> events; // Index into the map via "ID"
+extern EventMap<Event> eventMap; // Index into the map via "ID"
+// And a function to parse events and store on the map
+bool parseEvents(const Json::Value& events);
 } // namespace NYSDOT
 
 
