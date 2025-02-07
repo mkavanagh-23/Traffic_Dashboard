@@ -30,19 +30,30 @@ bool parseEvents(const Json::Value& events){
   return true;
 }
 
-/* TODO:  
- *    Check each Event ID against the map to see if it already exists to determine update or new
- *    Process the event and continue or create an event store on the map
- */
-
 bool processEvent(const Json::Value& parsedEvent) {
   // Extract the event ID
   std::string eventID{ parsedEvent["ID"].asString() };
+
+  /* TODO:
+   * Check eventID against objects on the map
+   * IF (eventMap.find(eventID) != eventMap.end() THEN
+   *    Check LastUpdated to see if it has changed
+   *    IF it has changed THEN
+   *        eventMap[eventID].update(parsedEvent)
+   * ELSE continue on below
+   */    
+
   // Extract the region
   std::string eventRegion{ parsedEvent["RegionName"].asString() };
 
   // Check against matching region(s)
   if(eventRegion == "Central Syracuse Utica Area") {
+
+    /* TODO:
+     * Construct an event object
+     * Move the constructed object onto the map
+     */
+
     return true;
   }
   return false;
