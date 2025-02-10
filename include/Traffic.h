@@ -96,10 +96,12 @@ private:
 public:
   // Constructors
   // Construct an event from an XML object
-  Event(rapidxml::xml_node<>* item);
+  Event(const rapidxml::xml_node<>* item);
   std::string getID(){ return ID; }
   // Move constructor
+  Event(Event&& other) noexcept;
   // Move assignment operator
+  Event& operator=(Event&& other) noexcept;
 
   // Overload the ostream operator
   friend std::ostream &operator<<(std::ostream &out, const Event &event);

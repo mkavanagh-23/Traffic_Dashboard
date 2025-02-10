@@ -193,6 +193,7 @@ std::ostream &operator<<(std::ostream &out, const Event &event) {
 
 namespace MCNY {
 const std::string RSS_URL{ "https://www.monroecounty.gov/incidents911.rss" };
+EventMap<Event> eventMap; // Key = "ID"
 
 bool getEvents() {
   // Parse Events Data from RSS feed
@@ -228,10 +229,7 @@ bool parseEvents(rapidxml::xml_document<>& xml) {
     
     // Create a temporary event object
     Event event(item);
-    std::cout << event.getID() << '\n';
-    // Extract info from document into event object
-    // This should be redefined as a constructor
-    // We also need to properly set up move semantics
+    eventMap.insert_or_assign(event.getID(), std::move(event));
   }
 
   return true;
@@ -240,7 +238,7 @@ bool parseEvents(rapidxml::xml_document<>& xml) {
 /***************************** MCNY EVENT *************************************/
 //Construct an event from a parsed XML item
 
-Event::Event(rapidxml::xml_node<>* item) {
+Event::Event(const rapidxml::xml_node<>* item) {
   if(rapidxml::xml_node<> *title = item->first_node("title")) {
     Title = title->value();
   }
@@ -279,8 +277,38 @@ Event::Event(rapidxml::xml_node<>* item) {
   Status = tokens[0].substr(tokens[0].find(":") + 2);
   // Extract the ID
   ID = tokens[1].substr(tokens[1].find(":") + 2);
-  std::cout << "constructed MCNY event: ";
+  std::cout << "Constructed MCNY event: " << ID << '\n';
 }
 
+  // Move constructor
+Event::Event(Event&& other) noexcept
+: ID(std::move(other.ID)),
+  Title(std::move(other.Title)),
+  Link(std::move(other.Link)),
+  PubDate(std::move(other.PubDate)),
+  Status(std::move(other.Status)),
+  GUID(std::move(other.GUID)),
+  Latitude(other.Latitude),
+  Longitude(other.Longitude)
+{
+  std::cout << "Moved MCNY event: " << ID << '\n';
+}
+
+  // Move assignment operator
+Event& Event::operator=(Event&& other) noexcept {
+  // Check for self assignment
+  if (this != &other) {
+    ID = std::move(other.ID);
+    Title = std::move(other.Title);
+    Link = std::move(other.Link);
+    PubDate = std::move(other.PubDate);
+    Status = std::move(other.Status);
+    GUID = std::move(other.GUID);
+    Latitude = other.Latitude;
+    Longitude = other.Longitude;
+  }
+  std::cout << "Invoked move assignment: " << '\n';
+  return *this;
+}
 } // namespace MCNY
 } // namespace Traffic
