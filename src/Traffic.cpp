@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <dotenv.h>
+#include <rapidxml.hpp>
 
 namespace Traffic {
 
@@ -26,6 +27,7 @@ EventMap<Event> eventMap; // Key = "ID"
 
 bool getEvents(){
   // Source API key from local environment
+  // This should eventually be moved into some kind of setup() function to make sure it executes only once and before the main loop begins
   API_KEY = std::getenv("NYSDOT_API_KEY");
   if(API_KEY.empty()) {
     std::cerr << "\033[31m[dotEnv] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have defined it in '.env'.\033[0m\n";
@@ -37,7 +39,7 @@ bool getEvents(){
   std::string url{ "https://511ny.org/api/getevents/?format=json&key=" + API_KEY };
   std::string responseStr{ cURL::getData(url) };
   if(responseStr.empty()) {
-    std::cerr << "\033[31m[dotEnv] Failed to retrieve JSON from 511ny.\033[0m\n";
+    std::cerr << "\033[31m[cURL] Failed to retrieve JSON from 511ny.\033[0m\n";
     return false;
   }
   std::cout << "\033[32m[cURL] Successfully retrieved JSON from 511ny.\033[0m\n";
@@ -83,6 +85,7 @@ void printEvents() {
   for(const auto& [key, event] : eventMap) {
     std::cout << event << '\n';
   }
+  std::cout << "Found " << eventMap.size() << " Matching Event Records.\n";
 }
 
 /****** NYSDOT::EVENT ******/
@@ -180,9 +183,104 @@ std::ostream &operator<<(std::ostream &out, const Event &event) {
       << '\n' << event.RoadwayName << ' ' << event.DirectionOfTravel
       << '\n' << event.PrimaryLocation << ' ' << event.SecondaryLocation
       << "\nLanes: " << event.LanesAffected << ' ' << event.LanesStatus
-      << "\n Last Updated: " << event.LastUpdated
+      << "\nLast Updated: " << event.LastUpdated
       << std::endl;
   return out;
 }
 } // namespace NYSDOT
+
+/************************ Monroe County Dispatch Feed *************************/
+
+namespace MCNY {
+const std::string RSS_URL{ "https://www.monroecounty.gov/incidents911.rss" };
+
+bool getEvents() {
+  // Parse Events Data from RSS feed
+  std::string responseStr{ cURL::getData(RSS_URL) };
+  if(responseStr.empty()) {
+    std::cerr << "\033[31m[cURL] Failed to retrieve XML from RSS feed.\033[0m\n";
+    return false;
+  }
+  std::cout << "\033[32m[cURL] Successfully retrieved XML from RSS feed.\033[0m\n";
+
+  // Test XML parsing
+  rapidxml::xml_document<> parsedData;  // Create a document object to hold XML events
+  XML::parseData(parsedData, responseStr);
+  if(!parseEvents(parsedData)) {
+    std::cerr << "\033[31m[XML] Error parsing root tree.\033[0m\n";
+    return false;
+  }
+  std::cout << "\033[32m[XML] Successfully parsed root tree.\033[0m\n";
+  //std::cout << responseStr;
+
+  return true;
+}
+
+bool parseEvents(rapidxml::xml_document<>& xml) { 
+  rapidxml::xml_node<>* root = xml.first_node("rss"); // Define root entry point
+  rapidxml::xml_node<>* channel = root->first_node("channel"); // Navigate to channel
+  
+  // Iterate throgh each event in the document tree
+  for(rapidxml::xml_node<>* item = channel->first_node("item"); item; item = item->next_sibling()) {
+    // TODO:
+    // Add the event to the map
+    // Log the time to keep track of last-updated
+    
+    // Create a temporary event object
+    Event event(item);
+    std::cout << event.getID() << '\n';
+    // Extract info from document into event object
+    // This should be redefined as a constructor
+    // We also need to properly set up move semantics
+  }
+
+  return true;
+}
+
+/***************************** MCNY EVENT *************************************/
+//Construct an event from a parsed XML item
+
+Event::Event(rapidxml::xml_node<>* item) {
+  if(rapidxml::xml_node<> *title = item->first_node("title")) {
+    Title = title->value();
+  }
+  if(rapidxml::xml_node<> *link = item->first_node("link")) {
+    Link = link->value();
+  }
+  if(rapidxml::xml_node<> *pubDate = item->first_node("pubDate")) {
+    PubDate = pubDate->value();
+  }
+  std::string tempDescription;
+  if(rapidxml::xml_node<> *description = item->first_node("description")) {
+    tempDescription = description->value();
+  }
+  if(rapidxml::xml_node<> *guid = item->first_node("guid")) {
+    GUID= guid->value();
+  }
+  if(rapidxml::xml_node<> *latitude = item->first_node("geo:lat")) {
+    std::string temp = latitude->value();
+    Latitude = std::stof(temp.substr(1));
+  }
+  if(rapidxml::xml_node<> *longitude = item->first_node("geo:long")) {
+    std::string temp = longitude->value();
+    Longitude = std::stof(temp.substr(1));
+  }
+    
+  // Extract items from the description
+  std::stringstream ss(tempDescription);
+  std::string token;
+  std::vector<std::string> tokens;
+
+  while(std::getline(ss, token, ',')) {
+    tokens.push_back(token);
+  }
+    
+  // Extract the Status
+  Status = tokens[0].substr(tokens[0].find(":") + 2);
+  // Extract the ID
+  ID = tokens[1].substr(tokens[1].find(":") + 2);
+  std::cout << "constructed MCNY event: ";
+}
+
+} // namespace MCNY
 } // namespace Traffic

@@ -2,6 +2,7 @@
 #define TRAFFIC_H
 
 #include <json/json.h>
+#include <rapidxml.hpp>
 
 #include <ostream>
 #include <string>
@@ -95,6 +96,8 @@ private:
 public:
   // Constructors
   // Construct an event from an XML object
+  Event(rapidxml::xml_node<>* item);
+  std::string getID(){ return ID; }
   // Move constructor
   // Move assignment operator
 
@@ -108,6 +111,9 @@ public:
 
 // Declare a hashmap to store MCNY::Event objects
 extern EventMap<Event> eventMap; // Index into the map via "ID"
+extern const std::string RSS_URL;
+bool getEvents();
+bool parseEvents(rapidxml::xml_document<>& xml);
 
 } // namespace MCNY
 } // namespace Traffic

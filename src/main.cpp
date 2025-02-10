@@ -46,5 +46,9 @@ int main(int argc, char** argv)
   Traffic::NYSDOT::getEvents();
   Traffic::NYSDOT::printEvents();
 
+  std::cout << "\n\n";
+
+  Traffic::MCNY::getEvents();
+
   return 0;
 }

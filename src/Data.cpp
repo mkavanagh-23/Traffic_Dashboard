@@ -3,6 +3,7 @@
 #include <iostream>
 #include <curl/curl.h>
 #include <json/json.h>
+#include <rapidxml.hpp>
 
 namespace cURL {
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output) {
@@ -20,6 +21,7 @@ std::string getData(const std::string& url) {
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // Set the write function
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);     // Set the data to write
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L); // Set a 10 second timeout
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
     
     // Retrieve the data
     CURLcode res = curl_easy_perform(curl);
@@ -41,7 +43,7 @@ std::string getData(const std::string& url) {
 } // namespace cURL
 
 namespace JSON {
-// Parse events from a Json data stream onto the global event map
+// Parse events from a Json data stream
 Json::Value parseData(const std::string& jsonData) {
   // Set up Json parsing objects
   Json::CharReaderBuilder builder;
@@ -60,3 +62,12 @@ Json::Value parseData(const std::string& jsonData) {
   return root; // Return the parsed root of objects
 }
 } // namespace JSON
+
+namespace XML {
+// Parse events from an XML data stream
+void parseData(rapidxml::xml_document<>& document, std::string xmlData) {
+  // Parse the XML into a document object
+  document.parse<0>(&xmlData[0]);
+}
+
+} // namespace XML
