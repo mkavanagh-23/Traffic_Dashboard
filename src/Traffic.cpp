@@ -217,7 +217,6 @@ bool getEvents() {
     return false;
   }
   std::cout << "\033[32m[XML] Successfully parsed root tree.\033[0m\n";
-  //std::cout << responseStr;
 
   return true;
 }
@@ -228,17 +227,22 @@ bool parseEvents(rapidxml::xml_document<>& xml) {
   
   // Iterate throgh each event in the document tree
   for(rapidxml::xml_node<>* item = channel->first_node("item"); item; item = item->next_sibling()) {
-    // TODO:
-    // Add the event to the map
-    // Log the time to keep track of last-updated
-    
     // Create a temporary event object
     Event event(item);
     eventMap.insert_or_assign(event.getID(), std::move(event));
+    // TODO:
+    // Log time to track LastUpdated
   }
   std::cout << "Found " << eventMap.size() << " Matching Event Records.\n";
 
   return true;
+}
+
+// Print the event map
+void printEvents() {
+  for(const auto& [key, event] : eventMap) {
+    std::cout << event << '\n';
+  }
 }
 
 /***************************** MCNY EVENT *************************************/
@@ -318,6 +322,14 @@ Event& Event::operator=(Event&& other) noexcept {
   }
   std::cout << "[MCNY] Invoked move assignment: " << '\n';
   return *this;
+}
+
+std::ostream &operator<<(std::ostream &out, const Event &event) {
+  out << "\nEvent ID: " << event.ID << "  |  " << event.Status
+      << '\n' << event.Title
+      << "\nDate: " << event.PubDate
+      << std::endl;
+  return out;
 }
 } // namespace MCNY
 } // namespace Traffic

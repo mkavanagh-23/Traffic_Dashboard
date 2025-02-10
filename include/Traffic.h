@@ -116,6 +116,7 @@ extern EventMap<Event> eventMap; // Index into the map via "ID"
 extern const std::string RSS_URL;
 bool getEvents();
 bool parseEvents(rapidxml::xml_document<>& xml);
+void printEvents();
 
 } // namespace MCNY
 } // namespace Traffic

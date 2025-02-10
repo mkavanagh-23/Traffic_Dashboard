@@ -44,9 +44,6 @@ int main(int argc, char** argv)
   // Test Event Parsing
   dotenv::init();   // Initialize environment sourcing for API key
   Traffic::NYSDOT::getEvents();
-
-  std::cout << "\n\n";
-
   Traffic::MCNY::getEvents();
 
   return 0;
