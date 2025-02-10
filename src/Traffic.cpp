@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <dotenv.h>
+#include <rapidxml.hpp>
 
 namespace Traffic {
 
@@ -26,6 +27,7 @@ EventMap<Event> eventMap; // Key = "ID"
 
 bool getEvents(){
   // Source API key from local environment
+  // This should eventually be moved into some kind of setup() function to make sure it executes only once and before the main loop begins
   API_KEY = std::getenv("NYSDOT_API_KEY");
   if(API_KEY.empty()) {
     std::cerr << "\033[31m[dotEnv] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have defined it in '.env'.\033[0m\n";
@@ -37,7 +39,7 @@ bool getEvents(){
   std::string url{ "https://511ny.org/api/getevents/?format=json&key=" + API_KEY };
   std::string responseStr{ cURL::getData(url) };
   if(responseStr.empty()) {
-    std::cerr << "\033[31m[dotEnv] Failed to retrieve JSON from 511ny.\033[0m\n";
+    std::cerr << "\033[31m[cURL] Failed to retrieve JSON from 511ny.\033[0m\n";
     return false;
   }
   std::cout << "\033[32m[cURL] Successfully retrieved JSON from 511ny.\033[0m\n";
@@ -64,6 +66,7 @@ bool parseEvents(const Json::Value& events){
     // Process the event for storage
     processEvent(parsedEvent);
   }
+  std::cout << "Found " << eventMap.size() << " Matching Event Records.\n";
   return true;
 }
 
@@ -112,7 +115,9 @@ Event::Event(const Json::Value &parsedEvent)
   PlannedEndDate{ parsedEvent["PlannedEndDate"].asString() },
   Reported{ parsedEvent["Reported"].asString() },
   StartDate{ parsedEvent["StartDate"].asString() } 
-{}
+{
+  std::cout << "Constructed NYSDOT event: " << ID << '\n';
+}
 
 // Define the move constructor
 Event::Event(Event&& other) noexcept 
@@ -139,7 +144,9 @@ Event::Event(Event&& other) noexcept
   PlannedEndDate(std::move(other.PlannedEndDate)),
   Reported(std::move(other.Reported)),
   StartDate(std::move(other.StartDate))
-{}
+{
+  std::cout << "Moved NYSDOT event: " << ID << '\n';
+}
 
 // Define the move assignment operator
 Event& Event::operator=(Event&& other) noexcept {
@@ -169,6 +176,7 @@ Event& Event::operator=(Event&& other) noexcept {
     Reported = std::move(other.Reported);
     StartDate = std::move(other.StartDate);
   }
+  std::cout << "[NYSDOT] Invoked move assignment: " << ID << '\n';
   return *this;
 }
 
@@ -180,9 +188,148 @@ std::ostream &operator<<(std::ostream &out, const Event &event) {
       << '\n' << event.RoadwayName << ' ' << event.DirectionOfTravel
       << '\n' << event.PrimaryLocation << ' ' << event.SecondaryLocation
       << "\nLanes: " << event.LanesAffected << ' ' << event.LanesStatus
-      << "\n Last Updated: " << event.LastUpdated
+      << "\nLast Updated: " << event.LastUpdated
       << std::endl;
   return out;
 }
 } // namespace NYSDOT
+
+/************************ Monroe County Dispatch Feed *************************/
+
+namespace MCNY {
+const std::string RSS_URL{ "https://www.monroecounty.gov/incidents911.rss" };
+EventMap<Event> eventMap; // Key = "ID"
+
+bool getEvents() {
+  // Parse Events Data from RSS feed
+  std::string responseStr{ cURL::getData(RSS_URL) };
+  if(responseStr.empty()) {
+    std::cerr << "\033[31m[cURL] Failed to retrieve XML from RSS feed.\033[0m\n";
+    return false;
+  }
+  std::cout << "\033[32m[cURL] Successfully retrieved XML from RSS feed.\033[0m\n";
+
+  // Test XML parsing
+  rapidxml::xml_document<> parsedData;  // Create a document object to hold XML events
+  XML::parseData(parsedData, responseStr);
+  if(!parseEvents(parsedData)) {
+    std::cerr << "\033[31m[XML] Error parsing root tree.\033[0m\n";
+    return false;
+  }
+  std::cout << "\033[32m[XML] Successfully parsed root tree.\033[0m\n";
+
+  return true;
+}
+
+bool parseEvents(rapidxml::xml_document<>& xml) { 
+  rapidxml::xml_node<>* root = xml.first_node("rss"); // Define root entry point
+  rapidxml::xml_node<>* channel = root->first_node("channel"); // Navigate to channel
+  
+  // Iterate throgh each event in the document tree
+  for(rapidxml::xml_node<>* item = channel->first_node("item"); item; item = item->next_sibling()) {
+    // Create a temporary event object
+    Event event(item);
+    eventMap.insert_or_assign(event.getID(), std::move(event));
+    // TODO:
+    // Log time to track LastUpdated
+  }
+  std::cout << "Found " << eventMap.size() << " Matching Event Records.\n";
+
+  return true;
+}
+
+// Print the event map
+void printEvents() {
+  for(const auto& [key, event] : eventMap) {
+    std::cout << event << '\n';
+  }
+}
+
+/***************************** MCNY EVENT *************************************/
+//Construct an event from a parsed XML item
+
+Event::Event(const rapidxml::xml_node<>* item) {
+  if(rapidxml::xml_node<> *title = item->first_node("title")) {
+    Title = title->value();
+  }
+  if(rapidxml::xml_node<> *link = item->first_node("link")) {
+    Link = link->value();
+  }
+  if(rapidxml::xml_node<> *pubDate = item->first_node("pubDate")) {
+    PubDate = pubDate->value();
+  }
+  if(rapidxml::xml_node<> *guid = item->first_node("guid")) {
+    GUID = guid->value();
+  }
+  if(rapidxml::xml_node<> *latitude = item->first_node("geo:lat")) {
+    std::string temp = latitude->value();
+    Latitude = std::stof(temp.substr(1));
+  }
+  if(rapidxml::xml_node<> *longitude = item->first_node("geo:long")) {
+    std::string temp = longitude->value();
+    Longitude = std::stof(temp.substr(1));
+  }
+  // Get the Status and ID
+  if(rapidxml::xml_node<> *description = item->first_node("description")) {
+    std::string temp;
+    temp = description->value();
+    
+    // Extract items from the description
+    std::stringstream ss(temp);
+    std::string token;
+    std::vector<std::string> tokens;
+    
+    // Elements delimited by ','
+    while(std::getline(ss, token, ',')) {
+      tokens.push_back(token);
+    }
+    
+    // First token is status
+    Status = tokens[0].substr(tokens[0].find(":") + 2);
+    // Second token is ID
+    ID = tokens[1].substr(tokens[1].find(":") + 2);
+  }
+    
+  std::cout << "Constructed MCNY event: " << ID << '\n';
+}
+
+  // Move constructor
+Event::Event(Event&& other) noexcept
+: ID(std::move(other.ID)),
+  Title(std::move(other.Title)),
+  Link(std::move(other.Link)),
+  PubDate(std::move(other.PubDate)),
+  Status(std::move(other.Status)),
+  GUID(std::move(other.GUID)),
+  Latitude(other.Latitude),
+  Longitude(other.Longitude)
+{
+  std::cout << "Moved MCNY event: " << ID << '\n';
+}
+
+  // Move assignment operator
+Event& Event::operator=(Event&& other) noexcept {
+  // Check for self assignment
+  if (this != &other) {
+    ID = std::move(other.ID);
+    Title = std::move(other.Title);
+    Link = std::move(other.Link);
+    PubDate = std::move(other.PubDate);
+    Status = std::move(other.Status);
+    GUID = std::move(other.GUID);
+    Latitude = other.Latitude;
+    Longitude = other.Longitude;
+  }
+  std::cout << "[MCNY] Invoked move assignment: " << '\n';
+  return *this;
+}
+
+std::ostream &operator<<(std::ostream &out, const Event &event) {
+  out << "\nEvent ID: " << event.ID << "  |  " << event.Status
+      << '\n' << event.Title
+      << "\nDate: " << event.PubDate
+      << std::endl;
+  return out;
+}
+} // namespace MCNY
 } // namespace Traffic
