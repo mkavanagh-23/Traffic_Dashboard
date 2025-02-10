@@ -66,6 +66,7 @@ bool parseEvents(const Json::Value& events){
     // Process the event for storage
     processEvent(parsedEvent);
   }
+  std::cout << "Found " << eventMap.size() << " Matching Event Records.\n";
   return true;
 }
 
@@ -85,7 +86,6 @@ void printEvents() {
   for(const auto& [key, event] : eventMap) {
     std::cout << event << '\n';
   }
-  std::cout << "Found " << eventMap.size() << " Matching Event Records.\n";
 }
 
 /****** NYSDOT::EVENT ******/
@@ -115,7 +115,9 @@ Event::Event(const Json::Value &parsedEvent)
   PlannedEndDate{ parsedEvent["PlannedEndDate"].asString() },
   Reported{ parsedEvent["Reported"].asString() },
   StartDate{ parsedEvent["StartDate"].asString() } 
-{}
+{
+  std::cout << "Constructed NYSDOT event: " << ID << '\n';
+}
 
 // Define the move constructor
 Event::Event(Event&& other) noexcept 
@@ -142,7 +144,9 @@ Event::Event(Event&& other) noexcept
   PlannedEndDate(std::move(other.PlannedEndDate)),
   Reported(std::move(other.Reported)),
   StartDate(std::move(other.StartDate))
-{}
+{
+  std::cout << "Moved NYSDOT event: " << ID << '\n';
+}
 
 // Define the move assignment operator
 Event& Event::operator=(Event&& other) noexcept {
@@ -172,6 +176,7 @@ Event& Event::operator=(Event&& other) noexcept {
     Reported = std::move(other.Reported);
     StartDate = std::move(other.StartDate);
   }
+  std::cout << "[NYSDOT] Invoked move assignment: " << ID << '\n';
   return *this;
 }
 
@@ -231,6 +236,7 @@ bool parseEvents(rapidxml::xml_document<>& xml) {
     Event event(item);
     eventMap.insert_or_assign(event.getID(), std::move(event));
   }
+  std::cout << "Found " << eventMap.size() << " Matching Event Records.\n";
 
   return true;
 }
@@ -248,12 +254,8 @@ Event::Event(const rapidxml::xml_node<>* item) {
   if(rapidxml::xml_node<> *pubDate = item->first_node("pubDate")) {
     PubDate = pubDate->value();
   }
-  std::string tempDescription;
-  if(rapidxml::xml_node<> *description = item->first_node("description")) {
-    tempDescription = description->value();
-  }
   if(rapidxml::xml_node<> *guid = item->first_node("guid")) {
-    GUID= guid->value();
+    GUID = guid->value();
   }
   if(rapidxml::xml_node<> *latitude = item->first_node("geo:lat")) {
     std::string temp = latitude->value();
@@ -263,20 +265,27 @@ Event::Event(const rapidxml::xml_node<>* item) {
     std::string temp = longitude->value();
     Longitude = std::stof(temp.substr(1));
   }
+  // Get the Status and ID
+  if(rapidxml::xml_node<> *description = item->first_node("description")) {
+    std::string temp;
+    temp = description->value();
     
-  // Extract items from the description
-  std::stringstream ss(tempDescription);
-  std::string token;
-  std::vector<std::string> tokens;
-
-  while(std::getline(ss, token, ',')) {
-    tokens.push_back(token);
+    // Extract items from the description
+    std::stringstream ss(temp);
+    std::string token;
+    std::vector<std::string> tokens;
+    
+    // Elements delimited by ','
+    while(std::getline(ss, token, ',')) {
+      tokens.push_back(token);
+    }
+    
+    // First token is status
+    Status = tokens[0].substr(tokens[0].find(":") + 2);
+    // Second token is ID
+    ID = tokens[1].substr(tokens[1].find(":") + 2);
   }
     
-  // Extract the Status
-  Status = tokens[0].substr(tokens[0].find(":") + 2);
-  // Extract the ID
-  ID = tokens[1].substr(tokens[1].find(":") + 2);
   std::cout << "Constructed MCNY event: " << ID << '\n';
 }
 
@@ -307,7 +316,7 @@ Event& Event::operator=(Event&& other) noexcept {
     Latitude = other.Latitude;
     Longitude = other.Longitude;
   }
-  std::cout << "Invoked move assignment: " << '\n';
+  std::cout << "[MCNY] Invoked move assignment: " << '\n';
   return *this;
 }
 } // namespace MCNY
