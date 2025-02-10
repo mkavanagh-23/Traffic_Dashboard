@@ -1,4 +1,5 @@
 #include "Video.h"
+#include "Output.h"
 
 #include <iostream>
 
@@ -9,14 +10,14 @@ Video::Video(const std::string& videoSource, VLC::Media::FromType fromType)
   : m_source{videoSource}, m_type{fromType}, m_media(m_instance, m_source, m_type), m_player(m_media)
 {
   if (!m_media.isValid())
-    std::cerr << "\033[31m[VLC] Error creating media object. Is it a valid source?\033[0m\n";
+    std::cerr << Output::Colors::RED << "[VLC] Error creating media object. Is it a valid source?" << Output::Colors::END << '\n';
   else
-    std::cout << "\033[32m[VLC] Successfully created media object from provided source.\033[0m\n";
+    std::cout << Output::Colors::GREEN << "[VLC] Successfully created media object from provided source." << Output::Colors::END << '\n';
 }
 
 void Video::play() {
   if (!m_media.isValid()) {
-    std::cerr << "\033[31m[VLC] Invalid media source.\033[0m\n" << std::endl;
+    std::cerr << Output::Colors::RED << "[VLC] Invalid media source." << Output::Colors::END << std::endl;
     return;
   }
   m_player.play();  // Start playback

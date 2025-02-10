@@ -1,13 +1,14 @@
 #include "Engine.h"
+#include "Output.h"
 #include <iostream>
 
 Engine engine;
 
 Engine::Engine() {
   if(init())
-    std::cout << "\033[32m[SDL] Successfully initialized rendering backend.\033[0m\n";
+    std::cout << Output::Colors::GREEN << "[SDL] Successfully initialized rendering backend." << Output::Colors::END << '\n';
   else
-    std::cerr << "\033[31m[SDL] Failed to initialize!\033[0m\n";
+    std::cerr << Output::Colors::RED << "[SDL] Failed to initialize!" << Output::Colors::END << '\n';
 }
 
 Engine::~Engine() {

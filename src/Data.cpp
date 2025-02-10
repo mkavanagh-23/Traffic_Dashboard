@@ -1,4 +1,5 @@
 #include "Data.h"
+#include "Output.h"
 #include <string>
 #include <iostream>
 #include <curl/curl.h>
@@ -28,14 +29,14 @@ std::string getData(const std::string& url) {
 
     // Check for errors
     if(res != CURLE_OK) {
-      std::cerr << "\033[31m[cURL] Error retrieving data: " << curl_easy_strerror(res) << ".\033[0m\n";
+      std::cerr << Output::Colors::RED << "[cURL] Error retrieving data: " << curl_easy_strerror(res) << '.' << Output::Colors::END << '\n';
     }
     
     // Cleanup the cURL object
     curl_easy_cleanup(curl);
   } 
   else {
-    std::cerr << "\033[31m[cURL] Failed to initialize cURL.\033[0m\n";
+    std::cerr << Output::Colors::RED << "[cURL] Failed to initialize cURL." << Output::Colors::END << '\n';
   }
   
   return responseData;
@@ -54,11 +55,11 @@ Json::Value parseData(const std::string& jsonData) {
   // Parse the string into the root Value object
   if(!Json::parseFromStream(builder, data, &root, &errs)) {
     // If initial parsing fails, send an error message
-    std::cerr << "\033[31m[JSON] Error parsing JSON (is it a valid stream?): " << errs << ".\033[0m\n";
+    std::cerr << Output::Colors::RED << "[JSON] Error parsing JSON (is it a valid stream?): " << errs << '.' << Output::Colors::END << '\n';
     // TODO: Throw an exception if we do not parse from stream
     // Should also throw an exception in the underlying/preceding curl function
   }
-  std::cout << "\033[32m[JSON] Successfully parsed events from JSON stream.\033[0m\n";
+  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed events from JSON stream." << Output::Colors::END << '\n';
   return root; // Return the parsed root of objects
 }
 } // namespace JSON

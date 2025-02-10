@@ -1,5 +1,6 @@
 #include "Traffic.h"
 #include "Data.h"
+#include "Output.h"
 
 #include <string>
 #include <iostream>
@@ -30,26 +31,26 @@ bool getEvents(){
   // This should eventually be moved into some kind of setup() function to make sure it executes only once and before the main loop begins
   API_KEY = std::getenv("NYSDOT_API_KEY");
   if(API_KEY.empty()) {
-    std::cerr << "\033[31m[dotEnv] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have defined it in '.env'.\033[0m\n";
+    std::cerr << Output::Colors::RED << "[dotEnv] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have defined it in '.env'." << Output::Colors::END << '\n';
     return false;
   }
-  std::cout << "\033[32m[dotEnv] Successfully sourced API key from local environment.\033[0m\n";
+  std::cout << Output::Colors::GREEN << "[dotEnv] Successfully sourced API key from local environment." << Output::Colors::END << '\n';
   
   // Parse Events Data from API
   std::string url{ "https://511ny.org/api/getevents/?format=json&key=" + API_KEY };
   std::string responseStr{ cURL::getData(url) };
   if(responseStr.empty()) {
-    std::cerr << "\033[31m[cURL] Failed to retrieve JSON from 511ny.\033[0m\n";
+    std::cerr << Output::Colors::RED << "cURL] Failed to retrieve JSON from 511ny." << Output::Colors::END << '\n';
     return false;
   }
-  std::cout << "\033[32m[cURL] Successfully retrieved JSON from 511ny.\033[0m\n";
+  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved JSON from 511ny." << Output::Colors::END << '\n';
   
   // Test JSON Parsing
   if(!parseEvents(JSON::parseData(responseStr))) {
-    std::cerr << "\033[31m[EVENT] Error parsing root tree.\033[0m\n";
+    std::cerr << Output::Colors::RED << "[EVENT] Error parsing root tree." << Output::Colors::END << '\n';
     return false;
   }
-  std::cout << "\033[32m[EVENT] Successfully parsed root tree.\033[0m\n";
+  std::cout << Output::Colors::GREEN << "[EVENT] Successfully parsed root tree." << Output::Colors::END << '\n';
 
   return true;
 }
@@ -60,7 +61,7 @@ bool parseEvents(const Json::Value& events){
   for(const auto& parsedEvent : events) {
     // Check if event is a valid object
     if(!parsedEvent.isObject()) {
-      std::cerr << "\033[31m[NYSDOT] Failed parsing event (is the JSON valid?)\033[0m\n";
+      std::cerr << Output::Colors::RED << "[NYSDOT] Failed parsing event (is the JSON valid?)" << Output::Colors::END << '\n';
       return false;
     }
     // Process the event for storage
@@ -116,7 +117,7 @@ Event::Event(const Json::Value &parsedEvent)
   Reported{ parsedEvent["Reported"].asString() },
   StartDate{ parsedEvent["StartDate"].asString() } 
 {
-  std::cout << "Constructed NYSDOT event: " << ID << '\n';
+  std::cout << Output::Colors::YELLOW << "Constructed NYSDOT event: " << ID << Output::Colors::END << '\n';
 }
 
 // Define the move constructor
@@ -145,7 +146,7 @@ Event::Event(Event&& other) noexcept
   Reported(std::move(other.Reported)),
   StartDate(std::move(other.StartDate))
 {
-  std::cout << "Moved NYSDOT event: " << ID << '\n';
+  std::cout << Output::Colors::BLUE << "Moved NYSDOT event: " << ID << Output::Colors::END << '\n';
 }
 
 // Define the move assignment operator
@@ -176,7 +177,7 @@ Event& Event::operator=(Event&& other) noexcept {
     Reported = std::move(other.Reported);
     StartDate = std::move(other.StartDate);
   }
-  std::cout << "[NYSDOT] Invoked move assignment: " << ID << '\n';
+  std::cout << Output::Colors::BLUE << "[NYSDOT] Invoked move assignment: " << ID << Output::Colors::END << '\n';
   return *this;
 }
 
@@ -204,19 +205,19 @@ bool getEvents() {
   // Parse Events Data from RSS feed
   std::string responseStr{ cURL::getData(RSS_URL) };
   if(responseStr.empty()) {
-    std::cerr << "\033[31m[cURL] Failed to retrieve XML from RSS feed.\033[0m\n";
+    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve XML from RSS feed." << Output::Colors::END << '\n';
     return false;
   }
-  std::cout << "\033[32m[cURL] Successfully retrieved XML from RSS feed.\033[0m\n";
+  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved XML from RSS feed." << Output::Colors::END << '\n';
 
   // Test XML parsing
   rapidxml::xml_document<> parsedData;  // Create a document object to hold XML events
   XML::parseData(parsedData, responseStr);
   if(!parseEvents(parsedData)) {
-    std::cerr << "\033[31m[XML] Error parsing root tree.\033[0m\n";
+    std::cerr << Output::Colors::RED << "[XML] Error parsing root tree." << Output::Colors::END << '\n';
     return false;
   }
-  std::cout << "\033[32m[XML] Successfully parsed root tree.\033[0m\n";
+  std::cout << Output::Colors::GREEN << "[XML] Successfully parsed root tree." << Output::Colors::END << '\n';
 
   return true;
 }
@@ -290,7 +291,7 @@ Event::Event(const rapidxml::xml_node<>* item) {
     ID = tokens[1].substr(tokens[1].find(":") + 2);
   }
     
-  std::cout << "Constructed MCNY event: " << ID << '\n';
+  std::cout << Output::Colors::YELLOW << "Constructed MCNY event: " << ID << Output::Colors::END << '\n';
 }
 
   // Move constructor
@@ -304,7 +305,7 @@ Event::Event(Event&& other) noexcept
   Latitude(other.Latitude),
   Longitude(other.Longitude)
 {
-  std::cout << "Moved MCNY event: " << ID << '\n';
+  std::cout << Output::Colors::BLUE << "Moved MCNY event: " << ID << Output::Colors::END << '\n';
 }
 
   // Move assignment operator
@@ -320,7 +321,7 @@ Event& Event::operator=(Event&& other) noexcept {
     Latitude = other.Latitude;
     Longitude = other.Longitude;
   }
-  std::cout << "[MCNY] Invoked move assignment: " << '\n';
+  std::cout << Output::Colors::BLUE << "[MCNY] Invoked move assignment: " << Output::Colors::END << '\n';
   return *this;
 }
 

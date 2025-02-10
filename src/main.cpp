@@ -1,5 +1,6 @@
 #include "Traffic.h"
 #include "Video.h"
+#include "Output.h"
 #include <SDL2/SDL.h>
 #include <dotenv.h>
 #include <chrono>
@@ -31,7 +32,7 @@ int main(int argc, char** argv)
 {
   // Check for valid arguments
   if (argc < 2) {
-    std::cerr << "\033[31musage: " << argv[0] << " <video source stream/url>\033[0m" << std::endl;
+    std::cerr << Output::Colors::RED << "usage: " << argv[0] << " <video source stream/url>" << Output::Colors::END << std::endl;
     return 1;
   }
 
