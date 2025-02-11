@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 # Enable CMake to generate the compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-file(GLOB SOURCES "src/*.cpp")
+file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*/*.cpp")
 
 # Output final executable in project root
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
@@ -24,6 +24,7 @@ target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
 # Include directories
 target_include_directories(${PROJECT_NAME}
   PRIVATE ${PROJECT_SOURCE_DIR}/include
+  PRIVATE ${PROJECT_SOURCE_DIR}/include/Traffic
   PRIVATE ${PROJECT_SOURCE_DIR}/external/videolan/libvlcpp
   PRIVATE ${PROJECT_SOURCE_DIR}/external/dotenv-cpp/include/laserpants/dotenv
   PRIVATE ${PROJECT_SOURCE_DIR}/external/rapidxml
