@@ -1,3 +1,5 @@
+#!/bin/bash
+
 rm curl
 rm json*
 rm libcurl*
