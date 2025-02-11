@@ -4,6 +4,7 @@
 #include <string>
 #include <json/json.h>
 #include <rapidxml.hpp>
+#include <unordered_map>
 
 // This file holds all functionality for retrieving and filtering basic data from CURL in XML and JSON formats
 
@@ -19,5 +20,13 @@ Json::Value parseData(const std::string& jsonData);
 namespace XML {
 void parseData(rapidxml::xml_document<>& document, std::string xmlData);
 } // namespace XML
+
+
+// Define shared data for various traffic event sources
+namespace Traffic {
+// Create a template for EventMaps of different event types
+template<typename T>
+using EventMap = std::unordered_map<std::string, T>;
+}
 
 #endif
