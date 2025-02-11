@@ -6,3 +6,5 @@ lib*
 curl
 json*
 .env
+error.txt
+log.txt
