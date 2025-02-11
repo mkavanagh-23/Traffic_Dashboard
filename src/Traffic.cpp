@@ -15,9 +15,7 @@ namespace Traffic {
  *  - Clean up events once they are cleared
  *  - Error handling - try/catch
  *  - Get camera data
- *      - cURL request should be implemented here rather than in main
- *      - i.e. getEvents() and getCameras()
- *      - Multithreading and loop structure - updates in the backend
+ *  - Multithreading and loop structure - updates in the backend
  *  - Logging
  */
 
@@ -272,11 +270,8 @@ Event::Event(const rapidxml::xml_node<>* item) {
   }
   // Get the Status and ID
   if(rapidxml::xml_node<> *description = item->first_node("description")) {
-    std::string temp;
-    temp = description->value();
-    
     // Extract items from the description
-    std::stringstream ss(temp);
+    std::stringstream ss(description->value());
     std::string token;
     std::vector<std::string> tokens;
     
