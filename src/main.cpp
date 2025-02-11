@@ -3,7 +3,6 @@
 #include "Video.h"
 #include "Output.h"
 #include <SDL2/SDL.h>
-#include <dotenv.h>
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
@@ -44,9 +43,12 @@ int main(int argc, char** argv)
   video.stop();
   
   // Test Event Parsing
-  dotenv::init();   // Initialize environment sourcing for API key
-  Traffic::NYSDOT::getEvents();
-  Traffic::MCNY::getEvents();
+  if(!Traffic::NYSDOT::getEnv())
+    return 1;
+  if(!Traffic::NYSDOT::getEvents())
+    return 1;
+  if(!Traffic::MCNY::getEvents())
+    return 1;
 
   return 0;
 }

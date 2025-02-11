@@ -5,11 +5,11 @@
 
 namespace Output {
 namespace Colors {
-  const std::string RED = "\033[31m";
-  const std::string YELLOW = "\033[33m";
-  const std::string GREEN = "\033[32m";
-  const std::string BLUE = "\033[34m";
-  const std::string END = "\033[0m";
+  constexpr std::string RED = "\033[31m";
+  constexpr std::string YELLOW = "\033[33m";
+  constexpr std::string GREEN = "\033[32m";
+  constexpr std::string BLUE = "\033[34m";
+  constexpr std::string END = "\033[0m";
 }
 }
 

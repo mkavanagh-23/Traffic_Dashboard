@@ -26,7 +26,6 @@ target_include_directories(${PROJECT_NAME}
   PRIVATE ${PROJECT_SOURCE_DIR}/include
   PRIVATE ${PROJECT_SOURCE_DIR}/include/Traffic
   PRIVATE ${PROJECT_SOURCE_DIR}/external/videolan/libvlcpp
-  PRIVATE ${PROJECT_SOURCE_DIR}/external/dotenv-cpp/include/laserpants/dotenv
   PRIVATE ${PROJECT_SOURCE_DIR}/external/rapidxml
 )
 

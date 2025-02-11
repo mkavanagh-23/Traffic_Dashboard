@@ -1,9 +1,9 @@
 #include "Traffic/NYSDOT.h"
 #include "Data.h"
 #include "Output.h"
-#include <dotenv.h>
 #include <string>
 #include <iostream>
+#include <cstdlib>
 
 namespace Traffic {
 /********************* NYSDOT Traffic Data (511ny.org) ************************/
@@ -21,18 +21,26 @@ namespace NYSDOT {
 std::string API_KEY;
 EventMap<Event> eventMap; // Key = "ID"
 
-bool getEvents(){
-  // Source API key from local environment
-  // This should eventually be moved into some kind of setup() function to make sure it executes only once and before the main loop begins
-  API_KEY = std::getenv("NYSDOT_API_KEY");
-  if(API_KEY.empty()) {
-    std::cerr << Output::Colors::RED << "[dotEnv] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have defined it in '.env'." << Output::Colors::END << '\n';
+bool getEnv() {
+  // Retrieve environment variable from local environment
+  const char* NYSDOT_API_KEY = std::getenv("NYSDOT_API_KEY");
+
+  // Check if environment variable exists
+  if(NYSDOT_API_KEY) {
+    API_KEY = NYSDOT_API_KEY;    
+    std::cout << Output::Colors::GREEN << "[ENV] Successfully sourced API key from local environment." << Output::Colors::END << '\n';
+    return true;
+  } else {
+    std::cerr << Output::Colors::RED << "[Env] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have it set." << Output::Colors::END << '\n';
     return false;
   }
-  std::cout << Output::Colors::GREEN << "[dotEnv] Successfully sourced API key from local environment." << Output::Colors::END << '\n';
-  
-  // Parse Events Data from API
+}
+
+bool getEvents(){
+  // Build the request URL
   std::string url{ "https://511ny.org/api/getevents/?format=json&key=" + API_KEY };
+
+  // Parse Events Data from API
   std::string responseStr{ cURL::getData(url) };
   if(responseStr.empty()) {
     std::cerr << Output::Colors::RED << "cURL] Failed to retrieve JSON from 511ny." << Output::Colors::END << '\n';

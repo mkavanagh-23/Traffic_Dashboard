@@ -10,6 +10,3 @@
 [submodule "external/jsoncpp"]
 	path = external/jsoncpp
 	url = https://github.com/open-source-parsers/jsoncpp.git
-[submodule "external/dotenv-cpp"]
-	path = external/dotenv-cpp
-	url = https://github.com/laserpants/dotenv-cpp.git
