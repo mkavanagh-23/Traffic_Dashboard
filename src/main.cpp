@@ -1,3 +1,4 @@
+#include "ONMT.h"
 #include "Traffic/NYSDOT.h"
 #include "Traffic/MCNY.h"
 #include "Video.h"
@@ -48,6 +49,8 @@ int main(int argc, char** argv)
   if(!Traffic::NYSDOT::getEvents())
     return 1;
   if(!Traffic::MCNY::getEvents())
+    return 1;
+  if(!Traffic::Ontario::getEvents())
     return 1;
 
   return 0;
