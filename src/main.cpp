@@ -5,7 +5,11 @@
 #include "Output.h"
 #include <SDL2/SDL.h>
 #include <chrono>
+#include <ctime>
+#include <csignal>
+#include <atomic>
 #include <cstdlib>
+#include <iomanip>
 #include <iostream>
 #include <thread>
 
@@ -29,6 +33,13 @@
  *  Create a dynamic graphical interface
  */
 
+std::atomic<bool> running(true);
+
+void signalHandler(int signum) {
+  std::cout << "\nInterrupt signal received (" << signum << "). Terminating program...\n";
+  running = false;
+}
+
 int main(int argc, char** argv)
 {
   // Check for valid arguments
@@ -36,6 +47,9 @@ int main(int argc, char** argv)
     std::cerr << Output::Colors::RED << "usage: " << argv[0] << " <video source stream/url>" << Output::Colors::END << std::endl;
     return 1;
   }
+
+  // Register signal handler
+  signal(SIGINT, signalHandler);
 
   // Create the video object from the stream URL
   Video video(argv[1], VLC::Media::FromLocation);
@@ -46,12 +60,18 @@ int main(int argc, char** argv)
   // Test Event Parsing
   if(!Traffic::NYSDOT::getEnv())
     return 1;
-  if(!Traffic::NYSDOT::getEvents())
-    return 1;
-  if(!Traffic::MCNY::getEvents())
-    return 1;
-  if(!Traffic::Ontario::getEvents())
-    return 1;
+
+  while(running) {
+    if(!Traffic::NYSDOT::getEvents())
+      return 1;
+    if(!Traffic::MCNY::getEvents())
+      return 1;
+    if(!Traffic::Ontario::getEvents())
+      return 1;
+    auto time = Output::currentTime();
+    std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(60));
+  }
 
   return 0;
 }

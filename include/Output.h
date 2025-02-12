@@ -1,6 +1,7 @@
 #ifndef OUTPUT_H
 #define OUTPUT_H
 
+#include <ctime>
 #include <string>
 
 namespace Output {
@@ -11,6 +12,8 @@ namespace Colors {
   constexpr std::string BLUE = "\033[34m";
   constexpr std::string END = "\033[0m";
 }
+
+std::time_t currentTime();
 }
 
 #endif
