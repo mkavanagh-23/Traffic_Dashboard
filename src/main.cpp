@@ -64,8 +64,8 @@ int main(int argc, char** argv)
   while(running) {
     if(!Traffic::NYSDOT::getEvents())
       return 1;
-    if(!Traffic::MCNY::getEvents())
-      return 1;
+    //if(!Traffic::MCNY::getEvents())
+    //  return 1;
     if(!Traffic::Ontario::getEvents())
       return 1;
     auto time = Output::currentTime();

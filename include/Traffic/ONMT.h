@@ -49,6 +49,8 @@ public:
   // Move assignment operator
   Event& operator=(Event&& other) noexcept;
 
+  int getLastUpdated() const { return LastUpdated; }
+  
   // Overload the ostream operator
   friend std::ostream &operator<<(std::ostream &out, const Event &event);
 };

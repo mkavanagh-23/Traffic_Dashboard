@@ -49,8 +49,18 @@ bool parseEvents(const Json::Value &events) {
 }
 
 bool processEvent(const Json::Value &parsedEvent) {
-  eventMap.insert_or_assign(parsedEvent["ID"].asString(), parsedEvent);  // Construct object in place if inserting or move if assigning
-  return true;
+  std::string key = parsedEvent["ID"].asString();
+  if(eventMap.contains(key)) {
+    if(eventMap.at(key).getLastUpdated() != parsedEvent["LastUpdated"].asInt()) {
+      eventMap.at(key) = parsedEvent;
+      std::cout << Output::Colors::YELLOW << "[NYSDOT] Updated event: " << key << Output::Colors::END << '\n';
+    }
+    return true;
+  } else {
+    eventMap.emplace(key, parsedEvent);  // Construct object in place
+    return true;
+  }
+  return false;
 }
 
 /******* Ontario MT Events *********/

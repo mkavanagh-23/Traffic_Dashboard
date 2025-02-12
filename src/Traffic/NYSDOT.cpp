@@ -8,7 +8,6 @@
 namespace Traffic {
 /********************* NYSDOT Traffic Data (511ny.org) ************************/
 /* TODO:
- *  - Add checks for each key before assignment
  *  - Clean up events once they are cleared
  *  - Error handling - try/catch
  *  - Get camera data
@@ -76,11 +75,23 @@ bool parseEvents(const Json::Value& events){
 
 // Check the event against filter value and store on the map
 bool processEvent(const Json::Value& parsedEvent) {
-  // Check against matching region(s)
-  if( parsedEvent["RegionName"].asString()  == "Central Syracuse Utica Area") {
-    // Construct an event object on the map
-    eventMap.insert_or_assign(parsedEvent["ID"].asString(), parsedEvent);
+  std::string key = parsedEvent["ID"].asString();
+  // Check if event already exists on the map
+  if(eventMap.contains(key)) {
+    // Check if LastUpdated is the same
+    if(eventMap.at(key).getLastUpdated() != parsedEvent["LastUpdated"].asString()) {
+      // If not then update the event stored on the map
+      eventMap.at(key) = parsedEvent;
+      std::cout << Output::Colors::YELLOW << "[NYSDOT] Updated event: " << key << Output::Colors::END << '\n';
+    }
     return true;
+  } else {
+    // Check against matching region(s)
+    if( parsedEvent["RegionName"].asString()  == "Central Syracuse Utica Area") {
+      // Construct an event object on the map
+      eventMap.emplace(key, parsedEvent);
+      return true;
+    }
   }
   return false;
 }
