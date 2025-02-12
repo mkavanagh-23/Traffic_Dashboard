@@ -96,30 +96,54 @@ void printEvents() {
 
 // Construct an event from a parsed Json Event
 Event::Event(const Json::Value &parsedEvent)
-: ID{ parsedEvent["ID"].asString() },
-  RegionName{ parsedEvent["RegionName"].asString() },
-  CountyName{ parsedEvent["CountyName"].asString() },
-  Severity{ parsedEvent["Severity"].asString() },
-  RoadwayName{ parsedEvent["RoadwayName"].asString() },
-  DirectionOfTravel{ parsedEvent["DirectionOfTravel"].asString() },
-  Description{ parsedEvent["Description"].asString() },
-  Location{ parsedEvent["Location"].asString() },
-  LanesAffected{ parsedEvent["LanesAffected"].asString() },
-  LanesStatus{ parsedEvent["LanesStatus"].asString() },
-  PrimaryLocation{ parsedEvent["PrimaryLocation"].asString() },
-  SecondaryLocation{ parsedEvent["SecondaryLocation"].asString() },
-  FirstArticleCity{ parsedEvent["FirstArticleCity"].asString() },
-  SecondCity{ parsedEvent["SecondCity"].asString() },
-  EventType{ parsedEvent["EventType"].asString() },
-  EventSubType{ parsedEvent["EventSubType"].asString() },
-  MapEncodedPolyline{ parsedEvent["MapEncodedPolyline"].asString() },
-  LastUpdated{ parsedEvent["LastUpdated"].asString() },
-  Latitude{ parsedEvent["Latitude"].asDouble() },
-  Longitude{ parsedEvent["Longitude"].asDouble() },
-  PlannedEndDate{ parsedEvent["PlannedEndDate"].asString() },
-  Reported{ parsedEvent["Reported"].asString() },
-  StartDate{ parsedEvent["StartDate"].asString() } 
 {
+  if(parsedEvent.find("ID"))
+    ID = parsedEvent["ID"].asString();
+  if(parsedEvent.find("RegionName"))
+    RegionName = parsedEvent["RegionName"].asString();
+  if(parsedEvent.find("CountyName"))
+    CountyName = parsedEvent["CountyName"].asString();
+  if(parsedEvent.find("Severity"))
+    Severity = parsedEvent["Severity"].asString();
+  if(parsedEvent.find("RoadwayName"))
+   RoadwayName = parsedEvent["RoadwayName"].asString();
+  if(parsedEvent.find("DirectionOfTravel"))
+    DirectionOfTravel = parsedEvent["DirectionOfTravel"].asString();
+  if(parsedEvent.find("Description"))
+    Description = parsedEvent["Description"].asString();
+  if(parsedEvent.find("Location"))
+    Location = parsedEvent["Location"].asString();
+  if(parsedEvent.find("LanesAffected"))
+    LanesAffected = parsedEvent["LanesAffected"].asString();
+  if(parsedEvent.find("LanesStatus"))
+    LanesStatus = parsedEvent["LanesStatus"].asString();
+  if(parsedEvent.find("PrimaryLocation"))
+    PrimaryLocation = parsedEvent["PrimaryLocation"].asString();
+  if(parsedEvent.find("SecondaryLocation"))
+    SecondaryLocation = parsedEvent["SecondaryLocation"].asString();
+  if(parsedEvent.find("FirstArticleCity"))
+    FirstArticleCity = parsedEvent["FirstArticleCity"].asString();
+  if(parsedEvent.find("SecondCity"))
+    SecondCity = parsedEvent["SecondCity"].asString();
+  if(parsedEvent.find("EventType"))
+    EventType = parsedEvent["EventType"].asString();
+  if(parsedEvent.find("EventSubType"))
+    EventSubType = parsedEvent["EventSubType"].asString();
+  if(parsedEvent.find("MapEncodedPolyline"))
+    MapEncodedPolyline = parsedEvent["MapEncodedPolyline"].asString();
+  if(parsedEvent.find("LastUpdated"))
+    LastUpdated = parsedEvent["LastUpdated"].asString();
+  if(parsedEvent.find("Latitude"))
+    Latitude = parsedEvent["Latitude"].asDouble();
+  if(parsedEvent.find("Longitude"))
+    Longitude = parsedEvent["Longitude"].asDouble();
+  if(parsedEvent.find("PlannedEndDate"))
+    PlannedEndDate = parsedEvent["PlannedEndDate"].asString();
+  if(parsedEvent.find("Reported"))
+    Reported = parsedEvent["Reported"].asString();
+  if(parsedEvent.find("StartDate"))
+    StartDate = parsedEvent["StartDate"].asString();
+
   std::cout << Output::Colors::YELLOW << "Constructed NYSDOT event: " << ID << Output::Colors::END << '\n';
 }
 
