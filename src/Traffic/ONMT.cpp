@@ -49,7 +49,7 @@ bool parseEvents(const Json::Value &events) {
 }
 
 bool processEvent(const Json::Value &parsedEvent) {
-  eventMap.insert_or_assign(parsedEvent["ID"].asString(), parsedEvent);
+  eventMap.insert_or_assign(parsedEvent["ID"].asString(), parsedEvent);  // Construct object in place if inserting or move if assigning
   return true;
 }
 
@@ -129,10 +129,10 @@ Event::Event(Event&& other) noexcept
   EncodedPolyline(std::move(other.EncodedPolyline)),
   LinkId(std::move(other.LinkId))
 {
-  std::cout << Output::Colors::BLUE << "Moved NYSDOT event: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::BLUE << "Moved Ontario 511 event: " << ID << Output::Colors::END << '\n';
 }
   
-// Define the move assignment operator
+//Define the move assignment operator
 Event& Event::operator=(Event&& other) noexcept {
   // Check for self assignment
   if (this != &other) {
@@ -159,16 +159,16 @@ Event& Event::operator=(Event&& other) noexcept {
     EncodedPolyline = std::move(other.EncodedPolyline);
     LinkId = std::move(other.LinkId);
   }
-  std::cout << Output::Colors::BLUE << "[NYSDOT] Invoked move assignment: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::BLUE << "[Ontario] Invoked move assignment: " << ID << Output::Colors::END << '\n';
   return *this;
 }
+
 std::ostream &operator<<(std::ostream &out, const Event &event) {
   out << "Ontario 511 Event:"
       << "\nID: " << event.ID
       << "\nLocation: " << event.RoadwayName << "  |  " << event.DirectionOfTravel
       << "\nDetails: " << event.Description
       << "\n  " << event.Comment;
-  
   return out;
 }
 
