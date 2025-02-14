@@ -44,7 +44,7 @@ int main(int argc, char** argv)
 {
   // Check for valid arguments
   if (argc < 2) {
-    std::cerr << Output::Colors::RED << "usage: " << argv[0] << " <video source stream/url>" << Output::Colors::END << std::endl;
+    std::cerr << Output::Colors::RED << "[ERROR] Usage: " << argv[0] << " <video source stream/url>" << Output::Colors::END << std::endl;
     return 1;
   }
 
@@ -64,12 +64,12 @@ int main(int argc, char** argv)
   while(running) {
     if(!Traffic::NYSDOT::getEvents())
       return 1;
-    //if(!Traffic::MCNY::getEvents())
-    //  return 1;
     if(!Traffic::Ontario::getEvents())
       return 1;
+    if(!Traffic::MCNY::getEvents())
+      return 1;
     auto time = Output::currentTime();
-    std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << std::endl;
+    std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << "\n\n";
     std::this_thread::sleep_for(std::chrono::seconds(60));
   }
 

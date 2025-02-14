@@ -10,6 +10,9 @@
 namespace Traffic {
 namespace MCNY {
 
+// Access event status and ID via a pair
+using strPair = std::pair<std::string, std::string>;
+
 // Define a MCNY::Event object
 class Event {
 private:
@@ -27,8 +30,8 @@ private:
 public:
   // Constructors
   // Construct an event from an XML object
-  Event(const rapidxml::xml_node<>* item);
-  std::string getID(){ return ID; }
+  Event(const rapidxml::xml_node<>* item, const strPair &description);
+  std::string getStatus(){ return Status; }
   // Move constructor
   Event(Event&& other) noexcept;
   // Move assignment operator
@@ -47,6 +50,7 @@ extern EventMap<Event> eventMap; // Index into the map via "ID"
 extern const std::string RSS_URL;
 bool getEvents();
 bool parseEvents(rapidxml::xml_document<>& xml);
+strPair parseDescription(rapidxml::xml_node<>* description);
 void printEvents();
 
 } // namespace MCNY

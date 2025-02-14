@@ -23,11 +23,11 @@ bool getEvents() {
 
   // Test JSON parsing
   if(!parseEvents(JSON::parseData(responseStr))) {
-    std::cerr << Output::Colors::RED << "[ON EVENT] Error parsing root tree." << Output::Colors::END << '\n';
+    std::cerr << Output::Colors::RED << "[ONMT] Error parsing root tree." << Output::Colors::END << '\n';
     return false; 
   }
 
-  std::cout << Output::Colors::GREEN << "[ON EVENT] Successfully parsed root tree." << Output::Colors::END << '\n';
+  std::cout << Output::Colors::GREEN << "[ONMT] Successfully parsed root tree." << Output::Colors::END << '\n';
   return true;
 }
 
@@ -36,7 +36,7 @@ bool parseEvents(const Json::Value &events) {
   for(const auto& parsedEvent : events) {
     // Check for validity of the object
     if(!parsedEvent.isObject()) {
-      std::cerr << Output::Colors::RED << "[NYSDOT] Failed parsing event (is the JSON valid?)" << Output::Colors::END << '\n';
+      std::cerr << Output::Colors::RED << "[ONMT] Failed parsing event (is the JSON valid?)" << Output::Colors::END << '\n';
       return false;
     }
     // Process the event for storage
@@ -50,17 +50,45 @@ bool parseEvents(const Json::Value &events) {
 
 bool processEvent(const Json::Value &parsedEvent) {
   std::string key = parsedEvent["ID"].asString();
-  if(eventMap.contains(key)) {
-    if(eventMap.at(key).getLastUpdated() != parsedEvent["LastUpdated"].asInt()) {
-      eventMap.at(key) = parsedEvent;
-      std::cout << Output::Colors::YELLOW << "[NYSDOT] Updated event: " << key << Output::Colors::END << '\n';
+
+  if(true) {    // Add check for region/etc here
+    // Try to insert a new Event at event, inserted = false if it fails
+    auto [event, inserted] = eventMap.try_emplace(key, parsedEvent);
+    // Check if we added a new event
+    if(inserted) {
+      std::cout << event->second;
+      return true;
     }
-    return true;
-  } else {
-    eventMap.emplace(key, parsedEvent);  // Construct object in place
-    return true;
+
+    // Check if LastUpdated is the same
+    if(event->second.getLastUpdated() != parsedEvent["LastUpdated"].asInt()) {
+      event->second = parsedEvent;
+      std::cout << Output::Colors::MAGENTA << "[ONMT] Updated event: " << key << Output::Colors::END << '\n';  
+      std::cout << event->second;
+      return true;
+    }
+
+    // Check for valid event creation
+    if(event->second.getLastUpdated() == 0)
+      return false;
   }
-  return false;
+  return true;
+
+
+
+  //if(eventMap.contains(key)) {
+  //  if(eventMap.at(key).getLastUpdated() != parsedEvent["LastUpdated"].asInt()) {
+  //    eventMap.at(key) = parsedEvent;
+  //    std::cout << Output::Colors::YELLOW << "[ONMT] Updated event: " << key << Output::Colors::END << '\n';
+  //    std::cout << eventMap.at(key);
+  //  }
+  //  return true;
+  //} else {
+  //  eventMap.emplace(key, parsedEvent);  // Construct object in place
+  //  std::cout << eventMap.at(key);
+  //  return true;
+  //}
+  //return false;
 }
 
 /******* Ontario MT Events *********/
@@ -111,7 +139,7 @@ Event::Event(const Json::Value& parsedEvent) {
   if(parsedEvent.find("LinkId"))
     LinkId = parsedEvent["LinkId"].asString();
 
-  std::cout << Output::Colors::YELLOW << "Constructed Ontario 511 event: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::YELLOW << "[ONMT] Constructed event: " << ID << Output::Colors::END << '\n';
 }
 
 // Define the move constructor
@@ -139,7 +167,7 @@ Event::Event(Event&& other) noexcept
   EncodedPolyline(std::move(other.EncodedPolyline)),
   LinkId(std::move(other.LinkId))
 {
-  std::cout << Output::Colors::BLUE << "Moved Ontario 511 event: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::BLUE << "[ONMT] Moved event: " << ID << Output::Colors::END << '\n';
 }
   
 //Define the move assignment operator
@@ -169,7 +197,7 @@ Event& Event::operator=(Event&& other) noexcept {
     EncodedPolyline = std::move(other.EncodedPolyline);
     LinkId = std::move(other.LinkId);
   }
-  std::cout << Output::Colors::BLUE << "[Ontario] Invoked move assignment: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::BLUE << "[ONMT] Invoked move assignment: " << ID << Output::Colors::END << '\n';
   return *this;
 }
 
@@ -178,7 +206,8 @@ std::ostream &operator<<(std::ostream &out, const Event &event) {
       << "\nID: " << event.ID
       << "\nLocation: " << event.RoadwayName << "  |  " << event.DirectionOfTravel
       << "\nDetails: " << event.Description
-      << "\n  " << event.Comment;
+      << "\n  " << event.Comment
+      << std::endl;
   return out;
 }
 

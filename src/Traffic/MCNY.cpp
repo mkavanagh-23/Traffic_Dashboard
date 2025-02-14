@@ -40,15 +40,49 @@ bool parseEvents(rapidxml::xml_document<>& xml) {
   
   // Iterate throgh each event in the document tree
   for(rapidxml::xml_node<>* item = channel->first_node("item"); item; item = item->next_sibling()) {
-    // Create a temporary event object
-    Event event(item);
-    eventMap.insert_or_assign(event.getID(), std::move(event));
-    // TODO:
-    // Log time to track LastUpdated
-  }
-  std::cout << "Found " << eventMap.size() << " Matching Event Records.\n";
+    // Extract Status and ID as a std::pair
+    strPair description = parseDescription(item->first_node("description"));
+    auto& [status, key] = description;      // Access elements via structured bindings
+    
+    // Try to insert a new Event at event, inserted = false if it already exists
+    auto [event, inserted] = eventMap.try_emplace(key, item, description);
+    // Check if we added a new event
+    if(inserted) {
+      std::cout << event->second;
+      continue;
+    }
 
+    // Check for change in status
+    if(event->second.getStatus() != status) {
+      event->second = Event(item, description);
+      std::cout << Output::Colors::MAGENTA << "Updated event: " << key << "  |  " << status 
+                << Output::Colors::END << '\n' ;
+      std::cout << event->second;
+    }
+
+    // Check for valid event creation
+    if(event->second.getStatus().empty())
+      return false;
+  }
+  std::cout << "Found " << eventMap.size() << " matching events.\n";
   return true;
+}
+
+strPair parseDescription(rapidxml::xml_node<>* description) {
+  // Extract items from the description
+  std::stringstream ss(description->value());
+  std::string token;
+  std::vector<std::string> tokens;
+  
+  // Elements delimited by ','
+  while(std::getline(ss, token, ',')) {
+    tokens.push_back(token);
+  }
+
+  // First token is status
+  // Second token is ID
+  return { tokens[0].substr(tokens[0].find(":") + 2), 
+           tokens[1].substr(tokens[1].find(":") + 2) };
 }
 
 // Print the event map
@@ -62,7 +96,7 @@ void printEvents() {
 /***************************** MCNY EVENT *************************************/
 //Construct an event from a parsed XML item
 
-Event::Event(const rapidxml::xml_node<>* item) {
+Event::Event(const rapidxml::xml_node<> *item, const strPair &description) {
   if(rapidxml::xml_node<> *title = item->first_node("title")) {
     Title = title->value();
   }
@@ -84,22 +118,10 @@ Event::Event(const rapidxml::xml_node<>* item) {
     Longitude = std::stof(temp.substr(1));
   }
   // Get the Status and ID
-  if(rapidxml::xml_node<> *description = item->first_node("description")) {
-    // Extract items from the description
-    std::stringstream ss(description->value());
-    std::string token;
-    std::vector<std::string> tokens;
-    
-    // Elements delimited by ','
-    while(std::getline(ss, token, ',')) {
-      tokens.push_back(token);
-    }
-    
-    // First token is status
-    Status = tokens[0].substr(tokens[0].find(":") + 2);
-    // Second token is ID
-    ID = tokens[1].substr(tokens[1].find(":") + 2);
-  }
+  // First token is status
+  Status = description.first;
+  // Second token is ID
+  ID = description.second;
     
   std::cout << Output::Colors::YELLOW << "Constructed MCNY event: " << ID << Output::Colors::END << '\n';
 }

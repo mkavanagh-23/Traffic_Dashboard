@@ -30,7 +30,7 @@ bool getEnv() {
     std::cout << Output::Colors::GREEN << "[ENV] Successfully sourced API key from local environment." << Output::Colors::END << '\n';
     return true;
   } else {
-    std::cerr << Output::Colors::RED << "[Env] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have it set." << Output::Colors::END << '\n';
+    std::cerr << Output::Colors::RED << "[ENV] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have it set." << Output::Colors::END << '\n';
     return false;
   }
 }
@@ -42,17 +42,17 @@ bool getEvents(){
   // Parse Events Data from API
   std::string responseStr{ cURL::getData(url) };
   if(responseStr.empty()) {
-    std::cerr << Output::Colors::RED << "cURL] Failed to retrieve JSON from 511ny." << Output::Colors::END << '\n';
+    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve JSON from 511ny." << Output::Colors::END << '\n';
     return false;
   }
   std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved JSON from 511ny." << Output::Colors::END << '\n';
   
   // Test JSON Parsing
   if(!parseEvents(JSON::parseData(responseStr))) {
-    std::cerr << Output::Colors::RED << "[EVENT] Error parsing root tree." << Output::Colors::END << '\n';
+    std::cerr << Output::Colors::RED << "[NYSDOT] Error parsing root tree." << Output::Colors::END << '\n';
     return false;
   }
-  std::cout << Output::Colors::GREEN << "[EVENT] Successfully parsed root tree." << Output::Colors::END << '\n';
+  std::cout << Output::Colors::GREEN << "[NYSDOT] Successfully parsed root tree." << Output::Colors::END << '\n';
 
   return true;
 }
@@ -69,31 +69,59 @@ bool parseEvents(const Json::Value& events){
     // Process the event for storage
     processEvent(parsedEvent);
   }
-  std::cout << "Found " << eventMap.size() << " Matching Event Records.\n";
+  std::cout << "[NYSDOT] Found " << eventMap.size() << " Matching Event Records.\n";
   return true;
 }
 
 // Check the event against filter value and store on the map
 bool processEvent(const Json::Value& parsedEvent) {
   std::string key = parsedEvent["ID"].asString();
-  // Check if event already exists on the map
-  if(eventMap.contains(key)) {
-    // Check if LastUpdated is the same
-    if(eventMap.at(key).getLastUpdated() != parsedEvent["LastUpdated"].asString()) {
-      // If not then update the event stored on the map
-      eventMap.at(key) = parsedEvent;
-      std::cout << Output::Colors::YELLOW << "[NYSDOT] Updated event: " << key << Output::Colors::END << '\n';
-    }
-    return true;
-  } else {
-    // Check against matching region(s)
-    if( parsedEvent["RegionName"].asString()  == "Central Syracuse Utica Area") {
-      // Construct an event object on the map
-      eventMap.emplace(key, parsedEvent);
+
+  if( parsedEvent["RegionName"].asString()  == "Central Syracuse Utica Area") {
+    // Try to insert a new Event at event, inserted = false if i already exists
+    auto [event, inserted] = eventMap.try_emplace(key, parsedEvent);
+    // Check if we added a new event
+    if(inserted) {
+      std::cout << event->second;
       return true;
     }
+
+    // Check if LastUpdated is the same
+    if(event->second.getLastUpdated() != parsedEvent["LastUpdated"].asString()) {
+      event->second = parsedEvent;
+      std::cout << Output::Colors::MAGENTA << "[NYSDOT] Updated event: " << key << Output::Colors::END << '\n';
+      std::cout << event->second;
+      return true;
+    }
+
+    // Check for valid event creation
+    if(event->second.getLastUpdated().empty())
+      return false;
   }
-  return false;
+  return true;
+
+
+
+  // Check if event already exists on the map
+  //if(eventMap.contains(key)) {
+  //  // Check if LastUpdated is the same
+  //  if(eventMap.at(key).getLastUpdated() != parsedEvent["LastUpdated"].asString()) {
+  //    // If not then update the event stored on the map
+  //    eventMap.at(key) = parsedEvent;
+  //    std::cout << Output::Colors::YELLOW << "[NYSDOT] Updated event: " << key << Output::Colors::END << '\n';
+  //    std::cout << eventMap.at(key);
+  //  }
+  //  return true;
+  //} else {
+  //  // Check against matching region(s)
+  //  if( parsedEvent["RegionName"].asString()  == "Central Syracuse Utica Area") {
+  //    // Construct an event object on the map
+  //    eventMap.emplace(key, parsedEvent);
+  //    std::cout << eventMap.at(key);
+  //    return true;
+  //  }
+  //}
+  //return false;
 }
 
 // Print the event map
@@ -155,7 +183,7 @@ Event::Event(const Json::Value &parsedEvent)
   if(parsedEvent.find("StartDate"))
     StartDate = parsedEvent["StartDate"].asString();
 
-  std::cout << Output::Colors::YELLOW << "Constructed NYSDOT event: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::YELLOW << "[NYSDOT] Constructed event: " << ID << Output::Colors::END << '\n';
 }
 
 // Define the move constructor
@@ -184,7 +212,7 @@ Event::Event(Event&& other) noexcept
   Reported(std::move(other.Reported)),
   StartDate(std::move(other.StartDate))
 {
-  std::cout << Output::Colors::BLUE << "Moved NYSDOT event: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::BLUE << "[NYSDOT] Moved event: " << ID << Output::Colors::END << '\n';
 }
 
 // Define the move assignment operator

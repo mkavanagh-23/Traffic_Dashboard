@@ -6,4 +6,4 @@ lib*
 curl
 json*
 error.txt
-log.txt
+log*
