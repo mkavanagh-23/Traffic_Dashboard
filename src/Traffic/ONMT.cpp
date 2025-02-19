@@ -35,9 +35,10 @@ bool parseEvents(const Json::Value &events) {
   //Iterate through each event
   for(const auto& parsedEvent : events) {
     // Check for validity of the object
+    // TODO: This should be refactored into the processEvent function
     if(!parsedEvent.isObject()) {
       std::cerr << Output::Colors::RED << "[ONMT] Failed parsing event (is the JSON valid?)" << Output::Colors::END << '\n';
-      return false;
+      return false; // Or do we want to continue here?
     }
     // Process the event for storage
     if(!processEvent(parsedEvent))
@@ -57,16 +58,16 @@ bool processEvent(const Json::Value &parsedEvent) {
     // Check if we added a new event
     if(inserted) {
       std::cout << event->second;
-      return true;
     }
 
     // Check if LastUpdated is the same
-    if(event->second.getLastUpdated() != parsedEvent["LastUpdated"].asInt()) {
+    else if(event->second.getLastUpdated() != parsedEvent["LastUpdated"].asInt()) {  // TODO: Should refactor into a less than check after implementing std::chrono
       event->second = parsedEvent;
       std::cout << Output::Colors::MAGENTA << "[ONMT] Updated event: " << key << Output::Colors::END << '\n';  
       std::cout << event->second;
-      return true;
     }
+
+    // Otherwise the event has not changed so do nothing
 
     // Check for valid event creation
     if(event->second.getLastUpdated() == 0)

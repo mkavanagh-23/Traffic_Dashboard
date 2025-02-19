@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     if(!Traffic::MCNY::getEvents())
       return 1;
     auto time = Output::currentTime();
-    std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << "\n\n";
+    std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << '\n' << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(60));
   }
 
