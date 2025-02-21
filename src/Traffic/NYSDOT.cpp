@@ -37,15 +37,15 @@ bool getEnv() {
 
 bool getEvents(){
   // Build the request URL
-  std::string url{ "https://511ny.org/api/getevents/?format=json&key=" + API_KEY };
+  std::string url{ "https://511ny.org/api/getevents?format=json&key=" + API_KEY };
 
   // Parse Events Data from API
   std::string responseStr{ cURL::getData(url) };
   if(responseStr.empty()) {
-    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve JSON from 511ny." << Output::Colors::END << '\n';
+    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve events JSON from 511ny." << Output::Colors::END << '\n';
     return false;
   }
-  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved JSON from 511ny." << Output::Colors::END << '\n';
+  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved events JSON from 511ny." << Output::Colors::END << '\n';
   
   // Test JSON Parsing
   if(!parseEvents(JSON::parseData(responseStr))) {
@@ -101,6 +101,20 @@ void printEvents() {
   for(const auto& [key, event] : eventMap) {
     std::cout << event << '\n';
   }
+}
+
+bool getCameras() {
+  // Build the request URL
+  std::string url{ "https://511ny.org/api/getcameras?format=json&key=" + API_KEY };
+  
+  // Parse Events Data from API
+  std::string responseStr{ cURL::getData(url) };
+  if(responseStr.empty()) {
+    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve cameras JSON from 511ny." << Output::Colors::END << '\n';
+    return false;
+  }
+  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved cameras JSON from 511ny." << Output::Colors::END << '\n';
+  return true;
 }
 
 /****** NYSDOT::EVENT ******/

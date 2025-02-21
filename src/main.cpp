@@ -59,6 +59,10 @@ int main(int argc, char** argv)
   if(!Traffic::NYSDOT::getEnv())
     return 1;
 
+  // Get cameras
+  if(!Traffic::NYSDOT::getCameras())
+    return 1;
+
   while(running) {
     // Get all Traffic events
     if(!Traffic::getEvents())
