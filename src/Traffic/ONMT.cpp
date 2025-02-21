@@ -53,19 +53,17 @@ bool processEvent(const Json::Value &parsedEvent) {
   auto location = std::make_pair(parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble());
 
 
-  if(BoundingArea::contains(location)) {    // Add check for region/etc here
+  if(BoundingArea::contains(location)) {    // Check if bounding area contains the event location
     // Try to insert a new Event at event, inserted = false if it fails
     auto [event, inserted] = eventMap.try_emplace(key, parsedEvent);
     // Check if we added a new event
-    if(inserted) {
+    if(!inserted) {
+      // Check for change in event
+      if(event->second.getLastUpdated() != parsedEvent["LastUpdated"].asInt()) {  // TODO: Should refactor into a less than check after implementing std::chrono
+        event->second = parsedEvent;
+        std::cout << Output::Colors::MAGENTA << "[ONMT] Updated event: " << key << Output::Colors::END << '\n';  
+      }
     }
-
-    // Check if LastUpdated is the same
-    else if(event->second.getLastUpdated() != parsedEvent["LastUpdated"].asInt()) {  // TODO: Should refactor into a less than check after implementing std::chrono
-      event->second = parsedEvent;
-      std::cout << Output::Colors::MAGENTA << "[ONMT] Updated event: " << key << Output::Colors::END << '\n';  
-    }
-
     // Check for valid event creation
     if(event->second.getLastUpdated() == 0)
       return false;

@@ -81,13 +81,12 @@ bool processEvent(const Json::Value& parsedEvent) {
     // Try to insert a new Event at event, inserted = false if i already exists
     auto [event, inserted] = eventMap.try_emplace(key, parsedEvent);    // Access the event via structured bindings
     // Check if we added a new event
-    if(inserted) {
-    }
-
-    // Check if LastUpdated is the same
-    else if(event->second.getLastUpdated() != parsedEvent["LastUpdated"].asString()) {
-      event->second = parsedEvent;
-      std::cout << Output::Colors::MAGENTA << "[NYSDOT] Updated event: " << key << Output::Colors::END << '\n';
+    if(!inserted) {
+      //Check for an update 
+      if(event->second.getLastUpdated() != parsedEvent["LastUpdated"].asString()) {
+        event->second = parsedEvent;
+        std::cout << Output::Colors::MAGENTA << "[NYSDOT] Updated event: " << key << Output::Colors::END << '\n';
+      }
     }
 
     // Check for valid event creation
