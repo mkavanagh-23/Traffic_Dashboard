@@ -46,7 +46,7 @@ public:
 };
 
 // Declare a hashmap to store MCNY::Event objects
-extern EventMap<Event> eventMap; // Index into the map via "ID"
+extern TrafficMap<Event> eventMap; // Index into the map via "ID"
 extern const std::string RSS_URL;
 bool getEvents();
 bool parseEvents(rapidxml::xml_document<>& xml);

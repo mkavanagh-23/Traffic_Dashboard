@@ -26,7 +26,7 @@ void parseData(rapidxml::xml_document<>& document, std::string xmlData);
 namespace Traffic {
 // Create a template for EventMaps of different event types
 template<typename T>
-using EventMap = std::unordered_map<std::string, T>;
+using TrafficMap = std::unordered_map<std::string, T>;
 
 // Get all traffic events
 bool getEvents();

@@ -7,7 +7,7 @@
 namespace Traffic {
 namespace Ontario {
 
-EventMap<Event> eventMap; // Key = "ID"
+TrafficMap<Event> eventMap; // Key = "ID"
 
 bool getEvents() {
   static const std::string url{ "https://511on.ca/api/v2/get/event" };
