@@ -15,10 +15,10 @@ bool getEvents() {
   // Parse events from API
   std::string responseStr{ cURL::getData(url) };
   if(responseStr.empty()) {
-    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve JSON from Ontario 511." << Output::Colors::END << '\n';
+    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve events JSON from Ontario 511." << Output::Colors::END << '\n';
     return false;
   }
-  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved JSON from Ontario 511." << Output::Colors::END << '\n';
+  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved events JSON from Ontario 511." << Output::Colors::END << '\n';
 
   // Test JSON parsing
   if(!parseEvents(JSON::parseData(responseStr))) {
@@ -26,7 +26,6 @@ bool getEvents() {
     return false; 
   }
 
-  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed root tree." << Output::Colors::END << '\n';
   return true;
 }
 
@@ -43,6 +42,7 @@ bool parseEvents(const Json::Value &events) {
     if(!processEvent(parsedEvent))
        return false;
   }
+  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed root tree." << Output::Colors::END << '\n';
   std::cout << "[ONMT] Found " << eventMap.size() << " Matching Event Records.\n";
 
   return true;
@@ -79,6 +79,19 @@ bool BoundingArea::contains(std::pair<double, double>& coordinate){
   return false;
 }
 
+bool getCameras() {
+  // Build the request URL
+  static const std::string url{ "https://511on.ca/api/v2/get/cameras" };
+  
+  // Parse Events Data from API
+  std::string responseStr{ cURL::getData(url) };
+  if(responseStr.empty()) {
+    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve cameras JSON from Ontario 511." << Output::Colors::END << '\n';
+    return false;
+  }
+  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved cameras JSON from Ontario 511." << Output::Colors::END << '\n';
+  return true;
+}
 
 /******* Ontario MT Events *********/
 // Construct an event from a parsed Json object

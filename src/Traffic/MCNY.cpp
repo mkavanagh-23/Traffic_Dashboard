@@ -29,7 +29,6 @@ bool getEvents() {
     std::cerr << Output::Colors::RED << "[XML] Error parsing root tree." << Output::Colors::END << '\n';
     return false;
   }
-  std::cout << Output::Colors::GREEN << "[XML] Successfully parsed root tree." << Output::Colors::END << '\n';
 
   return true;
 }
@@ -62,6 +61,7 @@ bool parseEvents(rapidxml::xml_document<>& xml) {
     if(event->second.getStatus().empty())
       return false;
   }
+  std::cout << Output::Colors::GREEN << "[XML] Successfully parsed root tree." << Output::Colors::END << '\n';
   std::cout << "[MCNY] Found " << eventMap.size() << " matching events.\n";
   return true;
 }

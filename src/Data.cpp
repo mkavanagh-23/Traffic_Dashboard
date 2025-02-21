@@ -88,4 +88,12 @@ bool getEvents(){
     return false;
   return true;
 }
+
+bool getCameras(){
+  if(!NYSDOT::getCameras())
+    return false;
+  if(!Ontario::getCameras())
+    return false;
+  return true;
+}
 }

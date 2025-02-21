@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     return 1;
 
   // Get cameras
-  if(!Traffic::NYSDOT::getCameras())
+  if(!Traffic::getCameras())
     return 1;
 
   while(running) {

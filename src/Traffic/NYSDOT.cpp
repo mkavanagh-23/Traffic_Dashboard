@@ -52,7 +52,6 @@ bool getEvents(){
     std::cerr << Output::Colors::RED << "[JSON] Error parsing root tree." << Output::Colors::END << '\n';
     return false;
   }
-  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed root tree." << Output::Colors::END << '\n';
 
   return true;
 }
@@ -69,6 +68,7 @@ bool parseEvents(const Json::Value& events){
     // Process the event for storage
     processEvent(parsedEvent);
   }
+  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed root tree." << Output::Colors::END << '\n';
   std::cout << "[NYSDOT] Found " << eventMap.size() << " Matching Event Records.\n";
   return true;
 }

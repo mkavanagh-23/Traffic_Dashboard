@@ -30,6 +30,7 @@ using TrafficMap = std::unordered_map<std::string, T>;
 
 // Get all traffic events
 bool getEvents();
+bool getCameras();
 }
 
 #endif

@@ -74,6 +74,23 @@ bool parseEvents(const Json::Value& events);
 bool processEvent(const Json::Value& parsedEvent);
 void printEvents();
 
+class Camera {
+private:
+  int ID;
+  std::string Source;
+  std::string SourceID;
+  std::string Roadway;
+  std::string Direction;
+  double Latitude;
+  double Longitude;
+  std::string location;
+  Json::Value views;    // A JSON value objection containing all camera views at the location
+  // TODO: Define a CameraView class that creates an object for each views
+  // These can be stored in a std::vector rather than copying, storing, and reparsing the Json::Value object
+public:
+};
+
+bool getCameras();
 } // namespace Ontario
 } // namespace Traffic
 
