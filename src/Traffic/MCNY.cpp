@@ -48,23 +48,21 @@ bool parseEvents(rapidxml::xml_document<>& xml) {
     auto [event, inserted] = eventMap.try_emplace(key, item, description);
     // Check if we added a new event
     if(inserted) {
-      std::cout << event->second;
       continue;
     }
 
     // Check for change in status
     if(event->second.getStatus() != status) {
       event->second = Event(item, description);
-      std::cout << Output::Colors::MAGENTA << "Updated event: " << key << "  |  " << status 
+      std::cout << Output::Colors::MAGENTA << "[MCNY] Updated event: " << key << "  |  " << status 
                 << Output::Colors::END << '\n' ;
-      std::cout << event->second;
     }
 
     // Check for valid event creation
     if(event->second.getStatus().empty())
       return false;
   }
-  std::cout << "Found " << eventMap.size() << " matching events.\n";
+  std::cout << "[MCNY] Found " << eventMap.size() << " matching events.\n";
   return true;
 }
 
@@ -123,7 +121,7 @@ Event::Event(const rapidxml::xml_node<> *item, const strPair &description) {
   // Second token is ID
   ID = description.second;
     
-  std::cout << Output::Colors::YELLOW << "Constructed MCNY event: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::YELLOW << "[MCNY] Constructed event: " << ID << Output::Colors::END << '\n';
 }
 
   // Move constructor
@@ -137,7 +135,7 @@ Event::Event(Event&& other) noexcept
   Latitude(other.Latitude),
   Longitude(other.Longitude)
 {
-  std::cout << Output::Colors::BLUE << "Moved MCNY event: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::BLUE << "[MCNY] Moved event: " << ID << Output::Colors::END << '\n';
 }
   
 // Move assignment operator

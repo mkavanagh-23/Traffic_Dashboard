@@ -49,10 +49,10 @@ bool getEvents(){
   
   // Test JSON Parsing
   if(!parseEvents(JSON::parseData(responseStr))) {
-    std::cerr << Output::Colors::RED << "[NYSDOT] Error parsing root tree." << Output::Colors::END << '\n';
+    std::cerr << Output::Colors::RED << "[JSON] Error parsing root tree." << Output::Colors::END << '\n';
     return false;
   }
-  std::cout << Output::Colors::GREEN << "[NYSDOT] Successfully parsed root tree." << Output::Colors::END << '\n';
+  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed root tree." << Output::Colors::END << '\n';
 
   return true;
 }
@@ -82,14 +82,12 @@ bool processEvent(const Json::Value& parsedEvent) {
     auto [event, inserted] = eventMap.try_emplace(key, parsedEvent);    // Access the event via structured bindings
     // Check if we added a new event
     if(inserted) {
-      std::cout << event->second;
     }
 
     // Check if LastUpdated is the same
     else if(event->second.getLastUpdated() != parsedEvent["LastUpdated"].asString()) {
       event->second = parsedEvent;
       std::cout << Output::Colors::MAGENTA << "[NYSDOT] Updated event: " << key << Output::Colors::END << '\n';
-      std::cout << event->second;
     }
 
     // Check for valid event creation
@@ -97,29 +95,6 @@ bool processEvent(const Json::Value& parsedEvent) {
       return false;
   }
   return true;
-
-
-
-  // Check if event already exists on the map
-  //if(eventMap.contains(key)) {
-  //  // Check if LastUpdated is the same
-  //  if(eventMap.at(key).getLastUpdated() != parsedEvent["LastUpdated"].asString()) {
-  //    // If not then update the event stored on the map
-  //    eventMap.at(key) = parsedEvent;
-  //    std::cout << Output::Colors::YELLOW << "[NYSDOT] Updated event: " << key << Output::Colors::END << '\n';
-  //    std::cout << eventMap.at(key);
-  //  }
-  //  return true;
-  //} else {
-  //  // Check against matching region(s)
-  //  if( parsedEvent["RegionName"].asString()  == "Central Syracuse Utica Area") {
-  //    // Construct an event object on the map
-  //    eventMap.emplace(key, parsedEvent);
-  //    std::cout << eventMap.at(key);
-  //    return true;
-  //  }
-  //}
-  //return false;
 }
 
 // Print the event map

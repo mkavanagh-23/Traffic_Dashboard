@@ -8,26 +8,25 @@ namespace Traffic {
 namespace Ontario {
 
 EventMap<Event> eventMap; // Key = "ID"
-//
 
 bool getEvents() {
-  std::string url{ "https://511on.ca/api/v2/get/event" };
+  static const std::string url{ "https://511on.ca/api/v2/get/event" };
   
   // Parse events from API
   std::string responseStr{ cURL::getData(url) };
   if(responseStr.empty()) {
-    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve JSON from Ontario 511." << Output::Colors::END << std::endl;
+    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve JSON from Ontario 511." << Output::Colors::END << '\n';
     return false;
   }
-  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved JSON from 511ny." << Output::Colors::END << '\n';
+  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved JSON from Ontario 511." << Output::Colors::END << '\n';
 
   // Test JSON parsing
   if(!parseEvents(JSON::parseData(responseStr))) {
-    std::cerr << Output::Colors::RED << "[ONMT] Error parsing root tree." << Output::Colors::END << '\n';
+    std::cerr << Output::Colors::RED << "[JSON] Error parsing root tree." << Output::Colors::END << '\n';
     return false; 
   }
 
-  std::cout << Output::Colors::GREEN << "[ONMT] Successfully parsed root tree." << Output::Colors::END << '\n';
+  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed root tree." << Output::Colors::END << '\n';
   return true;
 }
 
@@ -44,53 +43,44 @@ bool parseEvents(const Json::Value &events) {
     if(!processEvent(parsedEvent))
        return false;
   }
-  std::cout << "Found " << eventMap.size() << " Matching Event Records.\n";
+  std::cout << "[ONMT] Found " << eventMap.size() << " Matching Event Records.\n";
 
   return true;
 }
 
 bool processEvent(const Json::Value &parsedEvent) {
   std::string key = parsedEvent["ID"].asString();
+  auto location = std::make_pair(parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble());
 
-  if(true) {    // Add check for region/etc here
+
+  if(BoundingArea::contains(location)) {    // Add check for region/etc here
     // Try to insert a new Event at event, inserted = false if it fails
     auto [event, inserted] = eventMap.try_emplace(key, parsedEvent);
     // Check if we added a new event
     if(inserted) {
-      std::cout << event->second;
     }
 
     // Check if LastUpdated is the same
     else if(event->second.getLastUpdated() != parsedEvent["LastUpdated"].asInt()) {  // TODO: Should refactor into a less than check after implementing std::chrono
       event->second = parsedEvent;
       std::cout << Output::Colors::MAGENTA << "[ONMT] Updated event: " << key << Output::Colors::END << '\n';  
-      std::cout << event->second;
     }
-
-    // Otherwise the event has not changed so do nothing
 
     // Check for valid event creation
     if(event->second.getLastUpdated() == 0)
       return false;
   }
   return true;
-
-
-
-  //if(eventMap.contains(key)) {
-  //  if(eventMap.at(key).getLastUpdated() != parsedEvent["LastUpdated"].asInt()) {
-  //    eventMap.at(key) = parsedEvent;
-  //    std::cout << Output::Colors::YELLOW << "[ONMT] Updated event: " << key << Output::Colors::END << '\n';
-  //    std::cout << eventMap.at(key);
-  //  }
-  //  return true;
-  //} else {
-  //  eventMap.emplace(key, parsedEvent);  // Construct object in place
-  //  std::cout << eventMap.at(key);
-  //  return true;
-  //}
-  //return false;
 }
+
+bool BoundingArea::contains(std::pair<double, double>& coordinate){
+  auto& [latitude, longitude] = coordinate; // Access values by structured bindings
+  if((latitude >= latBottom && latitude <= latTop) && (longitude >= longLeft && longitude <= longRight))
+    return true;
+
+  return false;
+}
+
 
 /******* Ontario MT Events *********/
 // Construct an event from a parsed Json object
@@ -207,7 +197,6 @@ std::ostream &operator<<(std::ostream &out, const Event &event) {
       << "\nID: " << event.ID
       << "\nLocation: " << event.RoadwayName << "  |  " << event.DirectionOfTravel
       << "\nDetails: " << event.Description
-      << "\n  " << event.Comment
       << std::endl;
   return out;
 }

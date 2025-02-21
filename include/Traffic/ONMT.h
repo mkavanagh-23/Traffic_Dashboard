@@ -11,6 +11,17 @@ namespace Traffic {
 /******** Ontario Ministry of Transportation Traffic Data (511on.ca) **********/
 namespace Ontario {
 
+// Define a bounding box to check for matching events
+struct BoundingArea {
+  static constexpr double longLeft{ -80.099 };
+  static constexpr double longRight{ -78.509 };
+  static constexpr double latTop{ 44.205 };
+  static constexpr double latBottom{ 43.137 };
+
+  // Check if the bounding area contains the given coordinate
+  static bool contains(std::pair<double, double>& coordinate);
+};
+
 // Define an Ontario::Event object
 class Event {
 private:
