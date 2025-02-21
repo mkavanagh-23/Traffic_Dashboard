@@ -8,6 +8,7 @@ namespace Traffic {
 namespace Ontario {
 
 TrafficMap<Event> eventMap; // Key = "ID"
+constexpr BoundingBox regionToronto{ -80.099, -78.509, 44.205, 43.137 };
 
 bool getEvents() {
   static const std::string url{ "https://511on.ca/api/v2/get/event" };
@@ -53,7 +54,7 @@ bool processEvent(const Json::Value &parsedEvent) {
   auto location = std::make_pair(parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble());
 
 
-  if(BoundingArea::contains(location)) {    // Check if bounding area contains the event location
+  if(regionToronto.contains(location)) {    // Check if bounding area contains the event location
     // Try to insert a new Event at event, inserted = false if it fails
     auto [event, inserted] = eventMap.try_emplace(key, parsedEvent);
     // Check if we added a new event
@@ -69,14 +70,6 @@ bool processEvent(const Json::Value &parsedEvent) {
       return false;
   }
   return true;
-}
-
-bool BoundingArea::contains(std::pair<double, double>& coordinate){
-  auto& [latitude, longitude] = coordinate; // Access values by structured bindings
-  if((latitude >= latBottom && latitude <= latTop) && (longitude >= longLeft && longitude <= longRight))
-    return true;
-
-  return false;
 }
 
 bool getCameras() {

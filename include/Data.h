@@ -28,6 +28,15 @@ namespace Traffic {
 template<typename T>
 using TrafficMap = std::unordered_map<std::string, T>;
 
+struct BoundingBox {
+  const double longLeft;
+  const double longRight;
+  const double latTop;
+  const double latBottom;
+
+  bool contains(const std::pair<double, double>& coordinate) const;
+};
+
 // Get all traffic events
 bool getEvents();
 bool getCameras();

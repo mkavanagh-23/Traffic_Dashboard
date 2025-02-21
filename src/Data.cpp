@@ -77,6 +77,14 @@ void parseData(rapidxml::xml_document<>& document, std::string xmlData) {
 } // namespace XML
 
 namespace Traffic {
+bool BoundingBox::contains(const std::pair<double, double>& coordinate) const {
+  auto& [latitude, longitude] = coordinate;
+  if((latitude >= latBottom && latitude <= latTop) && (longitude >= longLeft && longitude <= longRight))
+    return true;
+
+  return false;
+}
+
 // Get all traffic events
 bool getEvents(){
   // Test event parsing
