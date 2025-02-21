@@ -1,4 +1,7 @@
 #include "Data.h"
+#include "NYSDOT.h"
+#include "MCNY.h"
+#include "ONMT.h"
 #include "Output.h"
 #include <string>
 #include <iostream>
@@ -72,3 +75,17 @@ void parseData(rapidxml::xml_document<>& document, std::string xmlData) {
 }
 
 } // namespace XML
+
+namespace Traffic {
+// Get all traffic events
+bool getEvents(){
+  // Test event parsing
+  if(!NYSDOT::getEvents())
+    return false;
+  if(!Ontario::getEvents())
+    return false;
+  if(!MCNY::getEvents())
+    return false;
+  return true;
+}
+}

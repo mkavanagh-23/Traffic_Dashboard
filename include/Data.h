@@ -27,6 +27,9 @@ namespace Traffic {
 // Create a template for EventMaps of different event types
 template<typename T>
 using EventMap = std::unordered_map<std::string, T>;
+
+// Get all traffic events
+bool getEvents();
 }
 
 #endif

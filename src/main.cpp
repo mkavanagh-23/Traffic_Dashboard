@@ -54,16 +54,14 @@ int main(int argc, char** argv)
   std::this_thread::sleep_for(std::chrono::seconds(2));
   video.stop();
   
-  // Test Event Parsing
+  // Source API key from ENV
+  // TODO: Will be placed in global Setup() function
   if(!Traffic::NYSDOT::getEnv())
     return 1;
 
   while(running) {
-    if(!Traffic::NYSDOT::getEvents())
-      return 1;
-    if(!Traffic::Ontario::getEvents())
-      return 1;
-    if(!Traffic::MCNY::getEvents())
+    // Get all Traffic events
+    if(!Traffic::getEvents())
       return 1;
     auto time = Output::currentTime();
     std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << '\n' << std::endl;
