@@ -262,9 +262,14 @@ Camera::Camera(const Json::Value& parsedCamera) {
     Longitude = parsedCamera["Longitude"].asDouble();
   if(parsedCamera.find("Location"))
     Location = parsedCamera["Location"].asString();
-  if(parsedCamera.find("Views"))
-    Views = parsedCamera["Views"];
-
+  if(parsedCamera.find("Views")){
+    // Construct a CameraView object and push it on a vector of views
+    const Json::Value views = parsedCamera["Views"];
+    for (const auto& view : views){
+      Views.emplace_back(view);
+    }
+    std::cout << Output::Colors::YELLOW << "[ONMT] Found " << Views.size() << " camera views for " << ID << Output::Colors::END << '\n';
+  }
   std::cout << Output::Colors::YELLOW << "[ONMT] Constructed camera: " << ID << Output::Colors::END << '\n';
 }
 
@@ -297,6 +302,17 @@ Camera& Camera::operator=(Camera&& other) noexcept {
   }
   std::cout << Output::Colors::BLUE << "[ONMT] Invoked move assignment for camera: " << ID << Output::Colors::END << '\n';
   return *this;
+}
+
+CameraView::CameraView(const Json::Value& parsedView) {
+  if(parsedView.find("Id"))
+    ID = parsedView["Id"].asInt();
+  if(parsedView.find("Url"))
+    URL = parsedView["Url"].asString();
+  if(parsedView.find("Status"))
+    Status = parsedView["Status"].asString();
+  if(parsedView.find("Description"))
+    Description = parsedView["Description"].asString();
 }
 } // namespace Ontario
 } // namespace Traffic

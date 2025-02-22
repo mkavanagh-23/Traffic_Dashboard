@@ -59,13 +59,13 @@ int main(int argc, char** argv)
     return 1;
 
   // Get cameras
-  if(!Traffic::getCameras())
-    return 1;
 
   while(running) {
-    // Get all Traffic events
-    if(!Traffic::getEvents())
+    if(!Traffic::getCameras())
       return 1;
+    // Get all Traffic events
+    //if(!Traffic::getEvents())
+    //  return 1;
     auto time = Output::currentTime();
     std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << '\n' << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(60));

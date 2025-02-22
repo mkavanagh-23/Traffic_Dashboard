@@ -4,6 +4,7 @@
 #include <json/json.h>
 #include <string>
 #include <ostream>
+#include <vector>
 
 namespace Traffic {
 /******** Ontario Ministry of Transportation Traffic Data (511on.ca) **********/
@@ -60,6 +61,17 @@ bool parseEvents(const Json::Value& events);
 bool processEvent(const Json::Value& parsedEvent);
 void printEvents();
 
+class CameraView {
+private:
+  int ID;
+  std::string URL;
+  std::string Status;
+  std::string Description;
+public:
+  CameraView() = default;
+  CameraView(const Json::Value& parsedView);
+};
+
 class Camera {
 private:
   int ID;
@@ -70,7 +82,7 @@ private:
   double Latitude;
   double Longitude;
   std::string Location;
-  Json::Value Views;    // A JSON value objection containing all camera views at the location
+  std::vector<CameraView> Views;    // A JSON value objection containing all camera views at the location
   // TODO: Define a CameraView class that creates an object for each views
   // These can be stored in a std::vector rather than copying, storing, and reparsing the Json::Value object
 public:
