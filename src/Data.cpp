@@ -62,7 +62,7 @@ Json::Value parseData(const std::string& jsonData) {
     // TODO: Throw an exception if we do not parse from stream
     // Should also throw an exception in the underlying/preceding curl function
   }
-  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed events from JSON stream." << Output::Colors::END << '\n';
+  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed objects from JSON stream." << Output::Colors::END << '\n';
   return root; // Return the parsed root of objects
 }
 } // namespace JSON
