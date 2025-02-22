@@ -1,26 +1,14 @@
 #ifndef ONMT_H
 #define ONMT_H
 
-#include "Data.h"
-
 #include <json/json.h>
 #include <string>
 #include <ostream>
+#include <vector>
 
 namespace Traffic {
 /******** Ontario Ministry of Transportation Traffic Data (511on.ca) **********/
 namespace Ontario {
-
-// Define a bounding box to check for matching events
-struct BoundingArea {
-  static constexpr double longLeft{ -80.099 };
-  static constexpr double longRight{ -78.509 };
-  static constexpr double latTop{ 44.205 };
-  static constexpr double latBottom{ 43.137 };
-
-  // Check if the bounding area contains the given coordinate
-  static bool contains(std::pair<double, double>& coordinate);
-};
 
 // Define an Ontario::Event object
 class Event {
@@ -67,13 +55,51 @@ public:
 };
 
 // Declare a hashmap to store NYSDOT::Event objects
-extern EventMap<Event> eventMap; // Index into the map via "ID"
 bool getEvents();
 // And a function to parse events and store on the map
 bool parseEvents(const Json::Value& events);
 bool processEvent(const Json::Value& parsedEvent);
 void printEvents();
 
+class CameraView {
+private:
+  int ID;
+  std::string URL;  // Link to a jpeg image of the latest camera still
+                    //  No video stream links are available anymore, sadly
+                    //  TODO: Implement JPEG stills conversion to SDL texture for inline rendering  
+  std::string Status;
+  std::string Description;
+public:
+  CameraView() = default;
+  CameraView(const Json::Value& parsedView);
+
+  std::string getURL(){ return URL; }
+};
+
+class Camera {
+private:
+  int ID;
+  std::string Source;
+  std::string SourceID;
+  std::string Roadway;
+  std::string Direction{ "Unknown" };
+  double Latitude;
+  double Longitude;
+  std::string Location;
+  std::vector<CameraView> Views;    // One or more camera streams located at the location
+public:
+  Camera() = default;
+  // Construct an event from a Json object
+  Camera(const Json::Value& parsedCamera);
+  // Move constructor
+  Camera(Camera&& other) noexcept;
+  // Move assignment operator
+  Camera& operator=(Camera&& other) noexcept;
+};
+
+bool getCameras();
+bool parseCameras(const Json::Value &cameras);
+bool processCamera(const Json::Value &parsedCamera);
 } // namespace Ontario
 } // namespace Traffic
 

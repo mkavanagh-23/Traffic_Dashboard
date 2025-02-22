@@ -2,7 +2,6 @@
 #define NYSDOT_H
 
 #include "Data.h"
-
 #include <json/json.h>
 #include <string>
 #include <ostream>
@@ -12,6 +11,7 @@ namespace Traffic {
 
 namespace NYSDOT {
 extern std::string API_KEY;
+bool getEnv();
 
 // Define a NYSDOT::Event object
 class Event {
@@ -62,14 +62,41 @@ public:
 };
   
 // Declare a hashmap to store NYSDOT::Event objects
-extern EventMap<Event> eventMap; // Index into the map via "ID"
-bool getEnv();
 bool getEvents();
 // And a function to parse events and store on the map
 bool parseEvents(const Json::Value& events);
 bool processEvent(const Json::Value& parsedEvent);
 void printEvents();
 
+class Camera {
+private:    // Define all private members
+  std::string ID;
+  std::string URL;  // URL to image
+  std::string VideoURL; // URL to video stream
+  std::string Name;
+  std::string DirectionOfTravel;
+  std::string RoadwayName;
+  bool Disabled;
+  bool Blocked;
+  double Latitude;
+  double Longitude;
+public:
+  Camera() = default;
+  // Construct a camera from a Json object
+  Camera(const Json::Value& parsedCamera);
+  // Move constructor
+  Camera(Camera&& other) noexcept;
+  // Move assignemnt operator
+  Camera& operator=(Camera&& other) noexcept;
+
+  std::string getURL() const { return VideoURL; }
+};
+
+extern TrafficMap<std::string, Camera> cameraMap; // Key = "ID"
+
+bool getCameras();
+bool parseCameras(const Json::Value &cameras);
+bool processCamera(const Json::Value &parsedCamera);
 } // namespace NYSDOT
 } // namespace Traffic
 #endif

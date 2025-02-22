@@ -7,26 +7,27 @@
 namespace Traffic {
 namespace Ontario {
 
-EventMap<Event> eventMap; // Key = "ID"
+TrafficMap<std::string, Event> eventMap; // Key = "ID"
+TrafficMap<int, Camera> cameraMap; // Key = "ID"
+constexpr BoundingBox regionToronto{ -80.099, -78.509, 44.205, 43.137 };
 
 bool getEvents() {
-  static const std::string url{ "https://511on.ca/api/v2/get/event" };
+  static const std::string url{ "https://511on.ca/api/v2/get/event?format=json&lang=en" };
   
   // Parse events from API
   std::string responseStr{ cURL::getData(url) };
   if(responseStr.empty()) {
-    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve JSON from Ontario 511." << Output::Colors::END << '\n';
+    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve events JSON from Ontario 511." << Output::Colors::END << '\n';
     return false;
   }
-  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved JSON from Ontario 511." << Output::Colors::END << '\n';
+  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved events JSON from Ontario 511." << Output::Colors::END << '\n';
 
   // Test JSON parsing
   if(!parseEvents(JSON::parseData(responseStr))) {
-    std::cerr << Output::Colors::RED << "[JSON] Error parsing root tree." << Output::Colors::END << '\n';
+    std::cerr << Output::Colors::RED << "[JSON] Error parsing events root tree." << Output::Colors::END << '\n';
     return false; 
   }
 
-  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed root tree." << Output::Colors::END << '\n';
   return true;
 }
 
@@ -43,6 +44,7 @@ bool parseEvents(const Json::Value &events) {
     if(!processEvent(parsedEvent))
        return false;
   }
+  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed events root tree." << Output::Colors::END << '\n';
   std::cout << "[ONMT] Found " << eventMap.size() << " Matching Event Records.\n";
 
   return true;
@@ -53,7 +55,7 @@ bool processEvent(const Json::Value &parsedEvent) {
   auto location = std::make_pair(parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble());
 
 
-  if(BoundingArea::contains(location)) {    // Check if bounding area contains the event location
+  if(regionToronto.contains(location)) {    // Check if bounding area contains the event location
     // Try to insert a new Event at event, inserted = false if it fails
     auto [event, inserted] = eventMap.try_emplace(key, parsedEvent);
     // Check if we added a new event
@@ -71,14 +73,54 @@ bool processEvent(const Json::Value &parsedEvent) {
   return true;
 }
 
-bool BoundingArea::contains(std::pair<double, double>& coordinate){
-  auto& [latitude, longitude] = coordinate; // Access values by structured bindings
-  if((latitude >= latBottom && latitude <= latTop) && (longitude >= longLeft && longitude <= longRight))
-    return true;
+bool getCameras() {
+  // Build the request URL
+  static const std::string url{ "https://511on.ca/api/v2/get/cameras?format=json&lang=en" };
+  
+  // Parse Events Data from API
+  std::string responseStr{ cURL::getData(url) };
+  if(responseStr.empty()) {
+    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve cameras JSON from Ontario 511." << Output::Colors::END << '\n';
+    return false;
+  }
+  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved cameras JSON from Ontario 511." << Output::Colors::END << '\n';
 
-  return false;
+  if(!parseCameras(JSON::parseData(responseStr))) {
+    std::cerr << Output::Colors::RED << "[JSON] Error parsing cameras root tree." << Output::Colors::END << '\n';
+    return false;
+  }
+  return true;
 }
 
+bool parseCameras(const Json::Value &cameras) {
+  for(const auto& parsedCamera : cameras) {
+    if(!parsedCamera.isObject()) {
+      std::cerr << Output::Colors::RED << "[ONMT] Failed parsing camera (is the JSON valid?)" << Output::Colors::END << '\n';
+      return false; // Or do we want to continue here?
+    }
+
+    if(!processCamera(parsedCamera))
+      return false;
+  }
+  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed cameras root tree." << Output::Colors::END << '\n';
+  std::cout << "[ONMT] Found " << cameraMap.size() << " Matching camera Records.\n";
+  return true;
+}
+
+bool processCamera(const Json::Value &parsedCamera) {
+  int key = parsedCamera["Id"].asInt();
+  auto location = std::make_pair(parsedCamera["Latitude"].asDouble(), parsedCamera["Longitude"].asDouble());
+
+  if(regionToronto.contains(location)) {
+    auto [camera, inserted] = cameraMap.try_emplace(key, parsedCamera);
+    if(!inserted) {
+      // Check if camera status changed??
+      camera->second = parsedCamera;
+      std::cout << Output::Colors::MAGENTA << "[ONMT] Updated camera: " << key << Output::Colors::END << '\n';  
+    }
+  }
+  return true;
+}
 
 /******* Ontario MT Events *********/
 // Construct an event from a parsed Json object
@@ -186,7 +228,7 @@ Event& Event::operator=(Event&& other) noexcept {
     EncodedPolyline = std::move(other.EncodedPolyline);
     LinkId = std::move(other.LinkId);
   }
-  std::cout << Output::Colors::BLUE << "[ONMT] Invoked move assignment: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::BLUE << "[ONMT] Invoked move assignment for event: " << ID << Output::Colors::END << '\n';
   return *this;
 }
 
@@ -199,5 +241,75 @@ std::ostream &operator<<(std::ostream &out, const Event &event) {
   return out;
 }
 
+/******* Ontario MT Cameras *********/
+// Construct a camera from a parsed Json object
+Camera::Camera(const Json::Value& parsedCamera) {
+  if(parsedCamera.find("Id"))
+    ID = parsedCamera["Id"].asInt();
+  if(parsedCamera.find("Source"))
+    Source = parsedCamera["Source"].asString();
+  if(parsedCamera.find("SourceId"))
+    SourceID = parsedCamera["SourceId"].asString();
+  if(parsedCamera.find("Roadway"))
+    Roadway = parsedCamera["Roadway"].asString();
+  if(parsedCamera.find("Direction"))
+    Direction = parsedCamera["Direction"].asString();
+  if(parsedCamera.find("Latitude"))
+    Latitude = parsedCamera["Latitude"].asDouble();
+  if(parsedCamera.find("Longitude"))
+    Longitude = parsedCamera["Longitude"].asDouble();
+  if(parsedCamera.find("Location"))
+    Location = parsedCamera["Location"].asString();
+  if(parsedCamera.find("Views")){
+    // Construct a CameraView object and push it on a vector of views
+    const Json::Value views = parsedCamera["Views"];
+    for (const auto& view : views){
+      Views.emplace_back(view);
+    }
+    std::cout << Output::Colors::YELLOW << "[ONMT] Found " << Views.size() << " camera views for " << ID << Output::Colors::END << '\n';
+  }
+  std::cout << Output::Colors::YELLOW << "[ONMT] Constructed camera: " << ID << " | " << Views.at(0).getURL() << Output::Colors::END << '\n';
+}
+
+Camera::Camera(Camera&& other) noexcept
+: ID(other.ID),
+  Source(std::move(other.Source)),
+  SourceID(std::move(other.SourceID)),
+  Roadway(std::move(other.Roadway)),
+  Direction(std::move(other.Direction)),
+  Latitude(other.Latitude),
+  Longitude(other.Longitude),
+  Location(std::move(other.Location)),
+  Views(std::move(other.Views))
+{
+  std::cout << Output::Colors::BLUE << "[ONMT] Moved camera: " << ID << Output::Colors::END << '\n';
+}
+  
+Camera& Camera::operator=(Camera&& other) noexcept {
+  if(this != &other){
+    ID = other.ID;
+    Source = std::move(other.Source);
+    SourceID = std::move(other.SourceID);
+    Roadway = std::move(other.Roadway);
+    Direction = std::move(other.Direction);
+    Latitude = other.Latitude;
+    Longitude = other.Longitude;
+    Location = std::move(other.Location);
+    Views = std::move(other.Views);
+  }
+  std::cout << Output::Colors::BLUE << "[ONMT] Invoked move assignment for camera: " << ID << Output::Colors::END << '\n';
+  return *this;
+}
+
+CameraView::CameraView(const Json::Value& parsedView) {
+  if(parsedView.find("Id"))
+    ID = parsedView["Id"].asInt();
+  if(parsedView.find("Url"))
+    URL = parsedView["Url"].asString();
+  if(parsedView.find("Status"))
+    Status = parsedView["Status"].asString();
+  if(parsedView.find("Description"))
+    Description = parsedView["Description"].asString();
+}
 } // namespace Ontario
 } // namespace Traffic

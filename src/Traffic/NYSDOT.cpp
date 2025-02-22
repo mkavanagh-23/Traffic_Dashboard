@@ -10,7 +10,6 @@ namespace Traffic {
 /* TODO:
  *  - Clean up events once they are cleared
  *  - Error handling - try/catch
- *  - Get camera data
  *  - Multithreading and loop structure - updates in the backend
  *  - Logging
  */
@@ -18,7 +17,9 @@ namespace Traffic {
 namespace NYSDOT {
 
 std::string API_KEY;
-EventMap<Event> eventMap; // Key = "ID"
+TrafficMap<std::string, Event> eventMap; // Key = "ID"
+TrafficMap<std::string, Camera> cameraMap; // Key = "ID"
+constexpr BoundingBox regionSyracuse{ -76.562, -75.606, 43.553, 42.621 };
 
 bool getEnv() {
   // Retrieve environment variable from local environment
@@ -27,32 +28,31 @@ bool getEnv() {
   // Check if environment variable exists
   if(NYSDOT_API_KEY) {
     API_KEY = NYSDOT_API_KEY;    
-    std::cout << Output::Colors::GREEN << "[ENV] Successfully sourced API key from local environment." << Output::Colors::END << '\n';
+    std::cout << Output::Colors::GREEN << "[ENV] Successfully sourced API key from local environment.\n" << Output::Colors::END;
     return true;
   } else {
-    std::cerr << Output::Colors::RED << "[ENV] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have it set." << Output::Colors::END << '\n';
+    std::cerr << Output::Colors::RED << "[ENV] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have it set.\n" << Output::Colors::END;
     return false;
   }
 }
 
 bool getEvents(){
   // Build the request URL
-  std::string url{ "https://511ny.org/api/getevents/?format=json&key=" + API_KEY };
+  std::string url{ "https://511ny.org/api/getevents?format=json&key=" + API_KEY };
 
   // Parse Events Data from API
   std::string responseStr{ cURL::getData(url) };
   if(responseStr.empty()) {
-    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve JSON from 511ny." << Output::Colors::END << '\n';
+    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve events JSON from 511ny.\n" << Output::Colors::END;
     return false;
   }
-  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved JSON from 511ny." << Output::Colors::END << '\n';
+  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved events JSON from 511ny.\n" << Output::Colors::END;
   
   // Test JSON Parsing
   if(!parseEvents(JSON::parseData(responseStr))) {
-    std::cerr << Output::Colors::RED << "[JSON] Error parsing root tree." << Output::Colors::END << '\n';
+    std::cerr << Output::Colors::RED << "[JSON] Error parsing root tree.\n" << Output::Colors::END;
     return false;
   }
-  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed root tree." << Output::Colors::END << '\n';
 
   return true;
 }
@@ -63,12 +63,13 @@ bool parseEvents(const Json::Value& events){
   for(const auto& parsedEvent : events) {
     // Check if event is a valid object
     if(!parsedEvent.isObject()) {
-      std::cerr << Output::Colors::RED << "[NYSDOT] Failed parsing event (is the JSON valid?)" << Output::Colors::END << '\n';
+      std::cerr << Output::Colors::RED << "[NYSDOT] Failed parsing event (is the JSON valid?)\n" << Output::Colors::END;
       return false;
     }
     // Process the event for storage
     processEvent(parsedEvent);
   }
+  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed root tree.\n" << Output::Colors::END;
   std::cout << "[NYSDOT] Found " << eventMap.size() << " Matching Event Records.\n";
   return true;
 }
@@ -101,6 +102,57 @@ void printEvents() {
   for(const auto& [key, event] : eventMap) {
     std::cout << event << '\n';
   }
+}
+
+bool getCameras() {
+  // Build the request URL
+  std::string url{ "https://511ny.org/api/getcameras?format=json&key=" + API_KEY };
+  
+  // Parse Events Data from API
+  std::string responseStr{ cURL::getData(url) };
+  if(responseStr.empty()) {
+    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve cameras JSON from 511ny.\n" << Output::Colors::END;
+    return false;
+  }
+  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved cameras JSON from 511ny.\n" << Output::Colors::END;
+
+  if(!parseCameras(JSON::parseData(responseStr))){
+    std::cerr << Output::Colors::RED << "[JSON] Error parsing cameras root tree.\n" << Output::Colors::END;
+    return false;
+  }
+  return true;
+}
+
+bool parseCameras(const Json::Value &cameras){
+  for(const auto& parsedCamera : cameras) {
+    if(!parsedCamera.isObject()) {
+      std::cerr << Output::Colors::RED << "[NYSDOT] Failed parsing camera (is the JSON valid?)\n" << Output::Colors::END;
+      return false; // Or do we want to continue here?
+    }
+    processCamera(parsedCamera);
+  }
+
+  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed cameras root tree." << Output::Colors::END << '\n';
+  std::cout << "[NYSDOT] Found " << cameraMap.size() << " Matching camera Records.\n";
+  return true;
+}
+
+bool processCamera(const Json::Value &parsedCamera){
+  std::string key = parsedCamera["ID"].asString();
+  auto location = std::make_pair(parsedCamera["Latitude"].asDouble(), parsedCamera["Longitude"].asDouble());
+  // Make sure camera is not disabled or blocked
+  if(!(parsedCamera["Disabled"].asBool()) && !(parsedCamera["Blocked"].asBool())) {
+    // Check for our region
+    if(regionSyracuse.contains(location)) {
+      auto [camera, inserted] = cameraMap.try_emplace(key, parsedCamera);
+      if(!inserted) {
+        // Check if camera status changed??
+        camera->second = parsedCamera;
+        std::cout << Output::Colors::MAGENTA << "[NYSDOT] Updated camera: " << key << Output::Colors::END << '\n';  
+      }
+    }
+  }
+  return true;
 }
 
 /****** NYSDOT::EVENT ******/
@@ -232,5 +284,64 @@ std::ostream &operator<<(std::ostream &out, const Event &event) {
   return out;
 }
 
+
+/****** NYSDOT::Camera ******/
+// Construct a camera from a parsed Json object
+Camera::Camera(const Json::Value& parsedCamera) {
+  if(parsedCamera.find("ID"))
+    ID = parsedCamera["ID"].asString();
+  if(parsedCamera.find("Url"))
+    URL = parsedCamera["Url"].asString();
+  if(parsedCamera.find("VideoUrl"))
+    VideoURL = parsedCamera["VideoUrl"].asString();
+  if(parsedCamera.find("Name"))
+    Name = parsedCamera["Name"].asString();
+  if(parsedCamera.find("DirectionOfTravel"))
+    DirectionOfTravel = parsedCamera["DirectionOfTravel"].asString();
+  if(parsedCamera.find("RoadwayName"))
+    RoadwayName = parsedCamera["RoadwayName"].asString();
+  if(parsedCamera.find("Disabled"))
+    Disabled = parsedCamera["Disabled"].asBool();
+  if(parsedCamera.find("Blocked"))
+    Blocked = parsedCamera["Blocked"].asBool();
+  if(parsedCamera.find("Latitude"))
+    Latitude = parsedCamera["Latitude"].asDouble();
+  if(parsedCamera.find("Longitude"))
+    Longitude = parsedCamera["Longitude"].asDouble();
+
+  std::cout << Output::Colors::YELLOW << "[NYSDOT] Constructed camera: " << ID << " | " << VideoURL << Output::Colors::END << '\n';
+}
+
+Camera::Camera(Camera&& other) noexcept
+: ID(std::move(other.ID)),
+  URL(std::move(other.URL)),
+  VideoURL(std::move(other.VideoURL)),
+  Name(std::move(other.Name)),
+  DirectionOfTravel(std::move(other.DirectionOfTravel)),
+  RoadwayName(std::move(other.RoadwayName)),
+  Disabled(other.Disabled),
+  Blocked(other.Blocked),
+  Latitude(other.Latitude),
+  Longitude(other.Longitude)
+{
+  std::cout << Output::Colors::BLUE << "[NYSDOT] Moved camera: " << ID << Output::Colors::END << '\n';
+}
+
+Camera& Camera::operator=(Camera&& other) noexcept {
+  if(this != &other){
+    ID = other.ID;
+    URL = std::move(other.URL);
+    VideoURL = std::move(other.VideoURL);
+    Name = std::move(other.Name);
+    DirectionOfTravel = std::move(other.DirectionOfTravel);
+    RoadwayName = std::move(other.RoadwayName);
+    Disabled = other.Disabled;
+    Blocked = other.Blocked;
+    Latitude = other.Latitude;
+    Longitude = other.Longitude;
+  }
+  std::cout << Output::Colors::BLUE << "[NYSDOT] Invoked move assignment for camera: " << ID << Output::Colors::END << '\n';
+  return *this;
+}
 } // namespace NYSDOT
 }

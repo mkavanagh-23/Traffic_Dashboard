@@ -25,8 +25,21 @@ void parseData(rapidxml::xml_document<>& document, std::string xmlData);
 // Define shared data for various traffic event sources
 namespace Traffic {
 // Create a template for EventMaps of different event types
-template<typename T>
-using EventMap = std::unordered_map<std::string, T>;
+template<typename T1, typename T2>
+using TrafficMap = std::unordered_map<T1, T2>;
+
+struct BoundingBox {
+  const double longLeft;
+  const double longRight;
+  const double latTop;
+  const double latBottom;
+
+  bool contains(const std::pair<double, double>& coordinate) const;
+};
+
+// Get all traffic events
+bool getEvents();
+bool getCameras();
 }
 
 #endif

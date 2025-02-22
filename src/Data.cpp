@@ -1,4 +1,7 @@
 #include "Data.h"
+#include "NYSDOT.h"
+#include "MCNY.h"
+#include "ONMT.h"
 #include "Output.h"
 #include <string>
 #include <iostream>
@@ -59,7 +62,7 @@ Json::Value parseData(const std::string& jsonData) {
     // TODO: Throw an exception if we do not parse from stream
     // Should also throw an exception in the underlying/preceding curl function
   }
-  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed events from JSON stream." << Output::Colors::END << '\n';
+  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed objects from JSON stream." << Output::Colors::END << '\n';
   return root; // Return the parsed root of objects
 }
 } // namespace JSON
@@ -72,3 +75,33 @@ void parseData(rapidxml::xml_document<>& document, std::string xmlData) {
 }
 
 } // namespace XML
+
+namespace Traffic {
+bool BoundingBox::contains(const std::pair<double, double>& coordinate) const {
+  auto& [latitude, longitude] = coordinate;
+  if((latitude >= latBottom && latitude <= latTop) && (longitude >= longLeft && longitude <= longRight))
+    return true;
+
+  return false;
+}
+
+// Get all traffic events
+bool getEvents(){
+  // Test event parsing
+  if(!NYSDOT::getEvents())
+    return false;
+  if(!Ontario::getEvents())
+    return false;
+  if(!MCNY::getEvents())
+    return false;
+  return true;
+}
+
+bool getCameras(){
+  if(!NYSDOT::getCameras())
+    return false;
+  if(!Ontario::getCameras())
+    return false;
+  return true;
+}
+}
