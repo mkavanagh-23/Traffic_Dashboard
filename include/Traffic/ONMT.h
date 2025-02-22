@@ -64,12 +64,16 @@ void printEvents();
 class CameraView {
 private:
   int ID;
-  std::string URL;
+  std::string URL;  // Link to a jpeg image of the latest camera still
+                    //  No video stream links are available anymore, sadly
+                    //  TODO: Implement JPEG stills conversion to SDL texture for inline rendering  
   std::string Status;
   std::string Description;
 public:
   CameraView() = default;
   CameraView(const Json::Value& parsedView);
+
+  std::string getURL(){ return URL; }
 };
 
 class Camera {
@@ -82,9 +86,7 @@ private:
   double Latitude;
   double Longitude;
   std::string Location;
-  std::vector<CameraView> Views;    // A JSON value objection containing all camera views at the location
-  // TODO: Define a CameraView class that creates an object for each views
-  // These can be stored in a std::vector rather than copying, storing, and reparsing the Json::Value object
+  std::vector<CameraView> Views;    // One or more camera streams located at the location
 public:
   Camera() = default;
   // Construct an event from a Json object

@@ -115,8 +115,6 @@ bool processCamera(const Json::Value &parsedCamera) {
     auto [camera, inserted] = cameraMap.try_emplace(key, parsedCamera);
     if(!inserted) {
       // Check if camera status changed??
-      
-      //TEST CODE
       camera->second = parsedCamera;
       std::cout << Output::Colors::MAGENTA << "[ONMT] Updated camera: " << key << Output::Colors::END << '\n';  
     }
@@ -270,7 +268,7 @@ Camera::Camera(const Json::Value& parsedCamera) {
     }
     std::cout << Output::Colors::YELLOW << "[ONMT] Found " << Views.size() << " camera views for " << ID << Output::Colors::END << '\n';
   }
-  std::cout << Output::Colors::YELLOW << "[ONMT] Constructed camera: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::YELLOW << "[ONMT] Constructed camera: " << ID << " | " << Views.at(0).getURL() << Output::Colors::END << '\n';
 }
 
 Camera::Camera(Camera&& other) noexcept
@@ -298,7 +296,6 @@ Camera& Camera::operator=(Camera&& other) noexcept {
     Longitude = other.Longitude;
     Location = std::move(other.Location);
     Views = std::move(other.Views);
-
   }
   std::cout << Output::Colors::BLUE << "[ONMT] Invoked move assignment for camera: " << ID << Output::Colors::END << '\n';
   return *this;

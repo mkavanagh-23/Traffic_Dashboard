@@ -1,6 +1,7 @@
 #ifndef NYSDOT_H
 #define NYSDOT_H
 
+#include "Data.h"
 #include <json/json.h>
 #include <string>
 #include <ostream>
@@ -80,9 +81,22 @@ private:    // Define all private members
   double Latitude;
   double Longitude;
 public:
+  Camera() = default;
+  // Construct a camera from a Json object
+  Camera(const Json::Value& parsedCamera);
+  // Move constructor
+  Camera(Camera&& other) noexcept;
+  // Move assignemnt operator
+  Camera& operator=(Camera&& other) noexcept;
+
+  std::string getURL() const { return VideoURL; }
 };
 
+extern TrafficMap<std::string, Camera> cameraMap; // Key = "ID"
+
 bool getCameras();
+bool parseCameras(const Json::Value &cameras);
+bool processCamera(const Json::Value &parsedCamera);
 } // namespace NYSDOT
 } // namespace Traffic
 #endif

@@ -36,36 +36,32 @@ void signalHandler(int signum) {
   running = false;
 }
 
-int main(int argc, char** argv)
+int main()
 {
-  // Check for valid arguments
-  if (argc < 2) {
-    std::cerr << Output::Colors::RED << "[ERROR] Usage: " << argv[0] << " <video source stream/url>" << Output::Colors::END << std::endl;
-    return 1;
-  }
-
   // Register signal handler
   signal(SIGINT, signalHandler);
 
-  // Create the video object from the stream URL
-  Video video(argv[1], VLC::Media::FromLocation);
-  video.play();
-  std::this_thread::sleep_for(std::chrono::seconds(2));
-  video.stop();
-  
   // Source API key from ENV
   // TODO: Will be placed in global Setup() function
   if(!Traffic::NYSDOT::getEnv())
     return 1;
 
   // Get cameras
+  if(!Traffic::getCameras())
+    return 1;
+
+  // Create a test video object from a camera URL
+  auto& [key, camera] = *Traffic::NYSDOT::cameraMap.begin();
+  Video video(camera.getURL(), VLC::Media::FromLocation);
+  video.play();
+  std::this_thread::sleep_for(std::chrono::seconds(5));
+  video.stop();
+  
 
   while(running) {
-    if(!Traffic::getCameras())
-      return 1;
     // Get all Traffic events
-    //if(!Traffic::getEvents())
-    //  return 1;
+    if(!Traffic::getEvents())
+      return 1;
     auto time = Output::currentTime();
     std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << '\n' << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(60));
