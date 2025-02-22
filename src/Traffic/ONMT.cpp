@@ -7,7 +7,8 @@
 namespace Traffic {
 namespace Ontario {
 
-TrafficMap<Event> eventMap; // Key = "ID"
+TrafficMap<std::string, Event> eventMap; // Key = "ID"
+TrafficMap<int, Camera> cameraMap; // Key = "ID"
 constexpr BoundingBox regionToronto{ -80.099, -78.509, 44.205, 43.137 };
 
 bool getEvents() {
@@ -102,10 +103,24 @@ bool parseCameras(const Json::Value &cameras) {
       return false;
   }
   std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed cameras root tree." << Output::Colors::END << '\n';
+  std::cout << "[ONMT] Found " << cameraMap.size() << " Matching camera Records.\n";
   return true;
 }
 
 bool processCamera(const Json::Value &parsedCamera) {
+  int key = parsedCamera["Id"].asInt();
+  auto location = std::make_pair(parsedCamera["Latitude"].asDouble(), parsedCamera["Longitude"].asDouble());
+
+  if(regionToronto.contains(location)) {
+    auto [camera, inserted] = cameraMap.try_emplace(key, parsedCamera);
+    if(!inserted) {
+      // Check if camera status changed??
+      
+      //TEST CODE
+      camera->second = parsedCamera;
+      std::cout << Output::Colors::MAGENTA << "[ONMT] Updated camera: " << key << Output::Colors::END << '\n';  
+    }
+  }
   return true;
 }
 
@@ -215,7 +230,7 @@ Event& Event::operator=(Event&& other) noexcept {
     EncodedPolyline = std::move(other.EncodedPolyline);
     LinkId = std::move(other.LinkId);
   }
-  std::cout << Output::Colors::BLUE << "[ONMT] Invoked move assignment: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::BLUE << "[ONMT] Invoked move assignment for event: " << ID << Output::Colors::END << '\n';
   return *this;
 }
 
@@ -228,5 +243,60 @@ std::ostream &operator<<(std::ostream &out, const Event &event) {
   return out;
 }
 
+/******* Ontario MT Cameras *********/
+// Construct a camera from a parsed Json object
+Camera::Camera(const Json::Value& parsedCamera) {
+  if(parsedCamera.find("Id"))
+    ID = parsedCamera["Id"].asInt();
+  if(parsedCamera.find("Source"))
+    Source = parsedCamera["Source"].asString();
+  if(parsedCamera.find("SourceId"))
+    SourceID = parsedCamera["SourceId"].asString();
+  if(parsedCamera.find("Roadway"))
+    Roadway = parsedCamera["Roadway"].asString();
+  if(parsedCamera.find("Direction"))
+    Direction = parsedCamera["Direction"].asString();
+  if(parsedCamera.find("Latitude"))
+    Latitude = parsedCamera["Latitude"].asDouble();
+  if(parsedCamera.find("Longitude"))
+    Longitude = parsedCamera["Longitude"].asDouble();
+  if(parsedCamera.find("Location"))
+    Location = parsedCamera["Location"].asString();
+  if(parsedCamera.find("Views"))
+    Views = parsedCamera["Views"];
+
+  std::cout << Output::Colors::YELLOW << "[ONMT] Constructed camera: " << ID << Output::Colors::END << '\n';
+}
+
+Camera::Camera(Camera&& other) noexcept
+: ID(other.ID),
+  Source(std::move(other.Source)),
+  SourceID(std::move(other.SourceID)),
+  Roadway(std::move(other.Roadway)),
+  Direction(std::move(other.Direction)),
+  Latitude(other.Latitude),
+  Longitude(other.Longitude),
+  Location(std::move(other.Location)),
+  Views(std::move(other.Views))
+{
+  std::cout << Output::Colors::BLUE << "[ONMT] Moved camera: " << ID << Output::Colors::END << '\n';
+}
+  
+Camera& Camera::operator=(Camera&& other) noexcept {
+  if(this != &other){
+    ID = other.ID;
+    Source = std::move(other.Source);
+    SourceID = std::move(other.SourceID);
+    Roadway = std::move(other.Roadway);
+    Direction = std::move(other.Direction);
+    Latitude = other.Latitude;
+    Longitude = other.Longitude;
+    Location = std::move(other.Location);
+    Views = std::move(other.Views);
+
+  }
+  std::cout << Output::Colors::BLUE << "[ONMT] Invoked move assignment for camera: " << ID << Output::Colors::END << '\n';
+  return *this;
+}
 } // namespace Ontario
 } // namespace Traffic

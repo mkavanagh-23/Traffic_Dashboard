@@ -18,7 +18,7 @@ namespace Traffic {
 namespace NYSDOT {
 
 std::string API_KEY;
-TrafficMap<Event> eventMap; // Key = "ID"
+TrafficMap<std::string, Event> eventMap; // Key = "ID"
 
 bool getEnv() {
   // Retrieve environment variable from local environment

@@ -66,15 +66,21 @@ private:
   std::string Source;
   std::string SourceID;
   std::string Roadway;
-  std::string Direction;
+  std::string Direction{ "Unknown" };
   double Latitude;
   double Longitude;
-  std::string location;
-  Json::Value views;    // A JSON value objection containing all camera views at the location
+  std::string Location;
+  Json::Value Views;    // A JSON value objection containing all camera views at the location
   // TODO: Define a CameraView class that creates an object for each views
   // These can be stored in a std::vector rather than copying, storing, and reparsing the Json::Value object
 public:
   Camera() = default;
+  // Construct an event from a Json object
+  Camera(const Json::Value& parsedCamera);
+  // Move constructor
+  Camera(Camera&& other) noexcept;
+  // Move assignment operator
+  Camera& operator=(Camera&& other) noexcept;
 };
 
 bool getCameras();

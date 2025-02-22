@@ -11,7 +11,7 @@ namespace Traffic {
 
 namespace MCNY {
 const std::string RSS_URL{ "https://www.monroecounty.gov/incidents911.rss" };
-TrafficMap<Event> eventMap; // Key = "ID"
+TrafficMap<std::string, Event> eventMap; // Key = "ID"
 
 bool getEvents() {
   // Parse Events Data from RSS feed

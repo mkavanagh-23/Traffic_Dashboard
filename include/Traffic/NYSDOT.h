@@ -1,8 +1,6 @@
 #ifndef NYSDOT_H
 #define NYSDOT_H
 
-#include "Data.h"
-
 #include <json/json.h>
 #include <string>
 #include <ostream>
@@ -63,7 +61,6 @@ public:
 };
   
 // Declare a hashmap to store NYSDOT::Event objects
-extern TrafficMap<Event> eventMap; // Index into the map via "ID"
 bool getEvents();
 // And a function to parse events and store on the map
 bool parseEvents(const Json::Value& events);
