@@ -22,7 +22,7 @@ TrafficMap<std::string, Camera> cameraMap; // Key = "ID"
 constexpr BoundingBox regionSyracuse{ -76.562, -75.606, 43.553, 42.621 };
 
 bool getEnv() {
-  // Retrieve environment variable from local environment
+  // Retrieve API Key from local environment
   const char* NYSDOT_API_KEY = std::getenv("NYSDOT_API_KEY");
 
   // Check if environment variable exists
