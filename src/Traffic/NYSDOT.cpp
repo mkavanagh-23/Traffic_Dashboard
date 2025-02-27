@@ -70,6 +70,8 @@ bool parseEvents(const Json::Value& events){
     processEvent(parsedEvent);
   }
   std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed root tree.\n" << Output::Colors::END;
+  // Clean up any cleared events
+  cleanEvents(events);
   std::cout << "[NYSDOT] Found " << eventMap.size() << " Matching Event Records.\n";
   return true;
 }
@@ -95,6 +97,60 @@ bool processEvent(const Json::Value& parsedEvent) {
       return false;
   }
   return true;
+}
+
+// Clean up cleared events
+void cleanEvents(const Json::Value& events) {
+  std::vector<std::string> keysToDelete;
+  // Iterate through each item in the map
+  for(const auto& [key, event] : eventMap) { // NOTE: Be extra mindful of iterator invalidation (SEE BELOW)
+
+    // Check if a match was found in the Json::Value object
+    if(!containsEvent(events, key)) {
+      // If not match is found, the event was cleared so delete it from the map
+      //eventMap.erase(key);      
+                                // FIX: Cannot do this here as we are currently iterating through the eventMap object
+                                // This means that when we delete the keyed object we invalidate our iterator leading to UB
+                                // Perhaps instead of erasing in the loop we could create a vector of keys, and then afterward we can delete each matching Event values
+                                // This is TOP PRIORITY and should be studied as it is a common pitfall of working with hashmaps
+      
+      // If no matching event, add it to the deletion vector
+      keysToDelete.push_back(key);
+
+      std::cout << Output::Colors::YELLOW << "[NYSDOT] Marked event for deletion: " << key << Output::Colors::END << '\n'; 
+    }
+  }
+  deleteEvents(keysToDelete);
+}
+
+// Check if the Json array contains an event with the given key
+// TODO: MUST REFACTOR VALIDITY CHECKS INTO TRY-CATCH
+bool containsEvent(const Json::Value& events, const std::string& key) {
+  // Confirm object is array
+  if(!events.isArray()) {
+    std::cerr << Output::Colors::RED << "[NYSDOT] JSON not a valid array!\n" << Output::Colors::END;
+  }
+
+  // Iterate through the array and check for matching key
+  for(const auto& parsedEvent : events) {
+    // Check for a valid object
+    if(!parsedEvent.isObject() || !parsedEvent.isMember("ID")) {
+      std::cerr << Output::Colors::RED << "[NYSDOT] Parsed JSON not a valid object!\n" << Output::Colors::END;
+    }
+    // Check for a key match
+    if(parsedEvent["ID"].asString() == key)
+      return true;
+    else
+      continue;
+  }
+  return false;
+}
+
+void deleteEvents(const std::vector<std::string>& keys) {
+  for(const auto& key : keys) {
+    eventMap.erase(key);
+    std::cout << Output::Colors::RED << "[NYSDOT] Deleted event: " << key << Output::Colors::END << '\n'; 
+  }
 }
 
 // Print the event map
