@@ -45,6 +45,7 @@ bool parseEvents(const Json::Value &events) {
        return false;
   }
   std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed events root tree." << Output::Colors::END << '\n';
+  cleanEvents(events);
   std::cout << "[ONMT] Found " << eventMap.size() << " Matching Event Records.\n";
 
   return true;
@@ -70,7 +71,54 @@ bool processEvent(const Json::Value &parsedEvent) {
     if(event->second.getLastUpdated() == 0)
       return false;
   }
-  return true;
+return true;
+}
+
+// Clean up cleared events
+void cleanEvents(const Json::Value& events) {
+  // initialize a vector to store keys marked for deletion
+  std::vector<std::string> keysToDelete;
+  // Iterate through each event in the eventmap
+  for(const auto& [key, event] : eventMap) {
+    // Check if the event is found in the retrieved array
+    if(!containsEvent(events, key)) {
+      // Add the event's key to the deletion vector
+      keysToDelete.push_back(key);
+      std::cout << Output::Colors::YELLOW << "[ONMT] Marked event for deletion: " << key << Output::Colors::END << '\n'; 
+    }
+  }
+  deleteEvents(keysToDelete);
+}
+
+// Check if yhe Json Array contains an event with the given key
+bool containsEvent(const Json::Value& events, const std::string& key) {
+  // Confirm the object is an array
+  if(!events.isArray()) {
+    std::cerr << Output::Colors::RED << "[ONMT] JSON not a valid array!\n" << Output::Colors::END;
+  }
+
+  // Iterate through the array and check for matching key
+  for(const auto& parsedEvent : events) {
+    // Confirm we parsed a valid object
+    if(!parsedEvent.isObject() || !parsedEvent.isMember("ID")) {
+      std::cerr << Output::Colors::RED << "[ONMT] Parsed JSON not a valid object!\n" << Output::Colors::END;
+      continue;
+    }
+    // Check for a key match
+    if(parsedEvent["ID"].asString() == key)
+      return true;
+    else
+      continue;
+  }
+  return false;
+}
+
+// Delete all events with matching keys from the deletion vector
+void deleteEvents(const std::vector<std::string>& keys) {
+  for(const auto& key : keys) {
+    eventMap.erase(key);
+    std::cout << Output::Colors::RED << "[ONMT] Deleted event: " << key << Output::Colors::END << '\n'; 
+  }
 }
 
 bool getCameras() {

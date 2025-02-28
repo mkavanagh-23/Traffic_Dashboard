@@ -92,8 +92,8 @@ bool getEvents(){
   // Test event parsing
   if(!NYSDOT::getEvents())
     return false;
-  //if(!Ontario::getEvents())
-  //  return false;
+  if(!Ontario::getEvents())
+    return false;
   //if(!MCNY::getEvents())
   //  return false;
   return true;

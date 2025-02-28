@@ -136,6 +136,7 @@ bool containsEvent(const Json::Value& events, const std::string& key) {
     // Check for a valid object
     if(!parsedEvent.isObject() || !parsedEvent.isMember("ID")) {
       std::cerr << Output::Colors::RED << "[NYSDOT] Parsed JSON not a valid object!\n" << Output::Colors::END;
+      continue;
     }
     // Check for a key match
     if(parsedEvent["ID"].asString() == key)
