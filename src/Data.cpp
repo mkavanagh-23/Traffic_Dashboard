@@ -94,8 +94,8 @@ bool getEvents(){
     return false;
   if(!Ontario::getEvents())
     return false;
-  //if(!MCNY::getEvents())
-  //  return false;
+  if(!MCNY::getEvents())
+    return false;
   return true;
 }
 

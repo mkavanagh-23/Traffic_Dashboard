@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <rapidxml.hpp>
+#include <vector>
 
 namespace Traffic {
 /************************ Monroe County Dispatch Feed *************************/
@@ -62,6 +63,7 @@ bool parseEvents(rapidxml::xml_document<>& xml) {
       return false;
   }
   std::cout << Output::Colors::GREEN << "[XML] Successfully parsed root tree." << Output::Colors::END << '\n';
+  cleanEvents(xml);
   std::cout << "[MCNY] Found " << eventMap.size() << " matching events.\n";
   return true;
 }
@@ -81,6 +83,47 @@ strPair parseDescription(rapidxml::xml_node<>* description) {
   // Second token is ID
   return { tokens[0].substr(tokens[0].find(":") + 2), 
            tokens[1].substr(tokens[1].find(":") + 2) };
+}
+
+void cleanEvents(rapidxml::xml_document<>& xml){
+  //Create a vector to hold the keys marked for deletion
+  std::vector<std::string> keysToDelete;
+  //Iterate through each key in the event map
+  for(const auto& [key, event] : eventMap) {
+    // Check if they key exists in the retriecved XML
+    if(!containsEvent(xml, key)){
+      // Add the event to the deletion vector if no match is found 
+      keysToDelete.push_back(key);
+      std::cout << Output::Colors::YELLOW << "[MCNY] Marked event for deletion: " << key << Output::Colors::END << '\n'; 
+    }
+  }
+  deleteEvents(keysToDelete);
+}
+
+bool containsEvent(rapidxml::xml_document<>& xml, const std::string& key){
+  rapidxml::xml_node<>* root = xml.first_node("rss"); // Define root entry point
+  rapidxml::xml_node<>* channel = root->first_node("channel"); // Navigate to channel
+
+  // Iterate through the XML document
+  for(rapidxml::xml_node<>* item = channel->first_node("item"); item; item = item->next_sibling()) {
+    // Extract key from description
+    strPair description = parseDescription(item->first_node("description"));
+    auto& [status, parsedKey] = description;      // Access elements via structured bindings
+    // Check for key match
+    if(parsedKey == key)
+      return true;
+    else
+      continue;
+  }
+  return false;
+}
+
+void deleteEvents(const std::vector<std::string>& keys){
+  // Iterate through the deletion vector, deleting each key from the map
+  for(const auto& key : keys) {
+    eventMap.erase(key);
+    std::cout << Output::Colors::RED << "[MCNY] Deleted event: " << key << Output::Colors::END << '\n'; 
+  }
 }
 
 // Print the event map
