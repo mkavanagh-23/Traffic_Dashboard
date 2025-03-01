@@ -16,6 +16,9 @@ bool getEnv();
 // Define a NYSDOT::Event object
 class Event {
 private:    // Define all private members
+  // TODO: 
+  // Should we add a data member for an array of camera objects?
+  // Or should the mapping function be utilized as a callback?
   std::string ID;            // UNIQUE KEY
   std::string RegionName;          // The region where the event occurred.
   std::string CountyName;          // The county where the event occurred.
@@ -66,6 +69,9 @@ bool getEvents();
 // And a function to parse events and store on the map
 bool parseEvents(const Json::Value& events);
 bool processEvent(const Json::Value& parsedEvent);
+void cleanEvents(const Json::Value& events);
+bool containsEvent(const Json::Value& events, const std::string& key);
+void deleteEvents(const std::vector<std::string>& keys);
 void printEvents();
 
 class Camera {
@@ -93,6 +99,7 @@ public:
 };
 
 extern TrafficMap<std::string, Camera> cameraMap; // Key = "ID"
+// Or should we define this as a std::vector for more efficiency as we walk the elements?
 
 bool getCameras();
 bool parseCameras(const Json::Value &cameras);

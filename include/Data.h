@@ -9,8 +9,18 @@
 // This file holds all functionality for retrieving and filtering basic data from CURL in XML and JSON formats
 
 namespace cURL {
+
+enum class Result {
+  SUCCESS,
+  UNSUPPORTED_PROTOCOL,
+  INIT_FAILED,
+  BAD_URL,
+  TIMEOUT,
+  REQUEST_FAILED
+};
+
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output);
-std::string getData(const std::string& url);
+std::pair<Result, std::string> getData(const std::string& url);
 } // namespace cURL
 
 namespace JSON {

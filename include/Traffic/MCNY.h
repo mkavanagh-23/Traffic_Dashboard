@@ -4,6 +4,7 @@
 #include <rapidxml.hpp>
 #include <string>
 #include <ostream>
+#include <vector>
 
 namespace Traffic {
 namespace MCNY {
@@ -48,6 +49,9 @@ extern const std::string RSS_URL;
 bool getEvents();
 bool parseEvents(rapidxml::xml_document<>& xml);
 strPair parseDescription(rapidxml::xml_node<>* description);
+void cleanEvents(rapidxml::xml_document<>& xml);
+bool containsEvent(rapidxml::xml_document<>& xml, const std::string& key);
+void deleteEvents(const std::vector<std::string>& keys);
 void printEvents();
 
 } // namespace MCNY

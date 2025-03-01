@@ -59,6 +59,9 @@ bool getEvents();
 // And a function to parse events and store on the map
 bool parseEvents(const Json::Value& events);
 bool processEvent(const Json::Value& parsedEvent);
+void cleanEvents(const Json::Value& events);
+bool containsEvent(const Json::Value& events, const std::string& key);
+void deleteEvents(const std::vector<std::string>& keys);
 void printEvents();
 
 class CameraView {

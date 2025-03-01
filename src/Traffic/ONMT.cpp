@@ -13,21 +13,35 @@ constexpr BoundingBox regionToronto{ -80.099, -78.509, 44.205, 43.137 };
 
 bool getEvents() {
   static const std::string url{ "https://511on.ca/api/v2/get/event?format=json&lang=en" };
-  
-  // Parse events from API
-  std::string responseStr{ cURL::getData(url) };
-  if(responseStr.empty()) {
-    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve events JSON from Ontario 511." << Output::Colors::END << '\n';
-    return false;
-  }
-  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved events JSON from Ontario 511." << Output::Colors::END << '\n';
 
-  // Test JSON parsing
-  if(!parseEvents(JSON::parseData(responseStr))) {
-    std::cerr << Output::Colors::RED << "[JSON] Error parsing events root tree." << Output::Colors::END << '\n';
-    return false; 
-  }
+  // Retrieve data from the URLm with cURL
+  auto [result, responseStr] = cURL::getData(url);
+  if(result == cURL::Result::SUCCESS) {
+    // Make sure we received data
+    if(responseStr.empty()) {
+      std::cerr << Output::Colors::RED << "[cURL] Received empty response (no data).\n" << Output::Colors::END;
+      return false;
+    }
 
+    std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved events JSON from Ontario 511.\n" << Output::Colors::END;
+
+    // Test JSON parsing
+    if(!parseEvents(JSON::parseData(responseStr))) {
+      std::cerr << Output::Colors::RED << "[JSON] Error parsing events root tree.\n" << Output::Colors::END;
+      return false; 
+    }
+
+  } else {
+    // Handle the error
+    switch(result) {
+      case cURL::Result::TIMEOUT:
+        std::cerr << Output::Colors::RED << "[cURL] Timed out retrieving data from remote stream. Retrying in 60 seconds..." << Output::Colors::END;
+        break;
+      default:
+        std::cerr << Output::Colors::RED << "[cURL] Critical error retrieiving data from remote stream. Terminating program." << Output::Colors::END;
+        return false;
+    }
+  }
   return true;
 }
 
@@ -45,6 +59,7 @@ bool parseEvents(const Json::Value &events) {
        return false;
   }
   std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed events root tree." << Output::Colors::END << '\n';
+  cleanEvents(events);
   std::cout << "[ONMT] Found " << eventMap.size() << " Matching Event Records.\n";
 
   return true;
@@ -70,24 +85,86 @@ bool processEvent(const Json::Value &parsedEvent) {
     if(event->second.getLastUpdated() == 0)
       return false;
   }
-  return true;
+return true;
+}
+
+// Clean up cleared events
+void cleanEvents(const Json::Value& events) {
+  // initialize a vector to store keys marked for deletion
+  std::vector<std::string> keysToDelete;
+  // Iterate through each event in the eventmap
+  for(const auto& [key, event] : eventMap) {
+    // Check if the event is found in the retrieved array
+    if(!containsEvent(events, key)) {
+      // Add the event's key to the deletion vector
+      keysToDelete.push_back(key);
+      std::cout << Output::Colors::YELLOW << "[ONMT] Marked event for deletion: " << key << Output::Colors::END << '\n'; 
+    }
+  }
+  deleteEvents(keysToDelete);
+}
+
+// Check if yhe Json Array contains an event with the given key
+bool containsEvent(const Json::Value& events, const std::string& key) {
+  // Confirm the object is an array
+  if(!events.isArray()) {
+    std::cerr << Output::Colors::RED << "[ONMT] JSON not a valid array!\n" << Output::Colors::END;
+  }
+
+  // Iterate through the array and check for matching key
+  for(const auto& parsedEvent : events) {
+    // Confirm we parsed a valid object
+    if(!parsedEvent.isObject() || !parsedEvent.isMember("ID")) {
+      std::cerr << Output::Colors::RED << "[ONMT] Parsed JSON not a valid object!\n" << Output::Colors::END;
+      continue;
+    }
+    // Check for a key match
+    if(parsedEvent["ID"].asString() == key)
+      return true;
+    else
+      continue;
+  }
+  return false;
+}
+
+// Delete all events with matching keys from the deletion vector
+void deleteEvents(const std::vector<std::string>& keys) {
+  for(const auto& key : keys) {
+    eventMap.erase(key);
+    std::cout << Output::Colors::RED << "[ONMT] Deleted event: " << key << Output::Colors::END << '\n'; 
+  }
 }
 
 bool getCameras() {
   // Build the request URL
   static const std::string url{ "https://511on.ca/api/v2/get/cameras?format=json&lang=en" };
-  
-  // Parse Events Data from API
-  std::string responseStr{ cURL::getData(url) };
-  if(responseStr.empty()) {
-    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve cameras JSON from Ontario 511." << Output::Colors::END << '\n';
-    return false;
-  }
-  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved cameras JSON from Ontario 511." << Output::Colors::END << '\n';
 
-  if(!parseCameras(JSON::parseData(responseStr))) {
-    std::cerr << Output::Colors::RED << "[JSON] Error parsing cameras root tree." << Output::Colors::END << '\n';
-    return false;
+  // Retrieve data from URL with cURL
+  auto [result, responseStr] = cURL::getData(url);
+  if(result == cURL::Result::SUCCESS){
+    // Make sure we received data
+    if(responseStr.empty()) {
+      std::cerr << Output::Colors::RED << "[cURL] Received empty response (no data).\n" << Output::Colors::END;
+      return false;
+    }
+    
+    std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved cameras JSON from Ontario 511.\n" << Output::Colors::END;
+    
+    // Parse Cameras from Response String
+    if(!parseCameras(JSON::parseData(responseStr))) {
+      std::cerr << Output::Colors::RED << "[JSON] Error parsing cameras root tree.\n" << Output::Colors::END;
+      return false;
+    }
+  } else {
+    // Handle the error
+    switch(result) {
+      case cURL::Result::TIMEOUT:
+        std::cerr << Output::Colors::RED << "[cURL] Timed out retrieving data from remote stream. Retrying in 10 minutes." << Output::Colors::END;
+        break;
+      default:
+        std::cerr << Output::Colors::RED << "[cURL] Critical error retrieiving data from remote stream. Terminating program." << Output::Colors::END;
+        return false;
+    }
   }
   return true;
 }
