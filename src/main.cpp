@@ -1,8 +1,7 @@
-#include "Traffic/NYSDOT.h"
-#include "Data.h"
+#include "NYSDOT.h"
+#include "DataUtils.h"
 #include "Video.h"
 #include "Output.h"
-#include <SDL2/SDL.h>
 #include <chrono>
 #include <ctime>
 #include <csignal>

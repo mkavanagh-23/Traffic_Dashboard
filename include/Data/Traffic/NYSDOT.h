@@ -1,10 +1,10 @@
 #ifndef NYSDOT_H
 #define NYSDOT_H
 
-#include "Data.h"
 #include <json/json.h>
 #include <string>
 #include <ostream>
+#include "DataUtils.h"
 
 namespace Traffic {
 /********************* NYSDOT Traffic Data (511ny.org) ************************/
