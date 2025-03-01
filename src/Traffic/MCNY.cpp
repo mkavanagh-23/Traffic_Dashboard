@@ -16,7 +16,7 @@ TrafficMap<std::string, Event> eventMap; // Key = "ID"
 
 bool getEvents() {
   // Parse Events Data from RSS feed
-  std::string responseStr{ cURL::getData(RSS_URL) };
+  auto [result, responseStr] = cURL::getData(RSS_URL);
   if(responseStr.empty()) {
     std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve XML from RSS feed." << Output::Colors::END << '\n';
     return false;

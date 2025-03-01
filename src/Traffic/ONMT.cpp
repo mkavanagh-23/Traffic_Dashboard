@@ -13,21 +13,35 @@ constexpr BoundingBox regionToronto{ -80.099, -78.509, 44.205, 43.137 };
 
 bool getEvents() {
   static const std::string url{ "https://511on.ca/api/v2/get/event?format=json&lang=en" };
-  
-  // Parse events from API
-  std::string responseStr{ cURL::getData(url) };
-  if(responseStr.empty()) {
-    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve events JSON from Ontario 511." << Output::Colors::END << '\n';
-    return false;
-  }
-  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved events JSON from Ontario 511." << Output::Colors::END << '\n';
 
-  // Test JSON parsing
-  if(!parseEvents(JSON::parseData(responseStr))) {
-    std::cerr << Output::Colors::RED << "[JSON] Error parsing events root tree." << Output::Colors::END << '\n';
-    return false; 
-  }
+  // Retrieve data from the URLm with cURL
+  auto [result, responseStr] = cURL::getData(url);
+  if(result == cURL::Result::SUCCESS) {
+    // Make sure we received data
+    if(responseStr.empty()) {
+      std::cerr << Output::Colors::RED << "[cURL] Received empty response (no data).\n" << Output::Colors::END;
+      return false;
+    }
 
+    std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved events JSON from Ontario 511.\n" << Output::Colors::END;
+
+    // Test JSON parsing
+    if(!parseEvents(JSON::parseData(responseStr))) {
+      std::cerr << Output::Colors::RED << "[JSON] Error parsing events root tree.\n" << Output::Colors::END;
+      return false; 
+    }
+
+  } else {
+    // Handle the error
+    switch(result) {
+      case cURL::Result::TIMEOUT:
+        std::cerr << Output::Colors::RED << "[cURL] Timed out retrieving data from remote stream. Retrying in 60 seconds..." << Output::Colors::END;
+        break;
+      default:
+        std::cerr << Output::Colors::RED << "[cURL] Critical error retrieiving data from remote stream. Terminating program." << Output::Colors::END;
+        return false;
+    }
+  }
   return true;
 }
 
@@ -124,18 +138,33 @@ void deleteEvents(const std::vector<std::string>& keys) {
 bool getCameras() {
   // Build the request URL
   static const std::string url{ "https://511on.ca/api/v2/get/cameras?format=json&lang=en" };
-  
-  // Parse Events Data from API
-  std::string responseStr{ cURL::getData(url) };
-  if(responseStr.empty()) {
-    std::cerr << Output::Colors::RED << "[cURL] Failed to retrieve cameras JSON from Ontario 511." << Output::Colors::END << '\n';
-    return false;
-  }
-  std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved cameras JSON from Ontario 511." << Output::Colors::END << '\n';
 
-  if(!parseCameras(JSON::parseData(responseStr))) {
-    std::cerr << Output::Colors::RED << "[JSON] Error parsing cameras root tree." << Output::Colors::END << '\n';
-    return false;
+  // Retrieve data from URL with cURL
+  auto [result, responseStr] = cURL::getData(url);
+  if(result == cURL::Result::SUCCESS){
+    // Make sure we received data
+    if(responseStr.empty()) {
+      std::cerr << Output::Colors::RED << "[cURL] Received empty response (no data).\n" << Output::Colors::END;
+      return false;
+    }
+    
+    std::cout << Output::Colors::GREEN << "[cURL] Successfully retrieved cameras JSON from Ontario 511.\n" << Output::Colors::END;
+    
+    // Parse Cameras from Response String
+    if(!parseCameras(JSON::parseData(responseStr))) {
+      std::cerr << Output::Colors::RED << "[JSON] Error parsing cameras root tree.\n" << Output::Colors::END;
+      return false;
+    }
+  } else {
+    // Handle the error
+    switch(result) {
+      case cURL::Result::TIMEOUT:
+        std::cerr << Output::Colors::RED << "[cURL] Timed out retrieving data from remote stream. Retrying in 10 minutes." << Output::Colors::END;
+        break;
+      default:
+        std::cerr << Output::Colors::RED << "[cURL] Critical error retrieiving data from remote stream. Terminating program." << Output::Colors::END;
+        return false;
+    }
   }
   return true;
 }

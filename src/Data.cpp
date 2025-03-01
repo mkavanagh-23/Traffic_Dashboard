@@ -18,33 +18,41 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* out
 }
 
 // Fetch a data string from a remote source
-std::string getData(const std::string& url) {
+std::pair<Result, std::string> getData(const std::string& url){
   CURL* curl{ curl_easy_init() };  // cURL malloc
   std::string responseData;   // Create a string to hold the data
-  
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // Set the cURL url
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // Set the write function
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);     // Set the data to write
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L); // Set a 10 second timeout
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
-    
-    // Retrieve the data
-    CURLcode res = curl_easy_perform(curl);
 
-    // Check for errors
-    if(res != CURLE_OK) {
-      std::cerr << Output::Colors::RED << "[cURL] Error retrieving data: " << curl_easy_strerror(res) << '.' << Output::Colors::END << '\n';
-    }
-    
-    // Cleanup the cURL object
-    curl_easy_cleanup(curl);
-  } 
-  else {
+  if(!curl) {
     std::cerr << Output::Colors::RED << "[cURL] Failed to initialize cURL." << Output::Colors::END << '\n';
+    return { Result::INIT_FAILED, "" };
   }
   
-  return responseData;
+  curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // Set the cURL url
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // Set the write function
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);     // Set the data to write
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L); // Set a 10 second timeout
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
+    
+  // Retrieve the data
+  CURLcode res = curl_easy_perform(curl);
+
+    // Check for errors
+  if(res != CURLE_OK) {
+    std::cerr << Output::Colors::RED << "[cURL] Error retrieving data: " << curl_easy_strerror(res) << ".\n";
+    
+    if(res == CURLE_UNSUPPORTED_PROTOCOL)
+      return { Result::UNSUPPORTED_PROTOCOL, "" };
+    else if(res == CURLE_URL_MALFORMAT)
+      return { Result::BAD_URL, "" };
+    else if(res == CURLE_OPERATION_TIMEDOUT)
+      return { Result::TIMEOUT, "" };
+    else
+      return { Result::REQUEST_FAILED, "" };
+  }
+  // Cleanup the cURL object
+  curl_easy_cleanup(curl);
+  
+  return { Result::SUCCESS, responseData };
 }
 } // namespace cURL
 
@@ -94,8 +102,8 @@ bool getEvents(){
     return false;
   if(!Ontario::getEvents())
     return false;
-  if(!MCNY::getEvents())
-    return false;
+  //if(!MCNY::getEvents())
+  //  return false;
   return true;
 }
 
