@@ -61,6 +61,8 @@ bool parseEvents(const Json::Value& events);
 bool processEvent(const Json::Value& parsedEvent);
 void cleanEvents(const Json::Value& events);
 bool containsEvent(const Json::Value& events, const std::string& key);
+bool isIncident(const Json::Value& parsedEvent);
+bool isConstruction(const Json::Value& parsedEvent);
 void deleteEvents(const std::vector<std::string>& keys);
 void printEvents();
 

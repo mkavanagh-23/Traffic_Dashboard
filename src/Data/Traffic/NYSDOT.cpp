@@ -1,6 +1,7 @@
 #include "NYSDOT.h"
 #include "DataUtils.h"
 #include "Output.h"
+#include <json/value.h>
 #include <string>
 #include <iostream>
 #include <cstdlib>
@@ -8,7 +9,6 @@
 namespace Traffic {
 /********************* NYSDOT Traffic Data (511ny.org) ************************/
 /* TODO:
- *  - Clean up events once they are cleared
  *  - Error handling - try/catch
  *  - Multithreading and loop structure - updates in the backend
  *  - Logging
@@ -18,6 +18,8 @@ namespace NYSDOT {
 
 std::string API_KEY;
 TrafficMap<std::string, Event> eventMap; // Key = "ID"
+// TODO: Do we want to create a separate map for each region???
+// Same for our camera maps
 TrafficMap<std::string, Camera> cameraMap; // Key = "ID"
 constexpr BoundingBox regionSyracuse{ -76.562, -75.606, 43.553, 42.621 };
 
@@ -83,7 +85,7 @@ bool parseEvents(const Json::Value& events){
     // Process the event for storage
     processEvent(parsedEvent);
   }
-  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed root tree.\n" << Output::Colors::END;
+  std::cout << Output::Colors::GREEN << "\n[JSON] Successfully parsed root tree.\n" << Output::Colors::END;
   // Clean up any cleared events
   cleanEvents(events);
   std::cout << "[NYSDOT] Found " << eventMap.size() << " Matching Event Records.\n";
@@ -94,7 +96,8 @@ bool parseEvents(const Json::Value& events){
 bool processEvent(const Json::Value& parsedEvent) {
   std::string key = parsedEvent["ID"].asString();
 
-  if( parsedEvent["RegionName"].asString()  == "Central Syracuse Utica Area") {
+  if(inRegion(parsedEvent) && isIncident(parsedEvent)) 
+  {
     // Try to insert a new Event at event, inserted = false if i already exists
     auto [event, inserted] = eventMap.try_emplace(key, parsedEvent);    // Access the event via structured bindings
     // Check if we added a new event
@@ -135,6 +138,29 @@ void cleanEvents(const Json::Value& events) {
     }
   }
   deleteEvents(keysToDelete);
+}
+
+// Check if an event is within region
+bool inRegion(const Json::Value& parsedEvent){
+  std::string region = parsedEvent["RegionName"].asString();
+
+  return (region == "Central Syracuse Utica Area" 
+       || region == "Finger Lakes Rochester Area" 
+       || region == "Niagara Buffalo Area" 
+       || region == "Capital Region Albany Saratoga Area" 
+       || region == "Southern Tier Homell Elmira Binghamton Area");
+}
+
+//Check if an event matches "EventType"
+bool isIncident(const Json::Value& parsedEvent){
+  return parsedEvent["EventType"].asString() == "accidentsAndIncidents";
+}
+
+bool isConstruction(const Json::Value& parsedEvent){
+  std::string type = parsedEvent["EventType"].asString();
+  return (type == "roadwork"
+       || type == "specialEvents"
+       || type == "closures");
 }
 
 // Check if the Json array contains an event with the given key
@@ -293,7 +319,8 @@ Event::Event(const Json::Value &parsedEvent)
   if(parsedEvent.find("StartDate"))
     StartDate = parsedEvent["StartDate"].asString();
 
-  std::cout << Output::Colors::YELLOW << "[NYSDOT] Constructed event: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::YELLOW << "\n[NYSDOT] Constructed event: " << ID << "  |  " << RegionName 
+            << '\n' << Output::Colors::END << Description << '\n';
 }
 
 // Define the move constructor
@@ -322,7 +349,8 @@ Event::Event(Event&& other) noexcept
   Reported(std::move(other.Reported)),
   StartDate(std::move(other.StartDate))
 {
-  std::cout << Output::Colors::BLUE << "[NYSDOT] Moved event: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::BLUE << "[NYSDOT] Moved event: " << ID  << "  |  " << RegionName
+            << '\n' << Output::Colors::END << Description << '\n';
 }
 
 // Define the move assignment operator
@@ -353,7 +381,8 @@ Event& Event::operator=(Event&& other) noexcept {
     Reported = std::move(other.Reported);
     StartDate = std::move(other.StartDate);
   }
-  std::cout << Output::Colors::BLUE << "[NYSDOT] Invoked move assignment: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::BLUE << "[NYSDOT] Invoked move assignment: " << ID << "  |  " << RegionName
+            << '\n' << Output::Colors::END << Description << '\n';
   return *this;
 }
 

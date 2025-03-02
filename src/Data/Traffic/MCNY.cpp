@@ -76,7 +76,7 @@ bool parseEvents(rapidxml::xml_document<>& xml) {
     if(event->second.getStatus().empty())
       return false;
   }
-  std::cout << Output::Colors::GREEN << "[XML] Successfully parsed root tree." << Output::Colors::END << '\n';
+  std::cout << Output::Colors::GREEN << "\n[XML] Successfully parsed root tree." << Output::Colors::END << '\n';
   cleanEvents(xml);
   std::cout << "[MCNY] Found " << eventMap.size() << " matching events.\n";
   return true;
@@ -178,7 +178,8 @@ Event::Event(const rapidxml::xml_node<> *item, const strPair &description) {
   // Second token is ID
   ID = description.second;
     
-  std::cout << Output::Colors::YELLOW << "[MCNY] Constructed event: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::YELLOW << "\n[MCNY] Constructed event: " << ID << Output::Colors::END 
+            << '\n' << Title << '\n';
 }
 
   // Move constructor
@@ -192,7 +193,8 @@ Event::Event(Event&& other) noexcept
   Latitude(other.Latitude),
   Longitude(other.Longitude)
 {
-  std::cout << Output::Colors::BLUE << "[MCNY] Moved event: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::BLUE << "\n[MCNY] Moved event: " << ID << Output::Colors::END 
+            << '\n' << Title << '\n';
 }
   
 // Move assignment operator
@@ -208,7 +210,8 @@ Event& Event::operator=(Event&& other) noexcept {
     Latitude = other.Latitude;
     Longitude = other.Longitude;
   }
-  std::cout << Output::Colors::BLUE << "[MCNY] Invoked move assignment: " << Output::Colors::END << '\n';
+  std::cout << Output::Colors::BLUE << "\n[MCNY] Invoked move assignment: " << Output::Colors::END 
+            << '\n' << Title << '\n';
   return *this;
 }
 

@@ -58,7 +58,7 @@ bool parseEvents(const Json::Value &events) {
     if(!processEvent(parsedEvent))
        return false;
   }
-  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed events root tree." << Output::Colors::END << '\n';
+  std::cout << Output::Colors::GREEN << "\n[JSON] Successfully parsed events root tree." << Output::Colors::END << '\n';
   cleanEvents(events);
   std::cout << "[ONMT] Found " << eventMap.size() << " Matching Event Records.\n";
 
@@ -70,7 +70,7 @@ bool processEvent(const Json::Value &parsedEvent) {
   auto location = std::make_pair(parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble());
 
 
-  if(regionToronto.contains(location)) {    // Check if bounding area contains the event location
+  if(regionToronto.contains(location) && isIncident(parsedEvent)) {    // Check if bounding area contains the event location
     // Try to insert a new Event at event, inserted = false if it fails
     auto [event, inserted] = eventMap.try_emplace(key, parsedEvent);
     // Check if we added a new event
@@ -125,6 +125,16 @@ bool containsEvent(const Json::Value& events, const std::string& key) {
       continue;
   }
   return false;
+}
+
+bool isIncident(const Json::Value& parsedEvent){
+  return (parsedEvent["EventType"].asString() == "accidentsAndIncidents");
+}
+
+bool isConstruction(const Json::Value& parsedEvent){
+  std::string type = parsedEvent["EventType"].asString();
+  return (type == "roadwork"
+       || type == "closures");
 }
 
 // Delete all events with matching keys from the deletion vector
@@ -247,7 +257,8 @@ Event::Event(const Json::Value& parsedEvent) {
   if(parsedEvent.find("LinkId"))
     LinkId = parsedEvent["LinkId"].asString();
 
-  std::cout << Output::Colors::YELLOW << "[ONMT] Constructed event: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::YELLOW << "\n[ONMT] Constructed event: " << ID << Output::Colors::END 
+            << '\n' << Description << '\n';
 }
 
 // Define the move constructor
@@ -275,7 +286,8 @@ Event::Event(Event&& other) noexcept
   EncodedPolyline(std::move(other.EncodedPolyline)),
   LinkId(std::move(other.LinkId))
 {
-  std::cout << Output::Colors::BLUE << "[ONMT] Moved event: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::BLUE << "[ONMT] Moved event: " << ID << Output::Colors::END
+            << '\n' << Description << '\n';
 }
   
 //Define the move assignment operator
@@ -305,7 +317,8 @@ Event& Event::operator=(Event&& other) noexcept {
     EncodedPolyline = std::move(other.EncodedPolyline);
     LinkId = std::move(other.LinkId);
   }
-  std::cout << Output::Colors::BLUE << "[ONMT] Invoked move assignment for event: " << ID << Output::Colors::END << '\n';
+  std::cout << Output::Colors::BLUE << "[ONMT] Invoked move assignment for event: " << ID << Output::Colors::END
+            << '\n' << Description << '\n';
   return *this;
 }
 
