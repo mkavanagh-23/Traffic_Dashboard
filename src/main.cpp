@@ -1,6 +1,5 @@
 #include "NYSDOT.h"
 #include "DataUtils.h"
-#include "Video.h"
 #include "Output.h"
 #include <chrono>
 #include <ctime>
@@ -49,13 +48,6 @@ int main()
   if(!Traffic::getCameras())
     return 1;
 
-  // Create a test video object from a camera URL
-  auto& [key, camera] = *Traffic::NYSDOT::cameraMap.begin();
-  Video video(camera.getURL(), VLC::Media::FromLocation);
-  video.play();
-  std::this_thread::sleep_for(std::chrono::seconds(5));
-  video.stop();
-  
 
   while(running) {
     // Get all Traffic events
