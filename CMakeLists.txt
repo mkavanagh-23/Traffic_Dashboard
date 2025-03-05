@@ -39,8 +39,8 @@ set(CMAKE_CXX_FLAGS_RELEASE
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Attempt to find system libraries first
-find_package(CURL CONFIG QUIET)
-find_package(jsoncpp CONFIG QUIET)
+find_package(CURL QUIET)
+find_package(jsoncpp QUIET)
 find_package(RapidXML QUIET)
 
 # External dependencies directory
@@ -66,12 +66,9 @@ if(NOT CURL_FOUND)
     set(BUILD_SHARED_LIBS ON CACHE BOOL "")  # Ensure shared library is built
     
     FetchContent_MakeAvailable(curl)
+else()
+    message(STATUS "libcurl found, using system version ${CURL_VERSION}")
 endif()
-
-# Explicitly find and print libcurl details
-find_package(CURL REQUIRED)
-message(STATUS "CURL Libraries: ${CURL_LIBRARIES}")
-message(STATUS "CURL Include Dirs: ${CURL_INCLUDE_DIRS}")
 
 # JsonCpp setup (only if not found in system)
 if(NOT jsoncpp_FOUND)
@@ -83,6 +80,8 @@ if(NOT jsoncpp_FOUND)
         GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(jsoncpp)
+else()
+    message(STATUS "JsonCpp found, using system version ${jsoncpp_VERSION}")
 endif()
 
 # RapidXML setup (only if not found in system, note: header-only library)
@@ -95,6 +94,8 @@ if(NOT RapidXML_FOUND)
         GIT_SHALLOW TRUE
     )
     FetchContent_MakeAvailable(rapidxml)
+else()
+    message(STATUS "RapidXML found, using system version ${RapidXML_VERSION}")
 endif()
 
 # Collect source files
