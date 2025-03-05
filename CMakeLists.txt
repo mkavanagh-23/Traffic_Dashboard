@@ -170,5 +170,5 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     $<TARGET_FILE:${PROJECT_NAME}>
     ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}
-    COMMENT "Copying executable to project root"
+    COMMENT "Copying binary to project root"
 )

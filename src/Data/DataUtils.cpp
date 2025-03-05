@@ -1,7 +1,7 @@
 #include "DataUtils.h"
-#include "NYSDOT.h"
-#include "MCNY.h"
-#include "ONMT.h"
+#include "Traffic/NYSDOT.h"
+#include "Traffic/MCNY.h"
+#include "Traffic/ONMT.h"
 #include "Output.h"
 #include <string>
 #include <iostream>
