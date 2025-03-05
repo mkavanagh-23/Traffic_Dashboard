@@ -272,51 +272,51 @@ bool processCamera(const Json::Value &parsedCamera){
 // Construct an event from a parsed Json Event
 Event::Event(const Json::Value &parsedEvent)
 {
-  if(parsedEvent.find("ID"))
+  if(parsedEvent.isMember("ID"))
     ID = parsedEvent["ID"].asString();
-  if(parsedEvent.find("RegionName"))
+  if(parsedEvent.isMember("RegionName"))
     RegionName = parsedEvent["RegionName"].asString();
-  if(parsedEvent.find("CountyName"))
+  if(parsedEvent.isMember("CountyName"))
     CountyName = parsedEvent["CountyName"].asString();
-  if(parsedEvent.find("Severity"))
+  if(parsedEvent.isMember("Severity"))
     Severity = parsedEvent["Severity"].asString();
-  if(parsedEvent.find("RoadwayName"))
+  if(parsedEvent.isMember("RoadwayName"))
    RoadwayName = parsedEvent["RoadwayName"].asString();
-  if(parsedEvent.find("DirectionOfTravel"))
+  if(parsedEvent.isMember("DirectionOfTravel"))
     DirectionOfTravel = parsedEvent["DirectionOfTravel"].asString();
-  if(parsedEvent.find("Description"))
+  if(parsedEvent.isMember("Description"))
     Description = parsedEvent["Description"].asString();
-  if(parsedEvent.find("Location"))
+  if(parsedEvent.isMember("Location"))
     Location = parsedEvent["Location"].asString();
-  if(parsedEvent.find("LanesAffected"))
+  if(parsedEvent.isMember("LanesAffected"))
     LanesAffected = parsedEvent["LanesAffected"].asString();
-  if(parsedEvent.find("LanesStatus"))
+  if(parsedEvent.isMember("LanesStatus"))
     LanesStatus = parsedEvent["LanesStatus"].asString();
-  if(parsedEvent.find("PrimaryLocation"))
+  if(parsedEvent.isMember("PrimaryLocation"))
     PrimaryLocation = parsedEvent["PrimaryLocation"].asString();
-  if(parsedEvent.find("SecondaryLocation"))
+  if(parsedEvent.isMember("SecondaryLocation"))
     SecondaryLocation = parsedEvent["SecondaryLocation"].asString();
-  if(parsedEvent.find("FirstArticleCity"))
+  if(parsedEvent.isMember("FirstArticleCity"))
     FirstArticleCity = parsedEvent["FirstArticleCity"].asString();
-  if(parsedEvent.find("SecondCity"))
+  if(parsedEvent.isMember("SecondCity"))
     SecondCity = parsedEvent["SecondCity"].asString();
-  if(parsedEvent.find("EventType"))
+  if(parsedEvent.isMember("EventType"))
     EventType = parsedEvent["EventType"].asString();
-  if(parsedEvent.find("EventSubType"))
+  if(parsedEvent.isMember("EventSubType"))
     EventSubType = parsedEvent["EventSubType"].asString();
-  if(parsedEvent.find("MapEncodedPolyline"))
+  if(parsedEvent.isMember("MapEncodedPolyline"))
     MapEncodedPolyline = parsedEvent["MapEncodedPolyline"].asString();
-  if(parsedEvent.find("LastUpdated"))
+  if(parsedEvent.isMember("LastUpdated"))
     LastUpdated = parsedEvent["LastUpdated"].asString();
-  if(parsedEvent.find("Latitude"))
+  if(parsedEvent.isMember("Latitude"))
     Latitude = parsedEvent["Latitude"].asDouble();
-  if(parsedEvent.find("Longitude"))
+  if(parsedEvent.isMember("Longitude"))
     Longitude = parsedEvent["Longitude"].asDouble();
-  if(parsedEvent.find("PlannedEndDate"))
+  if(parsedEvent.isMember("PlannedEndDate"))
     PlannedEndDate = parsedEvent["PlannedEndDate"].asString();
-  if(parsedEvent.find("Reported"))
+  if(parsedEvent.isMember("Reported"))
     Reported = parsedEvent["Reported"].asString();
-  if(parsedEvent.find("StartDate"))
+  if(parsedEvent.isMember("StartDate"))
     StartDate = parsedEvent["StartDate"].asString();
 
   std::cout << Output::Colors::YELLOW << "\n[NYSDOT] Constructed event: " << ID << "  |  " << RegionName 
@@ -403,25 +403,25 @@ std::ostream &operator<<(std::ostream &out, const Event &event) {
 /****** NYSDOT::Camera ******/
 // Construct a camera from a parsed Json object
 Camera::Camera(const Json::Value& parsedCamera) {
-  if(parsedCamera.find("ID"))
+  if(parsedCamera.isMember("ID"))
     ID = parsedCamera["ID"].asString();
-  if(parsedCamera.find("Url"))
+  if(parsedCamera.isMember("Url"))
     URL = parsedCamera["Url"].asString();
-  if(parsedCamera.find("VideoUrl"))
+  if(parsedCamera.isMember("VideoUrl"))
     VideoURL = parsedCamera["VideoUrl"].asString();
-  if(parsedCamera.find("Name"))
+  if(parsedCamera.isMember("Name"))
     Name = parsedCamera["Name"].asString();
-  if(parsedCamera.find("DirectionOfTravel"))
+  if(parsedCamera.isMember("DirectionOfTravel"))
     DirectionOfTravel = parsedCamera["DirectionOfTravel"].asString();
-  if(parsedCamera.find("RoadwayName"))
+  if(parsedCamera.isMember("RoadwayName"))
     RoadwayName = parsedCamera["RoadwayName"].asString();
-  if(parsedCamera.find("Disabled"))
+  if(parsedCamera.isMember("Disabled"))
     Disabled = parsedCamera["Disabled"].asBool();
-  if(parsedCamera.find("Blocked"))
+  if(parsedCamera.isMember("Blocked"))
     Blocked = parsedCamera["Blocked"].asBool();
-  if(parsedCamera.find("Latitude"))
+  if(parsedCamera.isMember("Latitude"))
     Latitude = parsedCamera["Latitude"].asDouble();
-  if(parsedCamera.find("Longitude"))
+  if(parsedCamera.isMember("Longitude"))
     Longitude = parsedCamera["Longitude"].asDouble();
 
   std::cout << Output::Colors::YELLOW << "[NYSDOT] Constructed camera: " << ID << " | " << VideoURL << Output::Colors::END << '\n';

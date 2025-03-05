@@ -1,90 +1,170 @@
-cmake_minimum_required(VERSION 3.16)
+# Minimum CMake version supporting modern C++ features
+cmake_minimum_required(VERSION 3.20)
 
-# Set the name for the project solution
-set(PROJECT_NAME Traffic_Dashboard)
-project(${PROJECT_NAME} VERSION 1.0.0)
+# Project name and language
+project(Traffic_Dashboard 
+    LANGUAGES CXX
+    VERSION 1.0.0
+)
 
-# Set C++ version standard 
+# Set C++ standard
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Enable CMake to generate the compile_commands.json
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# Ensure out-of-source builds
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+    message(FATAL_ERROR "In-source builds are not allowed. Please create a separate build directory.")
+endif()
 
-file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*/*.cpp" "src/*/*/*.cpp")
+# Add support for multi-configuration generators
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configs" FORCE)
 
-# Output final executable in project root
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/Debug)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR})
+# Debug-specific compiler flags
+set(CMAKE_CXX_FLAGS_DEBUG 
+    "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -g -O0" 
+    CACHE STRING "Flags used by the C++ compiler during debug builds" FORCE
+)
 
-# Create the executable target and set compilation flags
-add_executable(${PROJECT_NAME} ${SOURCES})
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
+# Release-specific compiler flags
+set(CMAKE_CXX_FLAGS_RELEASE 
+    "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -O3" 
+    CACHE STRING "Flags used by the C++ compiler during release builds" FORCE
+)
+# Include CMake module for finding packages
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# Attempt to find system libraries first
+find_package(CURL CONFIG QUIET)
+find_package(jsoncpp CONFIG QUIET)
+find_package(RapidXML QUIET)
+
+# External dependencies directory
+set(EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external")
+
+# Function to download and setup external libraries if not found
+include(FetchContent)
+set(FETCHCONTENT_QUIET OFF)
+
+# libcurl setup
+if(NOT CURL_FOUND)
+    message(STATUS "libcurl not found, will be downloaded and built")
+    FetchContent_Declare(
+        curl
+        GIT_REPOSITORY https://github.com/curl/curl.git
+        GIT_TAG curl-8_4_0  # Use a specific stable version
+        GIT_SHALLOW TRUE
+    )
+    
+    # Explicitly configure libcurl build options
+    set(BUILD_CURL_EXE OFF CACHE BOOL "")
+    set(BUILD_TESTING OFF CACHE BOOL "")
+    set(BUILD_SHARED_LIBS ON CACHE BOOL "")  # Ensure shared library is built
+    
+    FetchContent_MakeAvailable(curl)
+endif()
+
+# Explicitly find and print libcurl details
+find_package(CURL REQUIRED)
+message(STATUS "CURL Libraries: ${CURL_LIBRARIES}")
+message(STATUS "CURL Include Dirs: ${CURL_INCLUDE_DIRS}")
+
+# JsonCpp setup
+if(NOT jsoncpp_FOUND)
+    message(STATUS "JsonCpp not found, will be downloaded and built")
+    FetchContent_Declare(
+        jsoncpp
+        GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp.git
+        GIT_TAG 1.9.5  # Use a stable version
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(jsoncpp)
+endif()
+
+# RapidXML setup (note: header-only library)
+if(NOT RapidXML_FOUND)
+    message(STATUS "RapidXML not found, will be downloaded")
+    FetchContent_Declare(
+        rapidxml
+        GIT_REPOSITORY https://github.com/discord/rapidxml.git
+        GIT_TAG master
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(rapidxml)
+endif()
+
+# Collect source files
+file(GLOB_RECURSE SOURCES 
+    "${CMAKE_SOURCE_DIR}/src/*.cpp"
+)
+
+# Collect header files
+file(GLOB_RECURSE HEADERS
+    "${CMAKE_SOURCE_DIR}/include/*.h"
+    "${CMAKE_SOURCE_DIR}/include/*.hpp"
+)
+
+# Create executable
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+
+# Determine include paths for each library
+if(CURL_FOUND)
+    set(CURL_INCLUDE_DIRS "${CURL_INCLUDE_DIR}")
+else()
+    set(CURL_INCLUDE_DIRS "${curl_SOURCE_DIR}/include")
+endif()
+
+if(JSONCPP_FOUND)
+    set(JSONCPP_INCLUDE_DIRS "${JSONCPP_INCLUDE_DIR}")
+else()
+    set(JSONCPP_INCLUDE_DIRS "${jsoncpp_SOURCE_DIR}/include")
+endif()
+
+if(RapidXML_FOUND)
+    set(RAPIDXML_INCLUDE_DIRS "${RAPIDXML_INCLUDE_DIR}")
+else()
+    set(RAPIDXML_INCLUDE_DIRS "${rapidxml_SOURCE_DIR}")  # RapidXML is typically header-only
+endif()
 
 # Include directories
-target_include_directories(${PROJECT_NAME}
-  PRIVATE ${PROJECT_SOURCE_DIR}/include
-  PRIVATE ${PROJECT_SOURCE_DIR}/include/Data
-  PRIVATE ${PROJECT_SOURCE_DIR}/include/Data/Traffic
-  PRIVATE ${PROJECT_SOURCE_DIR}/external/videolan/libvlcpp
-  PRIVATE ${PROJECT_SOURCE_DIR}/external/rapidxml
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/include/Data
+    ${CMAKE_SOURCE_DIR}/include/Data/Traffic
+    ${CURL_INCLUDE_DIRS}
+    ${JSONCPP_INCLUDE_DIRS}
+    ${RAPIDXML_INCLUDE_DIRS}
 )
 
-# Add third-party libraries
-add_subdirectory(external/sdl2)
-add_subdirectory(external/curl)
-add_subdirectory(external/jsoncpp)
-
-# Find and link system libraries
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBVLC REQUIRED libvlc)
-target_include_directories(${PROJECT_NAME} PRIVATE ${LIBVLC_INCLUDE_DIRS})
+# Link libraries
 target_link_libraries(${PROJECT_NAME} 
-  PRIVATE ${LIBVLC_LIBRARIES}
-  PRIVATE SDL2
-  PRIVATE CURL::libcurl
-  PRIVATE jsoncpp
+    PRIVATE
+    libcurl
+    ${CURL_LIBRARIES}      # Use system libcurl if found
+    jsoncpp_lib            # JsonCpp library
+    ${RAPIDXML_LIBRARIES}  # RapidXML (usually header-only)
 )
 
-# Set rpath for SDL2 libraries on macOS
-set(CMAKE_INSTALL_RPATH "@executable_path")
-# For SDL2_image (or other libraries), you might also want to add it
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-# Link SDL2main if building for Windows
-if(WIN32)
-  target_link_libraries(
-    ${PROJECT_NAME} PRIVATE SDL2main
-  )
+# Platform-specific configurations
+if(MSVC)
+    # Microsoft Visual C++
+    target_compile_options(${PROJECT_NAME} PRIVATE /W4)
+elseif(CMAKE_COMPILER_IS_GNUCXX)
+    # GCC
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Werror)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    # Clang
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
 endif()
 
-# Copy runtime DLLs to the output directory for dynamic libraries
-if(TARGET SDL2)
-  add_custom_command(
-    TARGET ${PROJECT_NAME} POST_BUILD COMMAND
-    ${CMAKE_COMMAND} -E copy_if_different
-      "$<TARGET_FILE:SDL2>"
-      "$<TARGET_FILE_DIR:Traffic_Dashboard>"
-    VERBATIM
-  )
-endif()
+# If run with -install, install to system binary dir
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
-if(TARGET CURL::libcurl)
-  add_custom_command(
-    TARGET ${PROJECT_NAME} POST_BUILD COMMAND
-    ${CMAKE_COMMAND} -E copy_if_different
-      "$<TARGET_FILE:CURL::libcurl>"
-      "$<TARGET_FILE_DIR:Traffic_Dashboard>"
-    VERBATIM
-  )
-endif()
-
-if(TARGET jsoncpp)
-  add_custom_command(
-    TARGET ${PROJECT_NAME} POST_BUILD COMMAND
-    ${CMAKE_COMMAND} -E copy_if_different
-      "$<TARGET_FILE:jsoncpp>"
-      "$<TARGET_FILE_DIR:Traffic_Dashboard>"
-    VERBATIM
-  )
-endif()
+# Copy executable to project root after build
+add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:${PROJECT_NAME}>
+    ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}
+    COMMENT "Copying executable to project root"
+)
