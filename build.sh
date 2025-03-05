@@ -40,13 +40,16 @@ build_release() {
 case "$BUILD_TYPE" in
     debug)
         build_debug
+        cp build/debug/compile_commands.json build/
         ;;
     release)
         build_release
+        cp build/release/compile_commands.json build/
         ;;
     all)
         build_debug
         build_release
+        cp build/debug/compile_commands.json build/
         ;;
     *)
         usage
