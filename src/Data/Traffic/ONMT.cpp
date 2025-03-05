@@ -212,49 +212,49 @@ bool processCamera(const Json::Value &parsedCamera) {
 /******* Ontario MT Events *********/
 // Construct an event from a parsed Json object
 Event::Event(const Json::Value& parsedEvent) {
-  if(parsedEvent.find("ID"))
+  if(parsedEvent.isMember("ID"))
     ID = parsedEvent["ID"].asString();
-  if(parsedEvent.find("Organization"))
+  if(parsedEvent.isMember("Organization"))
     Organization = parsedEvent["Organization"].asString();
-  if(parsedEvent.find("RoadwayName"))
+  if(parsedEvent.isMember("RoadwayName"))
     RoadwayName = parsedEvent["RoadwayName"].asString();
-  if(parsedEvent.find("DirectionOfTravel"))
+  if(parsedEvent.isMember("DirectionOfTravel"))
      DirectionOfTravel = parsedEvent["DirectionOfTravel"].asString();
-  if(parsedEvent.find("Description"))
+  if(parsedEvent.isMember("Description"))
     Description = parsedEvent["Description"].asString();
-  if(parsedEvent.find("Reported"))
+  if(parsedEvent.isMember("Reported"))
     Reported = parsedEvent["Reported"].asInt();
-  if(parsedEvent.find("LastUpdated"))
+  if(parsedEvent.isMember("LastUpdated"))
     LastUpdated = parsedEvent["LastUpdated"].asInt();
-  if(parsedEvent.find("StartDate"))
+  if(parsedEvent.isMember("StartDate"))
     StartDate = parsedEvent["StartDate"].asInt();
-  if(parsedEvent.find("PlannedEndDate"))
+  if(parsedEvent.isMember("PlannedEndDate"))
     PlannedEndDate = parsedEvent["PlannedEndDate"].asInt();
-  if(parsedEvent.find("LanesAffected"))
+  if(parsedEvent.isMember("LanesAffected"))
     LanesAffected = parsedEvent["LanesAffected"].asString();
-  if(parsedEvent.find("Latitude"))
+  if(parsedEvent.isMember("Latitude"))
     Latitude = parsedEvent["Latitude"].asDouble();
-  if(parsedEvent.find("Longitude"))
+  if(parsedEvent.isMember("Longitude"))
     Longitude = parsedEvent["Longitude"].asDouble();
-  if(parsedEvent.find("LatitudeSecondary"))
+  if(parsedEvent.isMember("LatitudeSecondary"))
     LatitudeSecondary = parsedEvent["LatitudeSecondary"].asDouble();
-  if(parsedEvent.find("LongitudeSecondary"))
+  if(parsedEvent.isMember("LongitudeSecondary"))
     LongitudeSecondary = parsedEvent["LongitudeSecondary"].asDouble();
-  if(parsedEvent.find("EventType"))
+  if(parsedEvent.isMember("EventType"))
     EventType = parsedEvent["EventType"].asString();
-  if(parsedEvent.find("IsFullClosure"))
+  if(parsedEvent.isMember("IsFullClosure"))
     IsFullClosure = parsedEvent["IsFullClosure"].asBool();
-  if(parsedEvent.find("Comment"))
+  if(parsedEvent.isMember("Comment"))
     Comment = parsedEvent["Comment"].asString();
-  if(parsedEvent.find("Recurrence"))
+  if(parsedEvent.isMember("Recurrence"))
     Recurrence = parsedEvent["Recurrence"].asString();
-  if(parsedEvent.find("RecurrenceSchedules"))
+  if(parsedEvent.isMember("RecurrenceSchedules"))
     RecurrenceSchedules = parsedEvent["RecurrenceSchedules"].asString();
-  if(parsedEvent.find("EventSubType"))
+  if(parsedEvent.isMember("EventSubType"))
     EventSubType = parsedEvent["EventSubType"].asString();
-  if(parsedEvent.find("EncodedPolyline"))
+  if(parsedEvent.isMember("EncodedPolyline"))
     EncodedPolyline = parsedEvent["EncodedPolyline"].asString();
-  if(parsedEvent.find("LinkId"))
+  if(parsedEvent.isMember("LinkId"))
     LinkId = parsedEvent["LinkId"].asString();
 
   std::cout << Output::Colors::YELLOW << "\n[ONMT] Constructed event: " << ID << Output::Colors::END 
@@ -334,23 +334,23 @@ std::ostream &operator<<(std::ostream &out, const Event &event) {
 /******* Ontario MT Cameras *********/
 // Construct a camera from a parsed Json object
 Camera::Camera(const Json::Value& parsedCamera) {
-  if(parsedCamera.find("Id"))
+  if(parsedCamera.isMember("Id"))
     ID = parsedCamera["Id"].asInt();
-  if(parsedCamera.find("Source"))
+  if(parsedCamera.isMember("Source"))
     Source = parsedCamera["Source"].asString();
-  if(parsedCamera.find("SourceId"))
+  if(parsedCamera.isMember("SourceId"))
     SourceID = parsedCamera["SourceId"].asString();
-  if(parsedCamera.find("Roadway"))
+  if(parsedCamera.isMember("Roadway"))
     Roadway = parsedCamera["Roadway"].asString();
-  if(parsedCamera.find("Direction"))
+  if(parsedCamera.isMember("Direction"))
     Direction = parsedCamera["Direction"].asString();
-  if(parsedCamera.find("Latitude"))
+  if(parsedCamera.isMember("Latitude"))
     Latitude = parsedCamera["Latitude"].asDouble();
-  if(parsedCamera.find("Longitude"))
+  if(parsedCamera.isMember("Longitude"))
     Longitude = parsedCamera["Longitude"].asDouble();
-  if(parsedCamera.find("Location"))
+  if(parsedCamera.isMember("Location"))
     Location = parsedCamera["Location"].asString();
-  if(parsedCamera.find("Views")){
+  if(parsedCamera.isMember("Views")){
     // Construct a CameraView object and push it on a vector of views
     const Json::Value views = parsedCamera["Views"];
     for (const auto& view : views){
@@ -392,13 +392,13 @@ Camera& Camera::operator=(Camera&& other) noexcept {
 }
 
 CameraView::CameraView(const Json::Value& parsedView) {
-  if(parsedView.find("Id"))
+  if(parsedView.isMember("Id"))
     ID = parsedView["Id"].asInt();
-  if(parsedView.find("Url"))
+  if(parsedView.isMember("Url"))
     URL = parsedView["Url"].asString();
-  if(parsedView.find("Status"))
+  if(parsedView.isMember("Status"))
     Status = parsedView["Status"].asString();
-  if(parsedView.find("Description"))
+  if(parsedView.isMember("Description"))
     Description = parsedView["Description"].asString();
 }
 } // namespace Ontario
