@@ -42,6 +42,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 find_package(CURL QUIET)
 find_package(jsoncpp QUIET)
 find_package(RapidXML QUIET)
+find_package(Poco COMPONENTS Net QUIET)
 
 # External dependencies directory
 set(EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external")
@@ -98,6 +99,40 @@ else()
     message(STATUS "RapidXML found, using system version ${RapidXML_VERSION}")
 endif()
 
+# Function to download and setup Poco libraries if not found
+if(NOT Poco_FOUND)
+    message(STATUS "Poco libraries not found, will be downloaded and built")
+    FetchContent_Declare(
+        poco
+        GIT_REPOSITORY https://github.com/pocoproject/poco.git
+        GIT_TAG poco-1.13.3-release  # Use a stable recent version
+        GIT_SHALLOW TRUE
+    )
+    
+    # Poco-specific build configuration
+    set(POCO_STATIC OFF CACHE BOOL "Build Poco as shared libraries")
+    set(POCO_BUILD_TESTS OFF CACHE BOOL "Disable Poco tests")
+    set(POCO_BUILD_SAMPLES OFF CACHE BOOL "Disable Poco samples")
+    
+    # Only build the components we need
+    set(ENABLE_NETSSL OFF CACHE BOOL "")
+    set(ENABLE_CRYPTO OFF CACHE BOOL "")
+    set(ENABLE_DATA OFF CACHE BOOL "")
+    set(ENABLE_MONGODB OFF CACHE BOOL "")
+    set(ENABLE_POSTGRESQL OFF CACHE BOOL "")
+    set(ENABLE_MYSQL OFF CACHE BOOL "")
+    set(ENABLE_SQLITE OFF CACHE BOOL "")
+    set(ENABLE_REDIS OFF CACHE BOOL "")
+    set(ENABLE_PDF OFF CACHE BOOL "")
+    set(ENABLE_UTIL ON CACHE BOOL "")
+    set(ENABLE_NET ON CACHE BOOL "")
+    
+    FetchContent_MakeAvailable(poco)
+else()
+    message(STATUS "Poco libraries found, using system version ${Poco_VERSION}")
+endif()
+
+
 # Collect source files
 file(GLOB_RECURSE SOURCES 
     "${CMAKE_SOURCE_DIR}/src/*.cpp"
@@ -131,6 +166,15 @@ else()
     set(RAPIDXML_INCLUDE_DIRS "${rapidxml_SOURCE_DIR}")  # RapidXML is typically header-only
 endif()
 
+if(Poco_FOUND)
+    set(POCO_INCLUDE_DIRS "${Poco_INCLUDE_DIRS}")
+else()
+    set(POCO_INCLUDE_DIRS 
+        "${poco_SOURCE_DIR}/Net/include" 
+        "${poco_SOURCE_DIR}/Foundation/include"
+    )
+endif()
+
 # Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/include
@@ -139,15 +183,29 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CURL_INCLUDE_DIRS}
     ${JSONCPP_INCLUDE_DIRS}
     ${RAPIDXML_INCLUDE_DIRS}
+    ${POCO_INCLUDE_DIRS}
 )
 
 # Link libraries (prefer system libraries if found, otherwise link built ones)
-target_link_libraries(${PROJECT_NAME} 
-    PRIVATE
-    ${CURL_LIBRARIES}      # Use system libcurl if found
-    jsoncpp_lib            # JsonCpp library (system or built)
-    ${RAPIDXML_LIBRARIES}  # RapidXML (usually header-only)
-)
+if(Poco_FOUND)
+  target_link_libraries(${PROJECT_NAME} 
+      PRIVATE
+      ${CURL_LIBRARIES}      # Use system libcurl if found
+      jsoncpp_lib            # JsonCpp library (system or built)
+      ${RAPIDXML_LIBRARIES}  # RapidXML (usually header-only)
+      ${POCO_LIBRARIES}  # System libraries if found
+  )
+else()
+    # Use the built Poco libraries with exact target names
+    target_link_libraries(${PROJECT_NAME} 
+        PRIVATE
+        ${CURL_LIBRARIES}
+        jsoncpp_lib
+        ${RAPIDXML_LIBRARIES}
+        Poco::Net
+        Poco::Foundation
+    )
+endif()
 
 # Platform-specific configurations
 if(MSVC)
