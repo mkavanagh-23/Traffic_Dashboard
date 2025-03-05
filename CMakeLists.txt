@@ -34,6 +34,7 @@ set(CMAKE_CXX_FLAGS_RELEASE
     "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -O3" 
     CACHE STRING "Flags used by the C++ compiler during release builds" FORCE
 )
+
 # Include CMake module for finding packages
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -49,7 +50,7 @@ set(EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external")
 include(FetchContent)
 set(FETCHCONTENT_QUIET OFF)
 
-# libcurl setup
+# libcurl setup (only if not found in system)
 if(NOT CURL_FOUND)
     message(STATUS "libcurl not found, will be downloaded and built")
     FetchContent_Declare(
@@ -72,7 +73,7 @@ find_package(CURL REQUIRED)
 message(STATUS "CURL Libraries: ${CURL_LIBRARIES}")
 message(STATUS "CURL Include Dirs: ${CURL_INCLUDE_DIRS}")
 
-# JsonCpp setup
+# JsonCpp setup (only if not found in system)
 if(NOT jsoncpp_FOUND)
     message(STATUS "JsonCpp not found, will be downloaded and built")
     FetchContent_Declare(
@@ -84,7 +85,7 @@ if(NOT jsoncpp_FOUND)
     FetchContent_MakeAvailable(jsoncpp)
 endif()
 
-# RapidXML setup (note: header-only library)
+# RapidXML setup (only if not found in system, note: header-only library)
 if(NOT RapidXML_FOUND)
     message(STATUS "RapidXML not found, will be downloaded")
     FetchContent_Declare(
@@ -139,12 +140,11 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${RAPIDXML_INCLUDE_DIRS}
 )
 
-# Link libraries
+# Link libraries (prefer system libraries if found, otherwise link built ones)
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE
-    libcurl
     ${CURL_LIBRARIES}      # Use system libcurl if found
-    jsoncpp_lib            # JsonCpp library
+    jsoncpp_lib            # JsonCpp library (system or built)
     ${RAPIDXML_LIBRARIES}  # RapidXML (usually header-only)
 )
 
