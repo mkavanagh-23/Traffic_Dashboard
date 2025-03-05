@@ -128,16 +128,16 @@ bool containsEvent(const Json::Value& events, const std::string& key) {
 }
 
 bool isIncident(const Json::Value& parsedEvent){
-  return (parsedEvent["EventType"].asString() == "accidentsAndIncidents");
-}
-
-bool isConstruction(const Json::Value& parsedEvent){
   std::string type = parsedEvent["EventType"].asString();
-  return (type == "roadwork"
+  return (type == "accidentsAndIncidents"
        || type == "closures");
 }
 
-// Delete all events with matching keys from the deletion vector
+bool isConstruction(const Json::Value& parsedEvent){
+  return parsedEvent["EventType"].asString() == "roadwork";
+}
+
+// Delete all events with matching keys from. the deletion vector
 void deleteEvents(const std::vector<std::string>& keys) {
   for(const auto& key : keys) {
     eventMap.erase(key);
