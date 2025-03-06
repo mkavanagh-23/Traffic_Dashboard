@@ -1,6 +1,7 @@
 #include "Traffic/NYSDOT.h"
 #include "DataUtils.h"
 #include "Output.h"
+#include "Data/RestAPI.h"
 #include <ctime>
 #include <csignal>
 #include <cstdlib>
@@ -24,7 +25,8 @@
  *  Create a dynamic graphical interface
  */
 
-int main() {
+int main(int argc, char* argv[]) {
+
   // Source API key from ENV
   // TODO: Will be placed in global Setup() function
   if(!Traffic::NYSDOT::getEnv())
@@ -42,6 +44,10 @@ int main() {
     return 1;
   auto time = Output::currentTime();
   std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << '\n' << std::endl;
+
+  // Create and start the API server
+  RestAPI::ServerApp restServer;
+  return restServer.run(argc, argv);
 
   return 0;
 }
