@@ -1,14 +1,11 @@
 #include "Traffic/NYSDOT.h"
 #include "DataUtils.h"
 #include "Output.h"
-#include <chrono>
 #include <ctime>
 #include <csignal>
-#include <atomic>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
-#include <thread>
 
 #ifdef _WIN32
 #define JSON_DLL
@@ -27,18 +24,7 @@
  *  Create a dynamic graphical interface
  */
 
-std::atomic<bool> running(true);
-
-void signalHandler(int signum) {
-  std::cout << "\nInterrupt signal received (" << signum << "). Terminating program...\n";
-  running = false;
-}
-
-int main()
-{
-  // Register signal handler
-  signal(SIGINT, signalHandler);
-
+int main() {
   // Source API key from ENV
   // TODO: Will be placed in global Setup() function
   if(!Traffic::NYSDOT::getEnv())
@@ -49,14 +35,13 @@ int main()
     return 1;
 
 
-  while(running) {
-    // Get all Traffic events
-    if(!Traffic::getEvents())
-      return 1;
-    auto time = Output::currentTime();
-    std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << '\n' << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(60));
-  }
+  // Get all Traffic events
+  // TODO: Asynchronously call this in a loop in its own thread
+  // We want this to be spun off into a bg thread while the REST server runs in main
+  if(!Traffic::getEvents())
+    return 1;
+  auto time = Output::currentTime();
+  std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << '\n' << std::endl;
 
   return 0;
 }
