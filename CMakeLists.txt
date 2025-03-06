@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 
 # Project name and language
 project(Traffic_Dashboard 
-    LANGUAGES CXX
+    LANGUAGES C CXX
     VERSION 1.0.0
 )
 
@@ -42,7 +42,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 find_package(CURL QUIET)
 find_package(jsoncpp QUIET)
 find_package(RapidXML QUIET)
-find_package(Poco COMPONENTS Net QUIET)
+find_package(Poco COMPONENTS Net Foundation Util QUIET)
 
 # External dependencies directory
 set(EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external")
@@ -124,7 +124,7 @@ if(NOT Poco_FOUND)
     set(ENABLE_SQLITE OFF CACHE BOOL "")
     set(ENABLE_REDIS OFF CACHE BOOL "")
     set(ENABLE_PDF OFF CACHE BOOL "")
-    set(ENABLE_UTIL ON CACHE BOOL "")
+    set(ENABLE_UTIL ON CACHE BOOL "") # Make sure Util is enabled
     set(ENABLE_NET ON CACHE BOOL "")
     
     FetchContent_MakeAvailable(poco)
@@ -172,6 +172,7 @@ else()
     set(POCO_INCLUDE_DIRS 
         "${poco_SOURCE_DIR}/Net/include" 
         "${poco_SOURCE_DIR}/Foundation/include"
+        "${poco_SOURCE_DIR}/Util/include"
     )
 endif()
 
@@ -187,25 +188,35 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 )
 
 # Link libraries (prefer system libraries if found, otherwise link built ones)
-if(Poco_FOUND)
-  target_link_libraries(${PROJECT_NAME} 
-      PRIVATE
-      ${CURL_LIBRARIES}      # Use system libcurl if found
-      jsoncpp_lib            # JsonCpp library (system or built)
-      ${RAPIDXML_LIBRARIES}  # RapidXML (usually header-only)
-      ${POCO_LIBRARIES}  # System libraries if found
-  )
-else()
-    # Use the built Poco libraries with exact target names
-    target_link_libraries(${PROJECT_NAME} 
-        PRIVATE
-        ${CURL_LIBRARIES}
-        jsoncpp_lib
-        ${RAPIDXML_LIBRARIES}
-        Poco::Net
-        Poco::Foundation
-    )
-endif()
+# if(Poco_FOUND)
+#   target_link_libraries(${PROJECT_NAME} 
+#       PRIVATE
+#       ${CURL_LIBRARIES}      # Use system libcurl if found
+#       jsoncpp_lib            # JsonCpp library (system or built)
+#       ${RAPIDXML_LIBRARIES}  # RapidXML (usually header-only)
+#       ${POCO_LIBRARIES}      # System libraries if found
+#   )
+# else()
+#     # Use the built Poco libraries with exact target names
+#     target_link_libraries(${PROJECT_NAME} 
+#         PRIVATE
+#         ${CURL_LIBRARIES}
+#         jsoncpp_lib
+#         ${RAPIDXML_LIBRARIES}
+#         Poco::Net
+#         Poco::Foundation
+#         Poco::Util
+#     )
+# endif()
+target_link_libraries(${PROJECT_NAME} 
+    PRIVATE
+    ${CURL_LIBRARIES}
+    jsoncpp_lib
+    ${RAPIDXML_LIBRARIES}
+    Poco::Net
+    Poco::Foundation
+    Poco::Util
+)
 
 # Platform-specific configurations
 if(MSVC)
