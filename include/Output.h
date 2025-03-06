@@ -6,13 +6,13 @@
 
 namespace Output {
 namespace Colors {
-  constexpr std::string RED = "\033[31m";
-  constexpr std::string GREEN = "\033[32m";
-  constexpr std::string YELLOW = "\033[33m";
-  constexpr std::string BLUE = "\033[34m";
-  constexpr std::string MAGENTA = "\033[35m";
-  constexpr std::string CYAN = "\033[36m";
-  constexpr std::string END = "\033[0m";
+  const std::string RED = "\033[31m";
+  const std::string GREEN = "\033[32m";
+  const std::string YELLOW = "\033[33m";
+  const std::string BLUE = "\033[34m";
+  const std::string MAGENTA = "\033[35m";
+  const std::string CYAN = "\033[36m";
+  const std::string END = "\033[0m";
 }
 
 std::time_t currentTime();
