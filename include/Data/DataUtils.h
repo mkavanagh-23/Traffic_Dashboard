@@ -1,9 +1,11 @@
 #ifndef DATA_H
 #define DATA_H
 
-#include <string>
 #include <json/json.h>
 #include <rapidxml.hpp>
+#include <string>
+#include <vector>
+#include <tuple>
 #include <unordered_map>
 
 // This file holds all functionality for retrieving and filtering basic data from CURL in XML and JSON formats
@@ -19,8 +21,15 @@ enum class Result {
   REQUEST_FAILED
 };
 
+// Callback function for writing the header data
+size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata);
+// Callback function for writing the result data
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output);
-std::pair<Result, std::string> getData(const std::string& url);
+// Fetch and process data from remote url (Result, Data, Headers)
+std::tuple<Result, std::string, std::vector<std::string>> getData(const std::string& url);
+// Extract the content type from the response headers
+std::string getContentType(const std::vector<std::string>& headers);
+
 } // namespace cURL
 
 namespace JSON {

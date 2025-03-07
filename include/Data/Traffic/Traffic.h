@@ -6,6 +6,7 @@
 // std::optional??, or at least think about how to handle null values and/or default types
 #include "DataUtils.h"
 #include <json/json.h>
+#include <rapidxml.hpp>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -48,6 +49,9 @@ public:
   std::string_view getStream() const { return videoURL; }
 };
 
+// Get cameras from all sources
+void getCameras(std::string url);
+
 class Event {
 private:
   std::string ID;
@@ -65,6 +69,7 @@ private:
 public:
   // Constructors
   Event(const Json::Value& parsedEvent);
+  Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &description);
   Event(Event&& other) noexcept;
   Event& operator=(Event&& other) noexcept;
 
@@ -76,6 +81,9 @@ public:
   std::string_view getDescription() const { return description; }
   const std::vector<Camera>& getCameras() const { return cameras; } // Return by const reference, ensure no dangling references!!!
 };
+
+// Get events from all sources
+void getEvents(std::string url);
 
 }
 
