@@ -52,4 +52,9 @@ bool getEvents();
 bool getCameras();
 }
 
+struct Location {
+  double latitude;
+  double longitude;
+};
+
 #endif

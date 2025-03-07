@@ -26,6 +26,13 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
     Poco::Net::HTTPResponse::HTTPStatus status = Poco::Net::HTTPResponse::HTTP_OK;
     std::string endpoint = request.getURI();
 
+
+    // TODO: Add query handling:
+    // Potential filter keys: region, online, updated, etc...
+    // Endpoints should be modified so that we have a cameras and an events endpoint, the rest should be handled via query params
+    // This means we need to create a global structure for event objects
+    // This may involve some further processing of string values to get data types where we want them.
+
     if(endpoint == "/nysdot/events") {
       // Serialize and output events here
       output = "NYSDOT Events";
