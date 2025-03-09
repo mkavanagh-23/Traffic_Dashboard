@@ -111,7 +111,7 @@ bool processData(std::string& data, std::vector<std::string>& headers) {
   if(contentType.find("application/json") != std::string::npos) {
     auto parsedData = JSON::parseData(data);  // Returns a Json::Value object
     parseEvents(parsedData);
-  } else if(contentType.find("application/xml") != std::string::npos) {
+  } else if(contentType.find("text/xml") != std::string::npos) {
     auto parsedData = XML::parseData(data);  // Returns a unique_ptr to an xml_document<> into the responseStr
     // Check for parsing success
     if(!parsedData) {
