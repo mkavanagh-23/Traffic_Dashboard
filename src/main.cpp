@@ -1,9 +1,7 @@
-#include "Traffic/NYSDOT.h"
-#include "DataUtils.h"
 #include "Output.h"
 #include "Data/RestAPI.h"
+#include "Traffic.h"
 #include <ctime>
-#include <csignal>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
@@ -27,21 +25,14 @@
 
 int main(int argc, char* argv[]) {
 
-  // Source API key from ENV
-  // TODO: Will be placed in global Setup() function
-  if(!Traffic::NYSDOT::getEnv())
-    return 1;
 
   // Get cameras
-  if(!Traffic::getCameras())
-    return 1;
 
 
   // Get all Traffic events
   // TODO: Asynchronously call this in a loop in its own thread
   // We want this to be spun off into a bg thread while the REST server runs in main
-  if(!Traffic::getEvents())
-    return 1;
+  Traffic::fetchEvents();
   auto time = Output::currentTime();
   std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << '\n' << std::endl;
 

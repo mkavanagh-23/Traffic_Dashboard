@@ -1,19 +1,16 @@
 #include "DataUtils.h"
-#include "Traffic/NYSDOT.h"
-#include "Traffic/MCNY.h"
-#include "Traffic/ONMT.h"
 #include "Output.h"
+#include <ctime>
+#include <memory>
 #include <string>
 #include <vector>
 #include <tuple>
 #include <iostream>
+#include <regex>
+#include <chrono>
 #include <curl/curl.h>
 #include <json/json.h>
 #include <rapidxml.hpp>
-
-// TODO:
-// Refactor XML parsing to create and return an XML document object rather than take it in by reference
-// This will allow us to better maintain DRY principles
 
 namespace cURL {
 
@@ -110,26 +107,35 @@ Json::Value parseData(const std::string& jsonData) {
   // Parse the string into the root Value object
   if(!Json::parseFromStream(builder, data, &root, &errs)) {
     // If initial parsing fails, send an error message
-    std::cerr << Output::Colors::RED << "[JSON] Error parsing JSON (is it a valid stream?): " << errs << '.' << Output::Colors::END << '\n';
+    std::cerr << Output::Colors::RED << "[JSON] Error parsing JSON (is it a valid stream?): " << errs 
+              << '.' << Output::Colors::END << '\n';
     // TODO: Throw an exception if we do not parse from stream
     // Should also throw an exception in the underlying/preceding curl function
   }
-  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed objects from JSON stream." << Output::Colors::END << '\n';
+  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed objects from JSON stream." 
+            << Output::Colors::END << '\n';
   return root; // Return the parsed root of objects
 }
 } // namespace JSON
 
 namespace XML {
 // Parse events from an XML data stream
-void parseData(rapidxml::xml_document<>& document, std::string xmlData) {
-  // Parse the XML into a document object
-  document.parse<0>(&xmlData[0]);
+// NOTE: Use a unique ptr to ensure proper memory manegement here
+// WARNING: The caller must ensure that xmlData remains valid for the lifetime of 
+// the returned object as rapidxml does not copy the string but rather parses pointers 
+// into the data string. Since the data is created at the start of the calling function,
+// we should make sure parsedData remains scoped within it.
+std::unique_ptr<rapidxml::xml_document<>> parseData(std::string& xmlData) {
+  // Set up XML document object to hold the parsed data
+  auto parsedData = std::make_unique<rapidxml::xml_document<>>();
+  parsedData->parse<0>(xmlData.data());
+  return parsedData;
 }
 
 } // namespace XML
 
 namespace Traffic {
-bool BoundingBox::contains(const std::pair<double, double>& coordinate) const {
+bool BoundingBox::contains(const Location& coordinate) const {
   auto& [latitude, longitude] = coordinate;
   if((latitude >= latBottom && latitude <= latTop) && (longitude >= longLeft && longitude <= longRight))
     return true;
@@ -137,23 +143,132 @@ bool BoundingBox::contains(const std::pair<double, double>& coordinate) const {
   return false;
 }
 
-// Get all traffic events
-bool getEvents(){
-  // Test event parsing
-  if(!NYSDOT::getEvents())
-    return false;
-  if(!Ontario::getEvents())
-    return false;
-  if(!MCNY::getEvents())
-    return false;
-  return true;
+std::ostream &operator<<(std::ostream &out, const Location &location) {
+  out << "Coordinate [ " << location.latitude << ", " << location.longitude << " ]";
+  return out;
+}
+} // namespace Traffic
+
+namespace Time {
+using namespace std::chrono;
+
+// Create a local formatted time string for printing from a time point object
+std::tm toLocalPrint(const system_clock::time_point& time) {
+  auto utcTime = system_clock::to_time_t(time);
+  return *std::localtime(&utcTime);
 }
 
-bool getCameras(){
-  if(!NYSDOT::getCameras())
-    return false;
-  if(!Ontario::getCameras())
-    return false;
-  return true;
+// Convert a local timepoint to UTC
+void toUTC(system_clock::time_point& timePoint, const std::string& offset) {
+  int offsetHours = std::stoi(offset.substr(0, 3));
+  int offsetMinutes = std::stoi(offset.substr(3, 2)) * (offsetHours < 0 ? -1 : 1);
+  timePoint -= (hours(offsetHours) + minutes(offsetMinutes));
 }
+
+namespace UNIX {
+
+system_clock::time_point toChrono(const int unixtime, std::optional<std::string> offset) {
+  // Convert the given time into seconds since epoch
+  seconds sinceEpoch(unixtime);
+  // Create a seconds timepoint
+  sys_seconds tp = sys_seconds{ sinceEpoch };
+  // Convert to a system time point
+  system_clock::time_point timePoint = time_point_cast<system_clock::duration>(tp);
+  // Apply TZ offset if provided
+  if(offset.has_value())
+    toUTC(timePoint, offset.value());
+  return timePoint;
 }
+
+} // namespace UNIX
+
+
+namespace RFC2822 {
+
+int stoiMonth3(const std::string& month) {
+  if(month == "Jan")
+    return 1;
+  if(month == "Feb")
+    return 2;
+  if(month == "Mar")
+    return 3;
+  if(month == "Apr")
+    return 4;
+  if(month == "May")
+    return 5;
+  if(month == "Jun")
+    return 6;
+  if(month == "Jul")
+    return 7;
+  if(month == "Aug")
+    return 8;
+  if(month == "Sep")
+    return 9;
+  if(month == "Oct")
+    return 10;
+  if(month == "Nov")
+    return 11;
+  if(month == "Dec")
+    return 12;
+
+  // Else return an invalid number
+  return -1;
+}
+
+
+std::optional<system_clock::time_point> toChrono(const std::string& rfc2822){
+  // Regex matching for RFC2822
+  std::regex pattern(R"((?:\w+, )?(\d{1,2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2}) ([\+\-]\d{4})?)");
+  // Create an object to store the matching pattern
+  std::smatch matches;
+
+  // Attempt to match the pattern
+  if(std::regex_match(rfc2822, matches, pattern)) {
+    // Extract matches and convert to appropriate types
+    int parsedDay = std::stoi(matches[1]);     // 1 or 2-digit int
+    int parsedMonth = stoiMonth3(matches[2]); // 3 chars string
+    int parsedYear = std::stoi(matches[3]);   //4-digit int
+    int parsedHours = std::stoi(matches[4]);   // 2-digit int
+    int parsedMinutes = std::stoi(matches[5]);   // 2-digit int
+    int parsedSeconds = std::stoi(matches[6]);   // 2-digit int
+
+    // Create a local  Time Point object
+    system_clock::time_point timePoint = sys_days(year_month_day(year(parsedYear), month(parsedMonth), day(parsedDay)))
+                                       + hours(parsedHours) + minutes(parsedMinutes) + seconds(parsedSeconds);
+    
+    // Check for TZ offset in input string
+    if(matches[7].matched) {
+      // Convert timePoint to UTC
+      toUTC(timePoint, matches[7]);
+    }
+    return timePoint;
+  }
+  return std::nullopt;
+}
+} // namespace RFC2822
+
+namespace NYS511 {
+
+std::string offsetGMT{ "-0500" };
+
+system_clock::time_point toChrono(const std::string& timeStr) {
+  // Extract time components into ints
+  int parsedDay = std::stoi(timeStr.substr(0, 2));   // 2-digits
+  int parsedMonth = std::stoi(timeStr.substr(3, 2)); // 2-digits
+  int parsedYear = std::stoi(timeStr.substr(6, 4));  // 4-digits
+  int parsedHours = std::stoi(timeStr.substr(11, 2));  // 2-digits
+  int parsedMinutes = std::stoi(timeStr.substr(14, 2));  // 2-digit
+  int parsedSeconds = std::stoi(timeStr.substr(17, 2));    // 2-digit
+
+  // Create a local time point object
+  system_clock::time_point timePoint = sys_days(year_month_day(year(parsedYear), month(parsedMonth), day(parsedDay)))
+                                     + hours(parsedHours) + minutes(parsedMinutes) + seconds(parsedSeconds);
+  
+  // Apply GMT-offset to convert to UTC 
+  toUTC(timePoint, offsetGMT);
+
+  return timePoint;
+}
+
+} // namespace NYS511
+} // namespace Time

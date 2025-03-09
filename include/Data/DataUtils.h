@@ -5,8 +5,9 @@
 #include <rapidxml.hpp>
 #include <string>
 #include <vector>
+#include <memory>
 #include <tuple>
-#include <unordered_map>
+#include <chrono>
 
 // This file holds all functionality for retrieving and filtering basic data from CURL in XML and JSON formats
 
@@ -37,15 +38,19 @@ Json::Value parseData(const std::string& jsonData);
 } // namespace JSON
 
 namespace XML {
-void parseData(rapidxml::xml_document<>& document, std::string xmlData);
+std::unique_ptr<rapidxml::xml_document<>> parseData(std::string& xmlData);
 } // namespace XML
 
 
 // Define shared data for various traffic event sources
 namespace Traffic {
-// Create a template for EventMaps of different event types
-template<typename T1, typename T2>
-using TrafficMap = std::unordered_map<T1, T2>;
+
+struct Location {
+  double latitude;
+  double longitude;
+
+  friend std::ostream &operator<<(std::ostream &out, const Location &location);
+};
 
 struct BoundingBox {
   const double longLeft;
@@ -53,17 +58,41 @@ struct BoundingBox {
   const double latTop;
   const double latBottom;
 
-  bool contains(const std::pair<double, double>& coordinate) const;
+  bool contains(const Location& coordinate) const;
 };
 
-// Get all traffic events
-bool getEvents();
-bool getCameras();
-}
+} // namespace Traffic
 
-struct Location {
-  double latitude;
-  double longitude;
-};
+namespace Time {
+using namespace std::chrono;
+
+// Create a local formatted time string for printing from a time point object
+std::tm toLocalPrint(const system_clock::time_point& time);
+
+// Adjust a given timepoint by the offset value
+void toUTC(system_clock::time_point& timePoint, const std::string& offset);
+
+namespace UNIX {
+
+// Convert a UNIX time value to a chrono object with an optional offset
+system_clock::time_point toChrono(const int unixtime, std::optional<std::string> offset);
+
+} // namespace UNIX
+
+namespace RFC2822 {
+
+// Convert a 3-char month string into a 2-digit int
+int stoiMonth3(const std::string& month);
+// Attempt to convert a given string to
+std::optional<system_clock::time_point> toChrono(const std::string& rfc2822);
+
+} // namespace RFC2822
+
+namespace NYS511 {
+
+system_clock::time_point toChrono(const std::string& timeStr);
+
+} // namespace NYS511
+} // namespace Time
 
 #endif
