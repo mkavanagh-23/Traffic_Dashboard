@@ -32,7 +32,8 @@ int main(int argc, char* argv[]) {
   Traffic::fetchEvents();
   auto time = Output::currentTime();
   std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << '\n' << std::endl;
-  std::this_thread::sleep_for(std::chrono::seconds(60));
+  std::this_thread::sleep_for(std::chrono::seconds(2));
+  Traffic::printEvents();
   
   // Get cameras
 

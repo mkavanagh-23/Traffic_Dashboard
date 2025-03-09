@@ -527,7 +527,7 @@ std::ostream &operator<<(std::ostream &out, const Event &event){
   out << '\n' << event.region << " (" << event.dataSource << ")  |  " << event.ID << "  |  " << event.status << '\n'
       << event.roadwayName << "  |  " << event.directionOfTravel << "  |  " << event.location << '\n'
       << event.description << '\n'
-      << "Reported: " << std::put_time(&timeReported, "%T") << "  |  Updated: " << std::put_time(&timeUpdated, "%T")
+      << "Reported: " << std::put_time(&timeReported, "%T - %F") << "  |  Updated: " << std::put_time(&timeUpdated, "%T - %F")
       << std::endl;
   return out;
 }
