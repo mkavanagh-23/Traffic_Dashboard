@@ -36,6 +36,7 @@ int main(int argc, char* argv[]) {
   Traffic::printEvents();
   
   // Get cameras
+  Traffic::fetchCameras();
 
   // Create and start the API server
   RestAPI::ServerApp restServer;

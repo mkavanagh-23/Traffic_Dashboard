@@ -44,12 +44,12 @@ extern DataSource currentSource;
 class Camera {
 private:
   std::string ID;
-  DataSource dataSource;
-  std::string webURL;
+  DataSource dataSource{ DataSource::NYSDOT };
+  std::string description;
   std::string imageURL;
   std::string videoURL;
   bool online{ false };
-  Region region;
+  Region region{ Region::Syracuse };
   std::string roadwayName;
   std::string direction{ "Unknown" };
   Location location;
@@ -58,19 +58,23 @@ public:
   // Constructors
   Camera(const Json::Value& parsedCamera);
   Camera(Camera&& other) noexcept;
-  Camera operator=(Camera&& other) noexcept;
+  Camera& operator=(Camera&& other) noexcept;
 
   // Accessors
   std::string_view getID() const { return ID; }
   DataSource getSource() const { return dataSource; }
+  std::string_view getDescription() const { return description; }
   bool isOnline() const { return online; }
   Region getRegion() const { return region; }
   Location getLocation() const { return location; }
   std::string_view getStream() const { return videoURL; }
+  std::string_view getImage() const { return imageURL; }
 };
 
 // Get cameras from all sources
-void getCameras(std::string url);
+bool getCameras(std::string url);
+bool parseCameras(const std::string& data);
+bool processCamera(const Json::Value& parsedCamera);
 
 class Event {
 private:
@@ -112,9 +116,10 @@ extern std::unordered_map<std::string, Event> mapEvents;
 
 // Get events from all sources
 void fetchEvents();
+void fetchCameras();
 void printEvents();
 bool getEvents(std::string url);
-bool processData(std::string& data, std::vector<std::string>& headers);
+bool processData(std::string& data, const std::vector<std::string>& headers);   // XML must be able to manipulate data
 bool parseEvents(const Json::Value& parsedData);
 bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData);
 bool processEvent(const Json::Value& parsedEvent);

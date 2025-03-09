@@ -20,6 +20,7 @@ std::string NYSDOT_API_KEY{""};
 
 // URL strings
 const std::string NYSDOT_EVENTS_URL{"https://511ny.org/api/getevents?format=json&key="};
+const std::string NYSDOT_CAMERAS_URL{"https://511ny.org/api/getcameras?format=json&key="};
 const std::string ONMT_EVENTS_URL{"https://511on.ca/api/v2/get/event?format=json&lang=en"};
 const std::string MCNY_EVENTS_URL{ "https://www.monroecounty.gov/incidents911.rss" };
 
@@ -42,6 +43,11 @@ void fetchEvents() {
   getEvents(MCNY_EVENTS_URL);
   std::cout << "\nFetching Ontario 511 events:\n\n";
   getEvents(ONMT_EVENTS_URL);
+}
+
+void fetchCameras() {
+  std::cout << "\nFetching NYS 511 cameras:\n\n";
+  getCameras(NYSDOT_CAMERAS_URL);
 }
 
 // Print all events in the map
@@ -113,7 +119,7 @@ bool getEvents(std::string url) {
 }
 
 // Process retrieved data string and headers
-bool processData(std::string& data, std::vector<std::string>& headers) {
+bool processData(std::string& data, const std::vector<std::string>& headers) {
   // Extract the "Content-Type" header
   std::string contentType = cURL::getContentType(headers);
   
@@ -468,7 +474,141 @@ Event& Event::operator=(Event&& other) noexcept {
 
 // TODO:
 // Camera functions
+bool getCameras(std::string url){
+  // Source API key
+  if(NYSDOT_API_KEY.empty())
+    getEnv();
+  assert(!NYSDOT_API_KEY.empty() && "Failed to retrieve API key from local environment.");
+  url += NYSDOT_API_KEY;
+  // Set current Data Source
+  currentSource = DataSource::NYSDOT;
+  
+  // Retrieve data with cURL
+  auto [result, data, headers] = cURL::getData(url);
+  
+  // Check for successful extraction
+  if(result == cURL::Result::SUCCESS) {
+    // Make sure response data isnt empty
+    if(!data.empty()) {
+      //processData(data, headers);
+      parseCameras(data);
+    } else {
+      // Error out and exit if empty string returned  
+      std::cerr << Output::Colors::RED << "[cURL]: Retrieved data string empty.\n" << Output::Colors::END;
+      return false;
+    }
+  } else {
+    switch(result) {
+      case cURL::Result::TIMEOUT:
+        std::cerr << Output::Colors::RED << "[cURL] Timed out retrieving data from remote stream. Retrying in 60 seconds..." << Output::Colors::END;
+        break;
+      default:
+        std::cerr << Output::Colors::RED << "[cURL] Critical error retrieiving data from remote stream. Terminating program." << Output::Colors::END;
+        return false;
+    }
+  }
+
+  return true;
+}
+
+bool parseCameras(const std::string& data) {
+  auto parsedData = JSON::parseData(data);
+  for(const auto& camera : parsedData) {
+    if(!camera.isObject()) {
+      std::cerr << Output::Colors::RED << "[NYSDOT] Failed parsing camera (is the JSON valid?)\n" << Output::Colors::END;
+      return false; // Or do we want to continue here?
+    } else
+      processCamera(camera);
+  }
+  std::cout << Output::Colors::GREEN << "\n[JSON] Successfully parsed root tree.\n" << Output::Colors::END;
+  return true;
+}
+
+bool processCamera(const Json::Value& parsedCamera) {
+  if(!parsedCamera.isMember("ID")) {
+    std::cerr << Output::Colors::RED << "[JSON] Error: No 'ID' member present in JSON event.\n" << Output::Colors::END;
+    return false;
+  }
+
+  // Extract key/ID from the event
+  std::string key = parsedCamera["ID"].asString();
+  Location location = { parsedCamera["Latitude"].asDouble(), parsedCamera["Longitude"].asDouble() };
+
+  if(!regionSyracuse.contains(location)) // TODO: Add more regions
+    return false;
+
+  auto [camera, inserted] = mapCameras.try_emplace(key, parsedCamera);
+  if(!inserted) {
+    if(parsedCamera["Disabled"].asBool() == camera->second.isOnline()) {
+      return false;
+    }
+    camera->second = parsedCamera;
+    std::cout << Output::Colors::MAGENTA << "[JSON] Updated event: " << key << Output::Colors::END << '\n';
+  }
+  return true;
+}
+
 // Camera constructors
+Camera::Camera(const Json::Value& parsedCamera)
+: dataSource{ currentSource }
+{
+  if(parsedCamera.isMember("ID"))
+    ID = parsedCamera["ID"].asString();
+  if(parsedCamera.isMember("Name"))
+    description = parsedCamera["Name"].asString();
+  if(parsedCamera.isMember("Url"))
+    imageURL = parsedCamera["Url"].asString();
+  if(parsedCamera.isMember("VideoUrl"))
+    videoURL = parsedCamera["VideoUrl"].asString();
+  if(parsedCamera.isMember("Disabled") || parsedCamera.isMember("Blocked")) {
+    if(!parsedCamera["Disabled"].asBool() && !parsedCamera["Blocked"].asBool())
+      online = true;
+  }
+  if(parsedCamera.isMember("RoadwayName"))
+    roadwayName = parsedCamera["RoadwayName"].asString();
+  if(parsedCamera.isMember("DirectionOfTravel"))
+    direction = parsedCamera["DirectionOfTravel"].asString();
+  if(parsedCamera.isMember("Latitude") && parsedCamera.isMember("Latitude"))
+    location = { parsedCamera["Latitude"].asDouble(), parsedCamera["Longitude"].asDouble() }; 
+  
+  std::cout << Output::Colors::YELLOW << "\n[JSON Camera] Constructed camera: " << ID << "  |  " << region 
+            << '\n' << Output::Colors::END << description << '\n';
+}
+
+Camera::Camera(Camera&& other) noexcept
+: ID(std::move(other.ID)),
+  dataSource(other.dataSource),
+  description(std::move(other.description)),
+  imageURL(std::move(other.imageURL)),
+  videoURL(std::move(other.videoURL)),
+  online(other.online),
+  region(other.region),
+  roadwayName(std::move(other.roadwayName)),
+  direction(std::move(other.direction)),
+  location(other.location)
+{
+  std::cout << Output::Colors::BLUE << "[Camera] Moved camera: " << ID  << "  |  " << region
+            << '\n' << Output::Colors::END << description << '\n';
+}
+
+Camera& Camera::operator=(Camera&& other) noexcept
+{
+  if(this != &other) {
+    ID = std::move(other.ID);
+    dataSource = other.dataSource;
+    description = std::move(other.description);
+    imageURL = std::move(other.imageURL);
+    videoURL = std::move(other.videoURL);
+    online = other.online;
+    region = other.region;
+    roadwayName = std::move(other.roadwayName);
+    direction = std::move(other.direction);
+    location = other.location;
+  }
+  std::cout << Output::Colors::BLUE << "[Camera] Invoked move assignment: " << ID << "  |  " << region
+            << '\n' << Output::Colors::END << description << '\n';
+  return *this;
+}
 
 // Output Operators
 
