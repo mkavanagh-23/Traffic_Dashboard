@@ -180,34 +180,12 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/include/Data
-    ${CMAKE_SOURCE_DIR}/include/Data/Traffic
     ${CURL_INCLUDE_DIRS}
     ${JSONCPP_INCLUDE_DIRS}
     ${RAPIDXML_INCLUDE_DIRS}
     ${POCO_INCLUDE_DIRS}
 )
 
-# Link libraries (prefer system libraries if found, otherwise link built ones)
-# if(Poco_FOUND)
-#   target_link_libraries(${PROJECT_NAME} 
-#       PRIVATE
-#       ${CURL_LIBRARIES}      # Use system libcurl if found
-#       jsoncpp_lib            # JsonCpp library (system or built)
-#       ${RAPIDXML_LIBRARIES}  # RapidXML (usually header-only)
-#       ${POCO_LIBRARIES}      # System libraries if found
-#   )
-# else()
-#     # Use the built Poco libraries with exact target names
-#     target_link_libraries(${PROJECT_NAME} 
-#         PRIVATE
-#         ${CURL_LIBRARIES}
-#         jsoncpp_lib
-#         ${RAPIDXML_LIBRARIES}
-#         Poco::Net
-#         Poco::Foundation
-#         Poco::Util
-#     )
-# endif()
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE
     ${CURL_LIBRARIES}

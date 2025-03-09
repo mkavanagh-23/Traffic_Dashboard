@@ -19,7 +19,7 @@ namespace Traffic {
 std::string NYSDOT_API_KEY{""};
 
 // URL strings
-const std::string NYSDOT_EVENTS_URL{"https://511ny.org/api/getcameras?format=json&key="};
+const std::string NYSDOT_EVENTS_URL{"https://511ny.org/api/getevents?format=json&key="};
 const std::string ONMT_EVENTS_URL{"https://511on.ca/api/v2/get/event?format=json&lang=en"};
 const std::string MCNY_EVENTS_URL{ "https://www.monroecounty.gov/incidents911.rss" };
 
@@ -36,9 +36,19 @@ DataSource currentSource;
 
 // Get events from all URLs
 void fetchEvents() {
+  std::cout << "\nFetching NYS 511 events:\n\n";
   getEvents(NYSDOT_EVENTS_URL);
-  getEvents(ONMT_EVENTS_URL);
+  std::cout << "\nFetching Monroe County 911 events:\n\n";
   getEvents(MCNY_EVENTS_URL);
+  std::cout << "\nFetching Ontario 511 events:\n\n";
+  getEvents(ONMT_EVENTS_URL);
+}
+
+// Print all events in the map
+void printEvents() {
+  for(const auto& [key, event] : mapEvents) {
+    std::cout << event;
+  }
 }
 
 // Source data from local environment
@@ -326,7 +336,7 @@ std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent){
   // Check if we are in unixtime
   if(parsedEvent["LastUpdated"].isInt()){
     int unixtime = parsedEvent["LastUpdated"].asInt();
-    return Time::UNIX::toChrono(unixtime, "-0500");
+    return Time::UNIX::toChrono(unixtime, std::nullopt);
   }
   // Else return a NYSDOT time
   std::string time = parsedEvent["LastUpdated"].asString();
@@ -377,7 +387,6 @@ Event::Event(const Json::Value& parsedEvent)
     case DataSource::ONMT:
       region = Region::Toronto;
       if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
-        // TODO: Determine whether we need to provide offset values here
         timeReported = Time::UNIX::toChrono(parsedEvent["Reported"].asDouble(), std::nullopt);
         timeUpdated = Time::UNIX::toChrono(parsedEvent["LastUpdated"].asDouble(), std::nullopt);
       }
@@ -518,7 +527,7 @@ std::ostream &operator<<(std::ostream &out, const Event &event){
   out << '\n' << event.region << " (" << event.dataSource << ")  |  " << event.ID << "  |  " << event.status << '\n'
       << event.roadwayName << "  |  " << event.directionOfTravel << "  |  " << event.location << '\n'
       << event.description << '\n'
-      << "Reported: " << std::put_time(&timeReported, "%F") << "  |  Updated: " << std::put_time(&timeUpdated, "%F")
+      << "Reported: " << std::put_time(&timeReported, "%T") << "  |  Updated: " << std::put_time(&timeUpdated, "%T")
       << std::endl;
   return out;
 }

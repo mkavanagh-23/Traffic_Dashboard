@@ -107,12 +107,12 @@ Json::Value parseData(const std::string& jsonData) {
   // Parse the string into the root Value object
   if(!Json::parseFromStream(builder, data, &root, &errs)) {
     // If initial parsing fails, send an error message
-    std::cerr << Output::Colors::RED << "[JSON] Error parsing JSON (is it a valid stream?): " << errs 
+    std::cerr << Output::Colors::RED << "[JSON] Parsing error (is it a valid stream?): " << errs 
               << '.' << Output::Colors::END << '\n';
     // TODO: Throw an exception if we do not parse from stream
     // Should also throw an exception in the underlying/preceding curl function
   }
-  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed objects from JSON stream." 
+  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed objects from data stream." 
             << Output::Colors::END << '\n';
   return root; // Return the parsed root of objects
 }
@@ -129,6 +129,8 @@ std::unique_ptr<rapidxml::xml_document<>> parseData(std::string& xmlData) {
   // Set up XML document object to hold the parsed data
   auto parsedData = std::make_unique<rapidxml::xml_document<>>();
   parsedData->parse<0>(xmlData.data());
+  std::cout << Output::Colors::GREEN << "[XML] Successfully parsed document from data stream." 
+            << Output::Colors::END << '\n';
   return parsedData;
 }
 

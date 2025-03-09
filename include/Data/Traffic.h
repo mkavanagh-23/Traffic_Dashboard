@@ -112,6 +112,7 @@ extern std::unordered_map<std::string, Event> mapEvents;
 
 // Get events from all sources
 void fetchEvents();
+void printEvents();
 bool getEvents(std::string url);
 bool processData(std::string& data, std::vector<std::string>& headers);
 bool parseEvents(const Json::Value& parsedData);
