@@ -1,0 +1,750 @@
+{
+  "meta": {
+    "version": "v0"
+  },
+  "events": [
+    {
+      "generation_source": "CITY",
+      "created": "2021-07-06 09:52:00",
+      "eventGroupAffected": "29",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "MEDIUM",
+      "message": "Orangeville closed between Rochester and Lebreton due to construction. Follow the signed detour. From Wednesday, June 30 2021 to Saturday, November 1 2025.",
+      "schedule": [
+        {
+          "startDateTime": "2021-06-30T11:35",
+          "endDateTime": "2025-11-01T17:00"
+        }
+      ],
+      "id": 3687,
+      "updated": "2023-05-16 14:28:00",
+      "headline": "Orangeville between Rochester and Lebreton",
+      "geodata": {
+        "coordinates": "[-75.70673822173927, 45.40337634721964]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "MTO",
+      "created": "2021-08-26 12:22:00",
+      "eventGroupAffected": "25",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "UNKNOWN",
+      "message": "(MTO) 417 eastbound reduced to 3 lanes between Island Park and Kent due to construction. From 9pm Monday, August 23 2021 until further notice.",
+      "schedule": [
+        {
+          "startDateTime": "2021-08-23T21:00"
+        }
+      ],
+      "id": 4460,
+      "updated": "2023-11-07 14:08:00",
+      "headline": "(MTO) 417 E/B between Island Park and Kent (R3L)",
+      "geodata": {
+        "coordinates": "[-75.71824795673952, 45.400821988368214]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "MTO",
+      "created": "2021-09-10 13:27:00",
+      "eventGroupAffected": "25",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "UNKNOWN",
+      "message": "(MTO) 417 westbound reduced to 3 lanes between Kent and Parkdale due to construction. From 9pm Monday, August 23 2021 until further notice.",
+      "schedule": [
+        {
+          "startDateTime": "2021-08-23T21:00"
+        }
+      ],
+      "id": 4695,
+      "updated": "2023-11-07 14:08:00",
+      "headline": "(MTO) 417 W/B between Kent and Parkdale (R3L)",
+      "geodata": {
+        "coordinates": "[-75.7089236233934, 45.403424793772295]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2022-06-01 12:46:00",
+      "eventGroupAffected": "29",
+      "cause": "construction.",
+      "id": 8850,
+      "eventType": "CONSTRUCTION",
+      "priority": "UNKNOWN",
+      "message": "Carling reduced to 1 lane in each direction between Melrose and Merivale due to construction. Every night from 6pm to 7am. From Sunday, June 5 to Thursday, July 30.",
+      "updated": "2022-06-01 12:52:00",
+      "headline": "Carling between Melrose and Merivale",
+      "geodata": {
+        "coordinates": "[-75.72476299932306, 45.39010040718532]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2022-07-04 12:53:00",
+      "cause": "construction.",
+      "id": 9443,
+      "eventType": "CONSTRUCTION",
+      "priority": "LOW",
+      "message": "Buena Vista closed between Crescent and Cloverdale due to construction. From 7am to 7pm on Tuesday, July 12.",
+      "updated": "2022-07-04 13:00:00",
+      "headline": "Buena Vista between Crescent and Cloverdale",
+      "geodata": {
+        "coordinates": "[-75.67492252120306, 45.451376770143106]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "MTO",
+      "created": "2022-07-28 18:00:00",
+      "eventGroupAffected": "25",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "HIGH",
+      "message": "(MTO) Ramp closed between Lyon and 417 W/B due to construction. From August 23, 2021 to November 21, 2025.",
+      "schedule": [
+        {
+          "startDateTime": "2021-08-23T00:00",
+          "endDateTime": "2025-11-21T23:55"
+        }
+      ],
+      "id": 9838,
+      "updated": "2023-11-07 13:18:00",
+      "headline": "(MTO) Ramp between Lyon and 417 W/B",
+      "geodata": {
+        "coordinates": "[-75.69565296232739, 45.40757782743398]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2022-11-02 08:15:00",
+      "eventGroupAffected": "25",
+      "cause": "construction.",
+      "id": 11236,
+      "eventType": "CONSTRUCTION",
+      "priority": "MEDIUM",
+      "message": "Dynes off-peak lane reductions between Arnot and Claymor due to construction. From Wednesday, 2 November to Friday, 18 November. ",
+      "updated": "2022-11-02 08:24:00",
+      "headline": "Dynes between Arnot and Claymor",
+      "geodata": {
+        "coordinates": "[-75.71009026971306, 45.367835526358256]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2023-08-02 14:28:00",
+      "eventGroupAffected": "25",
+      "cause": "construction.",
+      "id": 14659,
+      "eventType": "CONSTRUCTION",
+      "priority": "MEDIUM",
+      "message": "Daly lane reduction in both directions between Colonel By and Waller due to construction. From 10pm Monday, May 1 to 10pm Wednesday, October 18.",
+      "updated": "2023-08-02 14:51:00",
+      "headline": "Daly between Colonel By and Waller",
+      "geodata": {
+        "coordinates": "[-75.68989993070902, 45.425308308201764]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "LRT",
+      "created": "2023-09-07 10:33:00",
+      "eventGroupAffected": "25",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "HIGH",
+      "message": "(LRT) Ramp lane reduction between 174 eastbound and Jeanne d'Arc due to construction. From 9:30am Monday, September 25 until further notice.",
+      "schedule": [
+        {
+          "startDateTime": "2023-09-25T09:30"
+        }
+      ],
+      "id": 15216,
+      "updated": "2023-09-26 12:33:00",
+      "headline": "(LRT) Ramp between 174 E/B and Jeanne d'Arc",
+      "geodata": {
+        "coordinates": "[-75.54671312358212, 45.46763884881704]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2023-09-07 14:27:00",
+      "eventGroupAffected": "31",
+      "cause": "construction.",
+      "id": 15236,
+      "eventType": "CONSTRUCTION",
+      "priority": "LOW",
+      "message": "Burritts lane reductions between Donnelly and River due to construction. Follow the signed detour. Use other routes. From 7pm Tuesday, September 5 to 7pm Monday, September 18. ",
+      "updated": "2023-09-07 14:42:00",
+      "headline": "Burritts between Donnelly and River",
+      "geodata": {
+        "coordinates": "[-75.7970668419028, 44.981758924424305]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "LRT",
+      "created": "2023-09-25 14:26:00",
+      "eventGroupAffected": "29",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "HIGH",
+      "message": "(LRT) Jeanne d'Arc reduced to 1 lane in each direction at 174 due to construction. From 5:30am Monday, September 25 until further notice.",
+      "schedule": [
+        {
+          "startDateTime": "2023-09-25T05:30"
+        }
+      ],
+      "id": 15530,
+      "updated": "2023-12-21 20:31:00",
+      "headline": "(LRT) Jeanne d'Arc at 174",
+      "geodata": {
+        "coordinates": "[-75.54595405139146, 45.46908035447922]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2023-10-03 11:10:00",
+      "eventGroupAffected": "29",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "MEDIUM",
+      "message": "Percy closed between Chamberlain and Glendale due to construction. From Wednesday, August 2 until further notice",
+      "schedule": [
+        {
+          "startDateTime": "2023-08-02T07:00"
+        }
+      ],
+      "id": 15666,
+      "updated": "2023-10-03 15:37:00",
+      "headline": "Percy between Chamberlain and Glendale",
+      "geodata": {
+        "coordinates": "[-75.69815035595107, 45.40538066148711]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2023-12-04 13:34:00",
+      "eventGroupAffected": "25",
+      "cause": "construction.",
+      "id": 16640,
+      "eventType": "CONSTRUCTION",
+      "priority": "UNKNOWN",
+      "message": "Victoria closed between Boundary and Cartwright due to construction. From 7am to 5pm on Friday, December 8.",
+      "updated": "2023-12-04 15:42:00",
+      "headline": "Victoria between Boundary and Cartwright",
+      "geodata": {
+        "coordinates": "[-75.4059968851382, 45.25792365043407]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2024-08-15 12:58:00",
+      "eventGroupAffected": "25",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "MEDIUM",
+      "message": "Jeanne d'Arc lane reduction in both directions between 174 and Fortune/Vineyard due to construction. Flagpersons present. From Monday, August 19 to Monday, June 30.",
+      "schedule": [
+        {
+          "startDateTime": "2024-08-19T07:00",
+          "endDateTime": "2025-06-30T17:00"
+        }
+      ],
+      "id": 19532,
+      "updated": "2024-08-19 07:17:00",
+      "headline": "Jeanne d'Arc between 174 and Fortune/Vineyard",
+      "geodata": {
+        "coordinates": "[-75.54726656520111, 45.47083656500486]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2024-09-05 13:33:00",
+      "eventGroupAffected": "29",
+      "cause": "construction.",
+      "id": 19730,
+      "eventType": "CONSTRUCTION",
+      "priority": "MEDIUM",
+      "message": "Tara northbound reduced to 1 lane between Navaho and Ainsley due to construction. From Monday, September 9 to Wednesday 11.",
+      "updated": "2024-09-05 13:41:00",
+      "headline": "Tara N/B between Navaho and Ainsley",
+      "geodata": {
+        "coordinates": "[-75.75010685977686, 45.360750840582114]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2024-11-24 14:17:00",
+      "eventGroupAffected": "31",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "UNKNOWN",
+      "message": "Joy's closed between Franktown and Garvin due to construction. Follow the signed detour. Avoid area. From Monday, November 25 to Friday, April 4.",
+      "schedule": [
+        {
+          "startDateTime": "2024-11-25T07:00",
+          "endDateTime": "2025-04-04T17:00"
+        }
+      ],
+      "id": 20530,
+      "updated": "2024-11-25 07:28:00",
+      "headline": "Joy's between Franktown and Garvin",
+      "geodata": {
+        "coordinates": "[-75.86416458678822, 45.18731631006225]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2024-12-06 11:53:00",
+      "eventGroupAffected": "31",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "UNKNOWN",
+      "message": "Deschâtelets closed between Mazenod and Hazel due to construction. Avoid area. Daily 7am- 4pm. Monday, December 16 to Saturday, March 15, 2025",
+      "schedule": [
+        {
+          "startDateTime": "2024-12-16T07:00",
+          "endDateTime": "2025-03-15T16:00"
+        }
+      ],
+      "id": 20657,
+      "updated": "2024-12-16 07:01:00",
+      "headline": "Deschâtelets between Mazenod and Hazel",
+      "geodata": {
+        "coordinates": "[-75.67549419693869, 45.40912950983521]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2024-12-11 08:01:00",
+      "eventGroupAffected": "31",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "MEDIUM",
+      "message": "Island Park Crescent closed between Clarendon and Edna due to construction. Avoid area and use other routes. From Saturday, February 1st to Saturday, November 1st, 2025.",
+      "schedule": [
+        {
+          "startDateTime": "2025-02-01T07:00",
+          "endDateTime": "2025-11-01T17:00"
+        }
+      ],
+      "id": 20709,
+      "updated": "2025-02-01 07:01:00",
+      "headline": "Island Park Crescent between Clarendon and Edna",
+      "geodata": {
+        "coordinates": "[-75.73376690109583, 45.39065992815397]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2025-01-23 11:12:00",
+      "eventGroupAffected": "25",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "UNKNOWN",
+      "message": "Bank St. lane reduction in both directions between Billings Bridge and Heron due to construction. Flagpersons present. Cyclists and pedestrians not affected.",
+      "schedule": [
+        {
+          "startDateTime": "2025-01-29T07:00",
+          "endDateTime": "2025-12-31T17:00"
+        }
+      ],
+      "id": 21041,
+      "updated": "2025-01-29 07:02:00",
+      "headline": "Bank between Billings Bridge and Heron",
+      "geodata": {
+        "coordinates": "[-75.67160484248359, 45.383470707897644]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2025-01-27 12:04:00",
+      "eventGroupAffected": "15",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "MEDIUM",
+      "message": "Aylmer closed between Galt and Bank due to construction. Avoid area. From Monday, February 3rd to Friday, February 28th.",
+      "schedule": [
+        {
+          "startDateTime": "2025-02-03T00:00",
+          "endDateTime": "2025-03-28T23:55"
+        }
+      ],
+      "id": 21069,
+      "updated": "2025-02-25 13:46:00",
+      "headline": "Aylmer between Galt and Bank",
+      "geodata": {
+        "coordinates": "[-75.68474238863523, 45.3953582241247]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "MTO",
+      "schedule": [
+        {
+          "startDateTime": "2025-02-24T07:00",
+          "endDateTime": "2025-06-20T23:59"
+        }
+      ],
+      "created": "2025-02-12 08:27:00",
+      "auto_gen_id": "49014",
+      "id": 21242,
+      "eventType": "CONSTRUCTION",
+      "priority": "UNKNOWN",
+      "message": "HWY 417 Westbound On-ramp [ ROCHESTER ST  (IC 121B) -  ] - Construction. ALL LANES CLOSED. Hwy 417 W/B Rochester on ramp closed until June 20, 2025 (Ottawa) . 2025-02-24 07:00 to 2025-06-20 23:59",
+      "updated": "2025-02-12 08:27:00",
+      "headline": "(MTO) HWY 417 Westbound On-ramp [ ROCHESTER ST  (IC 121B) -  ] - Construction",
+      "geodata": {
+        "coordinates": "[-75.70857, 45.40336]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2025-02-19 14:35:00",
+      "eventGroupAffected": "9",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "LOW",
+      "message": "Black Friars Road closed between Saville and Manitou due to construction. Follow the signed detour. Duration is unknown.",
+      "schedule": [
+        {
+          "startDateTime": "2025-03-11T00:00",
+          "endDateTime": "2025-03-14T23:55"
+        }
+      ],
+      "id": 21330,
+      "updated": "2025-03-11 00:01:00",
+      "headline": "Black Friars Road between Saville and Manitou",
+      "geodata": {
+        "coordinates": "[-75.76677484522656, 45.37652048530114]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2025-02-27 16:33:00",
+      "eventGroupAffected": "25",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "MEDIUM",
+      "message": "Randall closed between Utah and Bank due to construction. Follow the signed detour. From Monday, March 5th to Monday March 17th.",
+      "schedule": [
+        {
+          "startDateTime": "2025-03-05T07:00",
+          "endDateTime": "2025-03-17T05:00"
+        }
+      ],
+      "id": 21423,
+      "updated": "2025-03-05 07:01:00",
+      "headline": "Randall between Utah and Bank",
+      "geodata": {
+        "coordinates": "[-75.67050170743772, 45.382523590971054]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2025-02-28 11:24:00",
+      "eventGroupAffected": "31",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "LOW",
+      "message": "Shaw closed between Lunney and Ottawa Road 29 due to construction. Follow the signed detour. From March 2nd to 14th.",
+      "schedule": [
+        {
+          "startDateTime": "2025-03-02T07:00",
+          "endDateTime": "2025-03-14T17:00"
+        }
+      ],
+      "id": 21430,
+      "updated": "2025-03-02 07:02:00",
+      "headline": "Shaw between Lunney and Ottawa Road 29",
+      "geodata": {
+        "coordinates": "[-76.32017100132946, 45.383790792110844]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2025-02-28 14:07:00",
+      "eventGroupAffected": "13",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "LOW",
+      "message": "Canterbury closed between Arch and Plesser due to construction. Follow the signed detour. Avoid area. March 10th to 21st.",
+      "schedule": [
+        {
+          "startDateTime": "2025-03-10T07:00",
+          "endDateTime": "2025-03-21T18:00"
+        }
+      ],
+      "id": 21433,
+      "updated": "2025-03-10 07:01:00",
+      "headline": "Canterbury between Arch and Plesser",
+      "geodata": {
+        "coordinates": "[-75.63058516714236, 45.38916223560919]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2025-03-06 14:12:00",
+      "eventGroupAffected": "1",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "MEDIUM",
+      "message": "174 E/B on-ramp at Jeanne d'Arc off-peak lane reduction due to construction. March 10th to 14th",
+      "schedule": [
+        {
+          "startDateTime": "2025-03-10T09:00",
+          "endDateTime": "2025-03-14T18:00"
+        }
+      ],
+      "id": 21497,
+      "updated": "2025-03-10 09:03:00",
+      "headline": "174 E/B on-ramp at Jeanne d'Arc",
+      "geodata": {
+        "coordinates": "[-75.54517352856767, 45.46826022498329]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2025-03-06 15:12:00",
+      "eventGroupAffected": "31",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "LOW",
+      "message": "Emett closed between Wilhaven and French Hill due to construction. Follow the signed detour. Use other routes. March 10th to 21st.",
+      "schedule": [
+        {
+          "startDateTime": "2025-03-10T07:00",
+          "endDateTime": "2025-03-21T15:30"
+        }
+      ],
+      "id": 21499,
+      "updated": "2025-03-10 07:07:00",
+      "headline": "Emett between Wilhaven and French Hill",
+      "geodata": {
+        "coordinates": "[-75.349844339269, 45.49372945585018]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "CITY",
+      "created": "2025-03-07 10:17:00",
+      "eventGroupAffected": "17",
+      "cause": "construction.",
+      "eventType": "CONSTRUCTION",
+      "priority": "MEDIUM",
+      "message": "Findlay Creek reduced to one lane in both directions during off-peak hours at Bank due to construction. March 10th to 14th.",
+      "schedule": [
+        {
+          "startDateTime": "2025-03-10T09:00",
+          "endDateTime": "2025-03-14T15:00"
+        }
+      ],
+      "id": 21519,
+      "updated": "2025-03-10 09:08:00",
+      "headline": "Findlay Creek at Bank ",
+      "geodata": {
+        "coordinates": "[-75.59382698667062, 45.32046819966028]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "MTO",
+      "schedule": [
+        {
+          "startDateTime": "2025-03-10T22:00",
+          "endDateTime": "2025-03-13T05:00"
+        }
+      ],
+      "created": "2025-03-07 15:42:00",
+      "auto_gen_id": "49172",
+      "id": 21521,
+      "eventType": "CONSTRUCTION",
+      "priority": "UNKNOWN",
+      "message": "HWY 417 Eastbound  [ PINECREST AVE / GREENBANK RD (IC 129) - WOODROFFE AVE (IC 127) ] - Recurring-Construction. 2 Alternating Lane(s). Nightly lane reductions Hwy 417 E/B btwn Pinecrest and Woodroffe (Ottawa); E/B Pinecrest on ramps closed as required . 2025-03-10 22:00 to 2025-03-13 05:00",
+      "updated": "2025-03-07 15:42:00",
+      "headline": "(MTO) HWY 417 Eastbound  [ PINECREST AVE / GREENBANK RD (IC 129) - WOODROFFE AVE (IC 127) ] - Recurring-Construction",
+      "geodata": {
+        "coordinates": "[-75.78987, 45.34951]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "MTO",
+      "schedule": [
+        {
+          "startDateTime": "2025-03-12T22:00",
+          "endDateTime": "2025-03-14T06:00"
+        }
+      ],
+      "created": "2025-03-07 15:42:00",
+      "auto_gen_id": "49173",
+      "id": 21522,
+      "eventType": "CONSTRUCTION",
+      "priority": "UNKNOWN",
+      "message": "HWY 417 Westbound  [ WOODROFFE AVE (IC 127) - PINECREST AVE / GREENBANK RD (IC 129) ] - Recurring-Construction. 2 Alternating Lane(s). Nightly lane reductions Hwy 417 W/B btwn Woodroffe and Pinecrest (Ottawa) . 2025-03-12 22:00 to 2025-03-14 06:00",
+      "updated": "2025-03-07 15:42:00",
+      "headline": "(MTO) HWY 417 Westbound  [ WOODROFFE AVE (IC 127) - PINECREST AVE / GREENBANK RD (IC 129) ] - Recurring-Construction",
+      "geodata": {
+        "coordinates": "[-75.76829, 45.36114]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "MTO",
+      "schedule": [
+        {
+          "startDateTime": "2025-03-11T21:00",
+          "endDateTime": "2025-03-12T05:00"
+        }
+      ],
+      "created": "2025-03-07 18:57:00",
+      "auto_gen_id": "49176",
+      "id": 21524,
+      "eventType": "CONSTRUCTION",
+      "priority": "UNKNOWN",
+      "message": "HWY 417 Eastbound  [ MAITLAND AVE (IC 126) - ISLAND PARK DR W/B (IC 123) ] - Maintenance. 1 Left Lane(s). 2025-03-11 21:00 to 2025-03-12 05:00",
+      "updated": "2025-03-07 18:57:00",
+      "headline": "(MTO) HWY 417 Eastbound  [ MAITLAND AVE (IC 126) - ISLAND PARK DR W/B (IC 123) ] - Maintenance",
+      "geodata": {
+        "coordinates": "[-75.75457, 45.37042]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "MTO",
+      "schedule": [
+        {
+          "startDateTime": "2025-03-12T21:00",
+          "endDateTime": "2025-03-13T05:00"
+        }
+      ],
+      "created": "2025-03-07 18:57:00",
+      "auto_gen_id": "49177",
+      "id": 21525,
+      "eventType": "CONSTRUCTION",
+      "priority": "UNKNOWN",
+      "message": "HWY 417 Eastbound  [ MAITLAND AVE (IC 126) - MAITLAND AVE (IC 126) ] - Maintenance. 1 Left Lane(s). 2025-03-12 21:00 to 2025-03-13 05:00",
+      "updated": "2025-03-07 18:57:00",
+      "headline": "(MTO) HWY 417 Eastbound  [ MAITLAND AVE (IC 126) - MAITLAND AVE (IC 126) ] - Maintenance",
+      "geodata": {
+        "coordinates": "[-75.75457, 45.37042]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "MTO",
+      "schedule": [
+        {
+          "startDateTime": "2025-03-13T21:00",
+          "endDateTime": "2025-03-14T05:00"
+        }
+      ],
+      "created": "2025-03-07 19:03:00",
+      "auto_gen_id": "49178",
+      "id": 21526,
+      "eventType": "CONSTRUCTION",
+      "priority": "UNKNOWN",
+      "message": "HWY 417 Eastbound  [ MAITLAND AVE (IC 126) - MAITLAND AVE (IC 126) ] - Maintenance. 1 Left Lane(s). 2025-03-13 21:00 to 2025-03-14 05:00",
+      "updated": "2025-03-07 19:03:00",
+      "headline": "(MTO) HWY 417 Eastbound  [ MAITLAND AVE (IC 126) - MAITLAND AVE (IC 126) ] - Maintenance",
+      "geodata": {
+        "coordinates": "[-75.75457, 45.37042]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "MTO",
+      "schedule": [
+        {
+          "startDateTime": "2025-03-12T10:00",
+          "endDateTime": "2025-03-12T14:30"
+        }
+      ],
+      "created": "2025-03-11 02:51:00",
+      "auto_gen_id": "49189",
+      "id": 21537,
+      "eventType": "CONSTRUCTION",
+      "priority": "UNKNOWN",
+      "message": "HWY 417 Eastbound  [ BAYSWATER AVE - KENT ST (IC 120A) ] - Construction. 1 Left Lane(s). 2025-03-12 10:00 to 2025-03-12 14:30",
+      "updated": "2025-03-11 02:51:00",
+      "headline": "(MTO) HWY 417 Eastbound  [ BAYSWATER AVE - KENT ST (IC 120A) ] - Construction",
+      "geodata": {
+        "coordinates": "[-75.71742, 45.40123]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    },
+    {
+      "generation_source": "MTO",
+      "created": "2025-03-11 12:45:00",
+      "auto_gen_id": "140053",
+      "id": 21541,
+      "eventType": "INCIDENT",
+      "priority": "UNKNOWN",
+      "message": "HWY 417 Eastbound  [ VANIER PKWY/RIVERSIDE  (IC 117) -  ] - Collision. left shoulder and 1 left lane closed",
+      "updated": "2025-03-11 12:45:00",
+      "headline": "(MTO) HWY 417 Eastbound  [ VANIER PKWY/RIVERSIDE  (IC 117) -  ] - Collision",
+      "geodata": {
+        "coordinates": "[-75.65678, 45.41742]",
+        "type": "POINT"
+      },
+      "status": "ACTIVE"
+    }
+  ]
+}

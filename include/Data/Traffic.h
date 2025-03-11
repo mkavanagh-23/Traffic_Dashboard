@@ -32,6 +32,7 @@ enum class DataSource {
   NYSDOT,
   ONMT,
   MCNY,
+  OTT,
   UNKNOWN
 };
 std::ostream& operator<<(std::ostream& os, const DataSource& dataSource);
@@ -75,16 +76,16 @@ bool processCamera(const Json::Value& parsedCamera);
 
 class Event {
 private:
-  std::string ID;
+  std::string ID; // OTT - Convert from int
   DataSource dataSource;
   std::string status{ "Active" };
   Region region;
-  std::string roadwayName{ "Unknown" };
-  std::string directionOfTravel{ "None" };
-  std::string description;  // MCNY 'title' field
-  std::chrono::system_clock::time_point timeReported;
-  std::chrono::system_clock::time_point timeUpdated;
-  Location location;
+  std::string roadwayName{ "Unknown" }; // OTT - Parse from 'headline'
+  std::string directionOfTravel{ "None" };  // OTT - Parse from 'headline'
+  std::string description;  // MCNY 'title' field -- OTT 'message' field
+  std::chrono::system_clock::time_point timeReported; // OTT 'created' "2025-03-11 12:45:00"
+  std::chrono::system_clock::time_point timeUpdated;  // OTT 'updated' "2025-03-11 12:45:00"
+  Location location;  // OTT - 'geodata'{'coordinates'"[double_Latitude, double_Longitude]"}
   //std::vector<Camera> cameras;
 
 public:
