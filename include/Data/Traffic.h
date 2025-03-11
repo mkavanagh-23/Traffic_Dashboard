@@ -1,9 +1,6 @@
 #ifndef TRAFFIC_H
 #define TRAFFIC_H
 
-// TODO:
-// Use std::chrono or ctime to normalize to a common time type
-// std::optional??, or at least think about how to handle null values and/or default types
 #include "DataUtils.h"
 #include "Output.h"
 #include <iostream>

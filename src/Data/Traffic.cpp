@@ -10,8 +10,11 @@
 #include <unordered_map>
 
 // TODO: 
-// Cameras
-// Serializing via JSON we should serialize time to an ISO6801-formatted string
+// Add logic for Ottawa events
+//  https://traffic.ottawa.ca/service/events
+//  Returns JSON
+// Serializing to JSON 
+// we should serialize time to an ISO6801-formatted string
 
 namespace Traffic {
 
