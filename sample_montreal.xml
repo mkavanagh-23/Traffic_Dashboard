@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<rss xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0">
+  <channel>
+    <title>Québec 511 - Montréal</title>
+    <description><![CDATA[Road Conditions]]></description>
+    <copyright>Ministère des Transports</copyright>
+    <link>https://www.quebec511.info/Diffusion/Rss/GenererRss.aspx?regn=13000&amp;routes=10;13;15;19;20;25;40;112;117;125;134;136;138;335;520&amp;lang=en</link>
+    <docs>http://rssboard.org/rss-specification</docs>
+    <item>
+      <title>Montréal : Warning</title>
+      <description><![CDATA[Louis-H.-La Fontaine Tunnel<br/>Contraflow traffic (north tube), 2 lanes northbound and only one southbound.<br/>Northbound lanes width reduced to 3.2 m. Cause: tunnel repair.<br/><br/>Heavy vehicles:<br/>Coming from A-20 West/A-25 North (towards Montréal), right lane MANDATORY from De Mortagne Blvd.<br/><br/>Coming from A-25 South (towards Longueuil), right lane PROHIBITED from Sherbrooke Street.]]></description>
+      <pubDate>Thu, 06 Mar 2025 19:21:20 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=80265&amp;cat=1&amp;idreg=13000</link>
+      <category>Warning</category>
+    </item>
+    <item>
+      <title>A-10 : Road condition</title>
+      <description><![CDATA[From Île des Soeurs to Samuel-De Champlain Bridge Rive-Sud | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 09:01:35 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3511&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>R-112 : Roadwork</title>
+      <description><![CDATA[Between Montréal and Saint-Lambert
+On Victoria Bridge
+-----
+During the week during rush hours (Monday to Friday), BOTH lanes in ONE direction only:
+- From 5 a.m. to 9 a.m., towards Montreal (WESTBOUND)
+- From 3 p.m. to 7:15 p.m., towards the South Shore (EASTBOUND)
+Outside these hours, one lane open in each direction
+-----
+NOTE: heavy trucks forbidden, at all times]]></description>
+      <pubDate>Mon, 24 Feb 2025 17:30:41 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=271652&amp;cat=3&amp;idreg=13000</link>
+      <category>Roadwork</category>
+    </item>
+    <item>
+      <title>R-125 : Road condition</title>
+      <description><![CDATA[From Pie-IX Bridge in Montréal to Junction of highway 440 and route 125 in Laval | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 09:12:12 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3551&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>A-13 : Road condition</title>
+      <description><![CDATA[From Junction of highways 13 and 20 to Louis-Bisson Bridge in Laval | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 09:01:35 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3501&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>R-136 : Road condition</title>
+      <description><![CDATA[From Turcot Interchange to Jacques-Cartier Bridge in Montréal | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 09:01:35 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3691&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>R-136 : Roadwork</title>
+      <description><![CDATA[In Montréal
+Autoroute Ville-Marie
+In the Viger Tunnel
+WESTBOUND
+Between the beginning of the highway (at Panet Street) and the Sanguinet Street entrance
+Closure of 1 lane out of 4, at all times 
+Works: renovation of the Saint-Urbain Street overpass]]></description>
+      <pubDate>Sat, 11 Jan 2025 00:02:53 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=250648&amp;cat=3&amp;idreg=13000</link>
+      <category>Roadwork</category>
+    </item>
+    <item>
+      <title>R-136 : Roadwork</title>
+      <description><![CDATA[In Montreal
+Ville-Marie Highway
+EASTBOUND
+In the Ville-Marie Tunnel
+From the start of the tunnel to exit 6 (Berri Street)
+Closure of 2 lanes out of 5, at all times
+Works: renovation of the Ville-Marie and Viger Tunnels]]></description>
+      <pubDate>Thu, 20 Feb 2025 19:06:42 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=280264&amp;cat=3&amp;idreg=13000</link>
+      <category>Roadwork</category>
+    </item>
+    <item>
+      <title>R-138 : Road condition</title>
+      <description><![CDATA[From Honoré-Mercier Bridge Rive-Sud to Honoré-Mercier Bridge in Montréal | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 09:12:12 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=9411&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>R-138 : Road condition</title>
+      <description><![CDATA[From Honoré-Mercier Bridge in Montréal to Saint-Pierre Interchange | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 09:12:12 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3621&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>A-15 : Road condition</title>
+      <description><![CDATA[From Île des Soeurs to Décarie Interchange | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 09:01:35 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3512&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>A-15 : Road condition</title>
+      <description><![CDATA[From Des Laurentides Interchange to Médéric-Martin Bridge in Laval | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 09:04:54 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3521&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>A-19 : Road condition</title>
+      <description><![CDATA[From Papineau Bridge in Montréal to Junction of highway 19 and route 335 in Laval | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 08:43:44 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3701&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>A-20 : Road condition</title>
+      <description><![CDATA[From L'Île-Perrot to Dorval | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 07:08:39 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3531&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>A-20 : Road condition</title>
+      <description><![CDATA[From Dorval to Turcot Interchange | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 09:12:12 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3622&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>A-25 : Road condition</title>
+      <description><![CDATA[From Louis-Hippolyte La Fontaine Bridge Tunnel to Junction of highway 25 and boulevard Henri-Bourassa in Montréal | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 07:01:55 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3541&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>A-25 : Roadwork</title>
+      <description><![CDATA[In Montreal (Mercier-Hochelaga-Maisonneuve)
+Southbound
+Exit 4 (Souligny Avenue, Downtown)
+Lane width: 4.5 meters
+Works: repair project of Louis-Hippolyte-La Fontaine Tunnel]]></description>
+      <pubDate>Thu, 13 Jun 2024 22:47:56 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=206220&amp;cat=3&amp;idreg=13000</link>
+      <category>Roadwork</category>
+    </item>
+    <item>
+      <title>A-25 : Roadwork</title>
+      <description><![CDATA[In Montreal and in Longueuil
+SOUTHBOUND
+Between exit 4 (downtown) and De l'Île-Charron St. entrance, including the tunnel
+Complete closure
+From 11 pm Friday to 8 am Saturday
+From 11 pm Saturday to 9 am Sunday
+Detour: via De Boucherville, Hochelaga, Dickson S/B St., Notre-Dame St., Papineau Ave. and Jacques-Cartier Bridge
+Trucks (height more than 4.25 m): via Dickson St. N/B, Hochelaga St., De l'Assomption Blvd., Sherbrooke St., Pie-IX Blvd.
+Works: major repair of the Louis-H.-La Fontaine Tunnel]]></description>
+      <pubDate>Fri, 14 Mar 2025 13:40:59 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=290428&amp;cat=3&amp;idreg=13000</link>
+      <category>Roadwork</category>
+    </item>
+    <item>
+      <title>A-25 : Roadwork</title>
+      <description><![CDATA[In Montreal (Anjou)
+Southbound
+Between exit 6 (rue Beaubien) and the Louis-Hippolyte-La Fontaine Tunnel
+Trucks prohibited from driving in the right lane at all times except for exits
+Works: major repair project for the Louis-Hippolyte-La Fontaine Tunnel]]></description>
+      <pubDate>Tue, 28 Jan 2025 23:34:32 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=248986&amp;cat=3&amp;idreg=13000</link>
+      <category>Roadwork</category>
+    </item>
+    <item>
+      <title>A-25 : Road condition</title>
+      <description><![CDATA[From Junction of highway 25 and boulevard Henri-Bourassa in Montréal to Junction of highways 25 and 440 in Laval | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 09:00:55 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3711&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>A-40 : Road condition</title>
+      <description><![CDATA[From Vaudreuil-Dorion to Kirkland | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 09:00:32 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3561&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>A-40 : Roadwork</title>
+      <description><![CDATA[In Sainte-Anne-de-Bellevue
+Félix-Leclerc Highway
+WESTBOUND
+The Morgan Boulevard entrance
+Closure of the Morgan Boulevard entrance, at all times
+Detour: via the Des Anciens-Combattants Boulevard entrance
+Works: construction of the new Île-aux-Tourtes Bridge]]></description>
+      <pubDate>Thu, 09 Jan 2025 19:54:38 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=286260&amp;cat=3&amp;idreg=13000</link>
+      <category>Roadwork</category>
+    </item>
+    <item>
+      <title>A-40 : Road condition</title>
+      <description><![CDATA[From Kirkland to Junction of highways 40 and 520 | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 09:00:32 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3571&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>A-40 : Road condition</title>
+      <description><![CDATA[From Junction of highways 40 and 520 to Montréal Saint-Léonard borough | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 09:04:54 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3681&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>A-40 : Road condition</title>
+      <description><![CDATA[From Montréal Saint-Léonard borough to Charles-De Gaulle Bridge in Montréal | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 08:40:31 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=3631&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+    <item>
+      <title>A-40 : Roadwork</title>
+      <description><![CDATA[In Montreal
+Anjou Interchange
+On the ramp leading from A-40 WEST (exit 80-S) to A-25 SOUTH / Tunnel
+Channeling the track
+Closure of exit 6 (Beaubien Street, Yves-Prévost Boulevard) at all times for users coming from A-40 WEST
+Detour: via A-25 SOUTH and exit 5 towards Sherbrooke Street and Langelier Boulevard
+Track width reduced to 4.5 metres
+Works: renovation of the Louis-H.-La Fontaine Tunnel]]></description>
+      <pubDate>Thu, 09 Jan 2025 19:54:38 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=246994&amp;cat=3&amp;idreg=13000</link>
+      <category>Roadwork</category>
+    </item>
+    <item>
+      <title>A-40 : Roadwork</title>
+      <description><![CDATA[In Montreal
+Anjou Interchange
+Closure of the ramp leading from the A-40 WEST to the A-25 SOUTH / tunnel
+From Friday 11 p.m. to Saturday 8 a.m.
+Detour: continue and turn around at exit 78 (Langelier Boulevard)
+Works: Louis-H.-La Fontaine Tunnel repair]]></description>
+      <pubDate>Fri, 14 Mar 2025 13:41:17 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=290108&amp;cat=3&amp;idreg=13000</link>
+      <category>Roadwork</category>
+    </item>
+    <item>
+      <title>A-520 : Road condition</title>
+      <description><![CDATA[From Dorval to Junction of highways 40 and 520 | Bare and Dry | Good]]></description>
+      <pubDate>Fri, 14 Mar 2025 07:08:39 GMT</pubDate>
+      <link>/en/diffusion/etatreseau/DetailsElement.aspx?id=10811&amp;cat=2&amp;idreg=13000</link>
+      <category>Road condition</category>
+    </item>
+  </channel>
+</rss>
