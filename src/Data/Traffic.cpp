@@ -22,10 +22,13 @@ namespace Traffic {
 std::string NYSDOT_API_KEY{""};
 
 // URL strings
-const std::string NYSDOT_EVENTS_URL{"https://511ny.org/api/getevents?format=json&key="};
-const std::string NYSDOT_CAMERAS_URL{"https://511ny.org/api/getcameras?format=json&key="};
-const std::string ONMT_EVENTS_URL{"https://511on.ca/api/v2/get/event?format=json&lang=en"};
+const std::string NYSDOT_EVENTS_URL{ "https://511ny.org/api/getevents?format=json&key=" };
+const std::string ONGOV_EVENTS_URL{ "https://911events.ongov.net/CADInet/app/events.jsp" };
 const std::string MCNY_EVENTS_URL{ "https://www.monroecounty.gov/incidents911.rss" };
+const std::string ONMT_EVENTS_URL{ "https://511on.ca/api/v2/get/event?format=json&lang=en" };
+const std::string OTT_EVENTS_URL{ "https://traffic.ottawa.ca/service/events" };
+const std::string MTL_EVENTS_URL{ "https://www.quebec511.info/Diffusion/Rss/GenererRss.aspx?regn=13000&routes=10;13;15;19;20;25;40;112;117;125;134;136;138;335;520&lang=en" };
+const std::string NYSDOT_CAMERAS_URL{ "https://511ny.org/api/getcameras?format=json&key=" };
 
 // Data structures
 std::unordered_map<std::string, Event> mapEvents;
