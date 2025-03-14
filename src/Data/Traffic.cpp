@@ -10,11 +10,26 @@
 #include <unordered_map>
 
 // TODO: 
+// Integrate regex parsing of MCNY event titles (already built externally)
+//  Do we also need to use REGEX to parse through NYSDOT and ONMT event titles?
+// Add logic for ONGOV events
+//  Returns HTML
+//  Parse through each table row
+//  Add logic to detect multiple pages
+//  Refine cleanup logic to account for frequent downtime
 // Add logic for Ottawa events
-//  https://traffic.ottawa.ca/service/events
 //  Returns JSON
+// Add logic for montreal events
+//  Returns XML
 // Serializing to JSON 
-// we should serialize time to an ISO6801-formatted string
+//  We should serialize time to an ISO6801-formatted string
+// Serve serialized JSON via RESTful endpoints
+//
+// We may want to modify constructors to take in the currentSource variable as well
+// This way we can have a separate constructor for each source
+// We can also define base constructors for XML/JSON shared objects
+// Since currentSource is set at the start of each functional branch, this simplifies logic
+// Note that this limits us to sequential rather than concurrent data fetching
 
 namespace Traffic {
 
@@ -43,12 +58,20 @@ DataSource currentSource;
 
 // Get events from all URLs
 void fetchEvents() {
-  std::cout << "\nFetching NYS 511 events:\n\n";
-  getEvents(NYSDOT_EVENTS_URL);
-  std::cout << "\nFetching Monroe County 911 events:\n\n";
-  getEvents(MCNY_EVENTS_URL);
-  std::cout << "\nFetching Ontario 511 events:\n\n";
-  getEvents(ONMT_EVENTS_URL);
+//  std::cout << "\nFetching NYS 511 events:\n\n";
+//  getEvents(NYSDOT_EVENTS_URL);
+//  std::cout << "\nFetching Monroe County 911 events:\n\n";
+//  getEvents(MCNY_EVENTS_URL);
+//  std::cout << "\nFetching Ontario 511 events:\n\n";
+//  getEvents(ONMT_EVENTS_URL);
+
+  // TODO:
+  std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
+  getEvents(ONGOV_EVENTS_URL);
+  std::cout << "\nFetching Ottawa events:\n\n";
+  getEvents(OTT_EVENTS_URL);
+  std::cout << "\nFetching Montreal events:\n\n";
+  getEvents(MTL_EVENTS_URL);
 }
 
 void fetchCameras() {
