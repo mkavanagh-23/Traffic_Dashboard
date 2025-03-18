@@ -32,19 +32,27 @@
 // Since currentSource is set at the start of each functional branch, this simplifies logic
 // Note that this limits us to sequential rather than concurrent data fetching
 
+
 namespace Traffic {
+namespace NYSDOT {
+// API Key
+extern std::string API_KEY;
 
-// API Key(s)
-std::string NYSDOT_API_KEY{""};
+// URL(s)
+extern const std::string EVENTS_URL;
+extern const std::string CAMERAS_URL;
 
-// URL strings
-const std::string NYSDOT_EVENTS_URL{ "https://511ny.org/api/getevents?format=json&key=" };
+// Bounding boxes
+extern const BoundingBox regionSyracuse;
+
+}
+
+
 const std::string ONGOV_EVENTS_URL{ "https://911events.ongov.net/CADInet/app/events.jsp" };
 const std::string MCNY_EVENTS_URL{ "https://www.monroecounty.gov/incidents911.rss" };
 const std::string ONMT_EVENTS_URL{ "https://511on.ca/api/v2/get/event?format=json&lang=en" };
 const std::string OTT_EVENTS_URL{ "https://traffic.ottawa.ca/service/events" };
 const std::string MTL_EVENTS_URL{ "https://www.quebec511.info/Diffusion/Rss/GenererRss.aspx?regn=13000&routes=10;13;15;19;20;25;40;112;117;125;134;136;138;335;520&lang=en" };
-const std::string NYSDOT_CAMERAS_URL{ "https://511ny.org/api/getcameras?format=json&key=" };
 
 // Data structures
 std::unordered_map<std::string, Event> mapEvents;
@@ -52,7 +60,7 @@ std::unordered_map<std::string, Camera> mapCameras;
 
 // Define bounding boxes for region matching
 constexpr BoundingBox regionToronto{ -80.099, -78.509, 44.205, 43.137 };
-constexpr BoundingBox regionSyracuse{ -76.562, -75.606, 43.553, 42.621 };
+
 
 // Static object to store data source for current iteration
 DataSource currentSource;
@@ -60,7 +68,7 @@ DataSource currentSource;
 // Get events from all URLs
 void fetchEvents() {
   std::cout << "\nFetching NYS 511 events:\n\n";
-  getEvents(NYSDOT_EVENTS_URL);
+  getEvents(NYSDOT::EVENTS_URL);
 //  std::cout << "\nFetching Monroe County 911 events:\n\n";
 //  getEvents(MCNY_EVENTS_URL);
 //  std::cout << "\nFetching Ontario 511 events:\n\n";
@@ -77,7 +85,7 @@ void fetchEvents() {
 
 void fetchCameras() {
   std::cout << "\nFetching NYS 511 cameras:\n\n";
-  getCameras(NYSDOT_CAMERAS_URL);
+  getCameras(NYSDOT::CAMERAS_URL);
 }
 
 // Print all events in the map
@@ -94,7 +102,7 @@ void getEnv() {
 
   // Check for valid sourcing
   if(API_KEY) {
-    NYSDOT_API_KEY = API_KEY;
+    NYSDOT::API_KEY = API_KEY;
     std::cout << Output::Colors::GREEN << "[ENV] Successfully sourced API key from local environment.\n" << Output::Colors::END;
   } else
     std::cerr << Output::Colors::RED << "[ENV] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have it set.\n" << Output::Colors::END;
@@ -105,10 +113,10 @@ bool getEvents(std::string url) {
   // Check for Data Source
   if(url.find("511ny.org") != std::string::npos) {
     // Source API key
-    if(NYSDOT_API_KEY.empty())
+    if(NYSDOT::API_KEY.empty())
       getEnv();
-    assert(!NYSDOT_API_KEY.empty() && "Failed to retrieve API key from local environment.");
-    url += NYSDOT_API_KEY;
+    assert(!NYSDOT::API_KEY.empty() && "Failed to retrieve API key from local environment.");
+    url += NYSDOT::API_KEY;
     // Set current Data Source
     currentSource = DataSource::NYSDOT;
   } else if(url.find("511on.ca") != std::string::npos)
@@ -506,10 +514,10 @@ Event& Event::operator=(Event&& other) noexcept {
 // Camera functions
 bool getCameras(std::string url){
   // Source API key
-  if(NYSDOT_API_KEY.empty())
+  if(NYSDOT::API_KEY.empty())
     getEnv();
-  assert(!NYSDOT_API_KEY.empty() && "Failed to retrieve API key from local environment.");
-  url += NYSDOT_API_KEY;
+  assert(!NYSDOT::API_KEY.empty() && "Failed to retrieve API key from local environment.");
+  url += NYSDOT::API_KEY;
   // Set current Data Source
   currentSource = DataSource::NYSDOT;
   
@@ -564,7 +572,7 @@ bool processCamera(const Json::Value& parsedCamera) {
   std::string key = parsedCamera["ID"].asString();
   Location location = { parsedCamera["Latitude"].asDouble(), parsedCamera["Longitude"].asDouble() };
 
-  if(!regionSyracuse.contains(location)) // TODO: Add more regions
+  if(!NYSDOT::regionSyracuse.contains(location)) // TODO: Add more regions
     return false;
 
   auto [camera, inserted] = mapCameras.try_emplace(key, parsedCamera);
