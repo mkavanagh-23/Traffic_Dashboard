@@ -180,6 +180,7 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/include/Data
+    ${CMAKE_SOURCE_DIR}/include/Data/Traffic
     ${CURL_INCLUDE_DIRS}
     ${JSONCPP_INCLUDE_DIRS}
     ${RAPIDXML_INCLUDE_DIRS}

@@ -17,6 +17,7 @@
 //  Parse through each table row
 //  Add logic to detect multiple pages
 //  Refine cleanup logic to account for frequent downtime
+//  Need to develop a method for creating a unique ID string
 // Add logic for Ottawa events
 //  Returns JSON
 // Add logic for montreal events
@@ -58,20 +59,20 @@ DataSource currentSource;
 
 // Get events from all URLs
 void fetchEvents() {
-//  std::cout << "\nFetching NYS 511 events:\n\n";
-//  getEvents(NYSDOT_EVENTS_URL);
+  std::cout << "\nFetching NYS 511 events:\n\n";
+  getEvents(NYSDOT_EVENTS_URL);
 //  std::cout << "\nFetching Monroe County 911 events:\n\n";
 //  getEvents(MCNY_EVENTS_URL);
 //  std::cout << "\nFetching Ontario 511 events:\n\n";
 //  getEvents(ONMT_EVENTS_URL);
 
   // TODO:
-  std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
-  getEvents(ONGOV_EVENTS_URL);
-  std::cout << "\nFetching Ottawa events:\n\n";
-  getEvents(OTT_EVENTS_URL);
-  std::cout << "\nFetching Montreal events:\n\n";
-  getEvents(MTL_EVENTS_URL);
+  //std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
+  //getEvents(ONGOV_EVENTS_URL);
+  //std::cout << "\nFetching Ottawa events:\n\n";
+  //getEvents(OTT_EVENTS_URL);
+  //std::cout << "\nFetching Montreal events:\n\n";
+  //getEvents(MTL_EVENTS_URL);
 }
 
 void fetchCameras() {
