@@ -61,8 +61,17 @@ namespace ONMT {
   extern const BoundingBox regionToronto;
 } // namespace ONMT
 
-const std::string OTT_EVENTS_URL{ "https://traffic.ottawa.ca/service/events" };
-const std::string MTL_EVENTS_URL{ "https://www.quebec511.info/Diffusion/Rss/GenererRss.aspx?regn=13000&routes=10;13;15;19;20;25;40;112;117;125;134;136;138;335;520&lang=en" };
+// Extern OTT data
+namespace OTT {
+  extern const std::string EVENTS_URL;
+  extern const BoundingBox regionOttawa;
+} // namespace OTT
+
+// Extern MTL data
+namespace MTL {
+  extern const std::string EVENTS_URL;
+} // namespace MTL
+
 
 // Data structures
 std::unordered_map<std::string, Event> mapEvents;
@@ -76,10 +85,10 @@ DataSource currentSource;
 void fetchEvents() {
   std::cout << "\nFetching NYS 511 events:\n\n";
   getEvents(NYSDOT::EVENTS_URL);
-//  std::cout << "\nFetching Monroe County 911 events:\n\n";
-//  getEvents(MCNY_EVENTS_URL);
-//  std::cout << "\nFetching Ontario 511 events:\n\n";
-//  getEvents(ONMT_EVENTS_URL);
+  std::cout << "\nFetching Monroe County 911 events:\n\n";
+  getEvents(MCNY::EVENTS_URL);
+  std::cout << "\nFetching Ontario 511 events:\n\n";
+  getEvents(ONMT::EVENTS_URL);
 
   // TODO:
   //std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
