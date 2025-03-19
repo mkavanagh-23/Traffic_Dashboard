@@ -249,7 +249,7 @@ std::optional<system_clock::time_point> toChrono(const std::string& rfc2822){
 }
 } // namespace RFC2822
 
-namespace NYS511 {
+namespace DDMMYYYYHHMMSS {
 
 std::string offsetGMT{ "-0500" };
 
@@ -272,5 +272,5 @@ system_clock::time_point toChrono(const std::string& timeStr) {
   return timePoint;
 }
 
-} // namespace NYS511
+} // namespace DDMMYYYYHHMMSS
 } // namespace Time

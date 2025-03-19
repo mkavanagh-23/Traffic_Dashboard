@@ -53,19 +53,20 @@ namespace ONGOV {
 // Extern MCNY data
 namespace MCNY {
   extern const std::string EVENTS_URL;
-
 } // namespace MCNY
 
-const std::string ONMT_EVENTS_URL{ "https://511on.ca/api/v2/get/event?format=json&lang=en" };
+// Extern ONMT data
+namespace ONMT {
+  extern const std::string EVENTS_URL;
+  extern const BoundingBox regionToronto;
+} // namespace ONMT
+
 const std::string OTT_EVENTS_URL{ "https://traffic.ottawa.ca/service/events" };
 const std::string MTL_EVENTS_URL{ "https://www.quebec511.info/Diffusion/Rss/GenererRss.aspx?regn=13000&routes=10;13;15;19;20;25;40;112;117;125;134;136;138;335;520&lang=en" };
 
 // Data structures
 std::unordered_map<std::string, Event> mapEvents;
 std::unordered_map<std::string, Camera> mapCameras;
-
-// Define bounding boxes for region matching
-constexpr BoundingBox regionToronto{ -80.099, -78.509, 44.205, 43.137 };
 
 
 // Static object to store data source for current iteration
@@ -288,7 +289,7 @@ bool inMarket(const Json::Value& parsedEvent) {
   } else { // If we are and Ontario event check if we are in region 
     // Extract the location
     Location location{ parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble() };
-    if(!regionToronto.contains(location))
+    if(!ONMT::regionToronto.contains(location))
       return false;
   }
   // Check for matching incident type
@@ -314,7 +315,7 @@ std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent){
   }
   // Else return a NYSDOT time
   std::string time = parsedEvent["LastUpdated"].asString();
-  return Time::NYS511::toChrono(time);
+  return Time::DDMMYYYYHHMMSS::toChrono(time);
 }
 
 // Delete all events that match given keys from the map
@@ -353,8 +354,8 @@ Event::Event(const Json::Value& parsedEvent)
         std::cerr << Output::Colors::RED << "[JSON Event] Error: Failed to source dataSource member during construction\n"
                   << Output::Colors::END;
       if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
-        timeReported = Time::NYS511::toChrono(parsedEvent["Reported"].asString());
-        timeUpdated = Time::NYS511::toChrono(parsedEvent["LastUpdated"].asString());
+        timeReported = Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["Reported"].asString());
+        timeUpdated = Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["LastUpdated"].asString());
       }
       break;
     // Construct members for ONMT

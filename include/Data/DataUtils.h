@@ -88,11 +88,11 @@ std::optional<system_clock::time_point> toChrono(const std::string& rfc2822);
 
 } // namespace RFC2822
 
-namespace NYS511 {
+namespace DDMMYYYYHHMMSS {
 
 system_clock::time_point toChrono(const std::string& timeStr);
 
-} // namespace NYS511
+} // namespace DDMMYYYYHHMMSS
 } // namespace Time
 
 #endif
