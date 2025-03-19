@@ -6,6 +6,7 @@
 
 namespace Traffic {
 namespace MCNY {
+extern const std::string EVENTS_URL;
 
 bool processEvent(rapidxml::xml_node<>* parsedEvent);
 std::pair<std::string, std::string> parseDescription(rapidxml::xml_node<>* description);

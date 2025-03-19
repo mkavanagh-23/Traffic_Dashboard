@@ -1,6 +1,10 @@
 #include "Traffic.h"
 #include "NYSDOT.h"
 #include "MCNY.h"
+#include "ONMT.h"
+#include "MTL.h"
+#include "OTT.h"
+#include "ONGOV.h"
 #include "DataUtils.h"
 #include "Output.h"
 #include "rapidxml.hpp"
@@ -37,46 +41,9 @@
 
 namespace Traffic {
 
-// Extern NYSDOT data
-namespace NYSDOT {
-  extern std::string API_KEY;
-  extern const std::string EVENTS_URL;
-  extern const std::string CAMERAS_URL;
-  extern const BoundingBox regionSyracuse;
-} // namespace NYSDOT
-
-// Extern ONGOV data
-namespace ONGOV {
-  extern const std::string EVENTS_URL;
-} // namespace ONGOV
-
-// Extern MCNY data
-namespace MCNY {
-  extern const std::string EVENTS_URL;
-} // namespace MCNY
-
-// Extern ONMT data
-namespace ONMT {
-  extern const std::string EVENTS_URL;
-  extern const BoundingBox regionToronto;
-} // namespace ONMT
-
-// Extern OTT data
-namespace OTT {
-  extern const std::string EVENTS_URL;
-  extern const BoundingBox regionOttawa;
-} // namespace OTT
-
-// Extern MTL data
-namespace MTL {
-  extern const std::string EVENTS_URL;
-} // namespace MTL
-
-
 // Data structures
 std::unordered_map<std::string, Event> mapEvents;
 std::unordered_map<std::string, Camera> mapCameras;
-
 
 // Static object to store data source for current iteration
 DataSource currentSource;
@@ -92,11 +59,11 @@ void fetchEvents() {
 
   // TODO:
   //std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
-  //getEvents(ONGOV_EVENTS_URL);
+  //getEvents(ONGOV::EVENTS_URL);
   //std::cout << "\nFetching Ottawa events:\n\n";
-  //getEvents(OTT_EVENTS_URL);
+  //getEvents(OTT::EVENTS_URL);
   //std::cout << "\nFetching Montreal events:\n\n";
-  //getEvents(MTL_EVENTS_URL);
+  //getEvents(MTL::EVENTS_URL);
 }
 
 void fetchCameras() {
