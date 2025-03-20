@@ -42,6 +42,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 find_package(CURL QUIET)
 find_package(jsoncpp QUIET)
 find_package(RapidXML QUIET)
+find_package(Gumbo QUIET)
 find_package(Poco COMPONENTS Net Foundation Util QUIET)
 
 # External dependencies directory
@@ -73,14 +74,20 @@ endif()
 
 # JsonCpp setup (only if not found in system)
 if(NOT jsoncpp_FOUND)
-    message(STATUS "JsonCpp not found, will be downloaded and built")
-    FetchContent_Declare(
-        jsoncpp
-        GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp.git
-        GIT_TAG 1.9.5  # Use a stable version
-        GIT_SHALLOW TRUE
-    )
-    FetchContent_MakeAvailable(jsoncpp)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(JSONCPP jsoncpp)
+    if(NOT jsoncpp_FOUND)
+        message(STATUS "JsonCpp not found, will be downloaded and built")
+        FetchContent_Declare(
+            jsoncpp
+            GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp.git
+            GIT_TAG 1.9.5  # Use a stable version
+            GIT_SHALLOW TRUE
+        )
+        FetchContent_MakeAvailable(jsoncpp)
+    else()
+        message(STATUS "JsonCpp found, using system version ${jsoncpp_VERSION}")
+    endif()
 else()
     message(STATUS "JsonCpp found, using system version ${jsoncpp_VERSION}")
 endif()
@@ -97,6 +104,26 @@ if(NOT RapidXML_FOUND)
     FetchContent_MakeAvailable(rapidxml)
 else()
     message(STATUS "RapidXML found, using system version ${RapidXML_VERSION}")
+endif()
+
+# Gumbo Parser setup (only if not found)
+if(NOT Gumbo_FOUND)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GUMBO gumbo)
+    if(NOT GUMBO_FOUND)
+        message(STATUS "Gumbo Parser not found, will be downloaded")
+        FetchContent_Declare(
+            gumbo
+            GIT_REPOSITORY https://github.com/google/gumbo-parser.git
+            GIT_TAG master # You might want to use a specific tag/commit for stability
+            GIT_SHALLOW TRUE
+        )
+        FetchContent_MakeAvailable(gumbo)
+    else()
+        message(STATUS "Gumbo Parser found, using system version ${RapidXML_VERSION}")
+    endif()
+else()
+    message(STATUS "Gumbo Parser found, using system version ${RapidXML_VERSION}")
 endif()
 
 # Function to download and setup Poco libraries if not found
@@ -166,6 +193,12 @@ else()
     set(RAPIDXML_INCLUDE_DIRS "${rapidxml_SOURCE_DIR}")  # RapidXML is typically header-only
 endif()
 
+if(Gumbo_FOUND)
+    set(GUMBO_INCLUDE_DIRS "${GUMBO_INCLUDE_DIR}")
+else()
+    set(GUMBO_INCLUDE_DIRS "${Gumbo_SOURCE_DIR}/src")
+endif()
+
 if(Poco_FOUND)
     set(POCO_INCLUDE_DIRS "${Poco_INCLUDE_DIRS}")
 else()
@@ -180,9 +213,11 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/include/Data
+    ${CMAKE_SOURCE_DIR}/include/Data/Traffic
     ${CURL_INCLUDE_DIRS}
     ${JSONCPP_INCLUDE_DIRS}
     ${RAPIDXML_INCLUDE_DIRS}
+    ${GUMBO_INCLUDE_DIRS}
     ${POCO_INCLUDE_DIRS}
 )
 
@@ -191,6 +226,7 @@ target_link_libraries(${PROJECT_NAME}
     ${CURL_LIBRARIES}
     jsoncpp_lib
     ${RAPIDXML_LIBRARIES}
+    ${GUMBO_LIBRARIES}
     Poco::Net
     Poco::Foundation
     Poco::Util

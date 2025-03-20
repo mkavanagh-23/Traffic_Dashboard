@@ -30,6 +30,7 @@ std::ostream& operator<<(std::ostream& out, const Region& region);
 
 enum class DataSource {
   NYSDOT,
+  ONGOV,
   ONMT,
   MCNY,
   OTT,
@@ -121,13 +122,9 @@ bool processData(std::string& data, const std::vector<std::string>& headers);   
 bool parseEvents(const Json::Value& parsedData);
 bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData);
 bool processEvent(const Json::Value& parsedEvent);
-bool processEvent(rapidxml::xml_node<>* event);
-std::pair<std::string, std::string> parseDescription(rapidxml::xml_node<>* description);
 bool containsEvent(const Json::Value& events, const std::string& key);
 bool containsEvent(rapidxml::xml_document<>& events, const std::string& key);
 bool inMarket(const Json::Value& parsedEvent);
-bool inRegionNY(const Json::Value& parsedEvent);
-Region getRegionNY(const std::string& regionName);
 bool isIncident(const Json::Value& parsedEvent);
 std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent);
 void deleteEvents(std::vector<std::string> keys);

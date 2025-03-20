@@ -1,4 +1,10 @@
 #include "Traffic.h"
+#include "NYSDOT.h"
+#include "MCNY.h"
+#include "ONMT.h"
+#include "MTL.h"
+#include "OTT.h"
+#include "ONGOV.h"
 #include "DataUtils.h"
 #include "Output.h"
 #include "rapidxml.hpp"
@@ -6,34 +12,39 @@
 #include <optional>
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include <cassert>
 #include <unordered_map>
 
 // TODO: 
+// Integrate regex parsing of MCNY event titles (already built externally)
+//  Do we also need to use REGEX to parse through NYSDOT and ONMT event titles?
+// Add logic for ONGOV events
+//  Returns HTML
+//  Parse through each table row
+//  Add logic to detect multiple pages
+//  Refine cleanup logic to account for frequent downtime
+//  Need to develop a method for creating a unique ID string
 // Add logic for Ottawa events
-//  https://traffic.ottawa.ca/service/events
 //  Returns JSON
+// Add logic for montreal events
+//  Returns XML
 // Serializing to JSON 
-// we should serialize time to an ISO6801-formatted string
+//  We should serialize time to an ISO6801-formatted string
+// Serve serialized JSON via RESTful endpoints
+//
+// We may want to modify constructors to take in the currentSource variable as well
+// This way we can have a separate constructor for each source
+// We can also define base constructors for XML/JSON shared objects
+// Since currentSource is set at the start of each functional branch, this simplifies logic
+// Note that this limits us to sequential rather than concurrent data fetching
+
 
 namespace Traffic {
-
-// API Key(s)
-std::string NYSDOT_API_KEY{""};
-
-// URL strings
-const std::string NYSDOT_EVENTS_URL{"https://511ny.org/api/getevents?format=json&key="};
-const std::string NYSDOT_CAMERAS_URL{"https://511ny.org/api/getcameras?format=json&key="};
-const std::string ONMT_EVENTS_URL{"https://511on.ca/api/v2/get/event?format=json&lang=en"};
-const std::string MCNY_EVENTS_URL{ "https://www.monroecounty.gov/incidents911.rss" };
 
 // Data structures
 std::unordered_map<std::string, Event> mapEvents;
 std::unordered_map<std::string, Camera> mapCameras;
-
-// Define bounding boxes for region matching
-constexpr BoundingBox regionToronto{ -80.099, -78.509, 44.205, 43.137 };
-constexpr BoundingBox regionSyracuse{ -76.562, -75.606, 43.553, 42.621 };
 
 // Static object to store data source for current iteration
 DataSource currentSource;
@@ -41,16 +52,24 @@ DataSource currentSource;
 // Get events from all URLs
 void fetchEvents() {
   std::cout << "\nFetching NYS 511 events:\n\n";
-  getEvents(NYSDOT_EVENTS_URL);
+  getEvents(NYSDOT::EVENTS_URL);
   std::cout << "\nFetching Monroe County 911 events:\n\n";
-  getEvents(MCNY_EVENTS_URL);
+  getEvents(MCNY::EVENTS_URL);
   std::cout << "\nFetching Ontario 511 events:\n\n";
-  getEvents(ONMT_EVENTS_URL);
+  getEvents(ONMT::EVENTS_URL);
+
+  // TODO:
+  std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
+  getEvents(ONGOV::EVENTS_URL);
+  //std::cout << "\nFetching Ottawa events:\n\n";
+  //getEvents(OTT::EVENTS_URL);
+  //std::cout << "\nFetching Montreal events:\n\n";
+  //getEvents(MTL::EVENTS_URL);
 }
 
 void fetchCameras() {
   std::cout << "\nFetching NYS 511 cameras:\n\n";
-  getCameras(NYSDOT_CAMERAS_URL);
+  getCameras(NYSDOT::CAMERAS_URL);
 }
 
 // Print all events in the map
@@ -60,34 +79,23 @@ void printEvents() {
   }
 }
 
-// Source data from local environment
-void getEnv() {
-  // Retrieve API Key from local environment
-  const char* API_KEY = std::getenv("NYSDOT_API_KEY");
-
-  // Check for valid sourcing
-  if(API_KEY) {
-    NYSDOT_API_KEY = API_KEY;
-    std::cout << Output::Colors::GREEN << "[ENV] Successfully sourced API key from local environment.\n" << Output::Colors::END;
-  } else
-    std::cerr << Output::Colors::RED << "[ENV] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have it set.\n" << Output::Colors::END;
-}
-
 // Retrieve all events from the URL
 bool getEvents(std::string url) {
   // Check for Data Source
   if(url.find("511ny.org") != std::string::npos) {
     // Source API key
-    if(NYSDOT_API_KEY.empty())
-      getEnv();
-    assert(!NYSDOT_API_KEY.empty() && "Failed to retrieve API key from local environment.");
-    url += NYSDOT_API_KEY;
+    if(NYSDOT::API_KEY.empty())
+      NYSDOT::getEnv();
+    assert(!NYSDOT::API_KEY.empty() && "Failed to retrieve API key from local environment.");
+    url += NYSDOT::API_KEY;
     // Set current Data Source
     currentSource = DataSource::NYSDOT;
   } else if(url.find("511on.ca") != std::string::npos)
     currentSource = DataSource::ONMT;
   else if(url.find("monroecounty.gov") != std::string::npos)
     currentSource = DataSource::MCNY;
+  else if(url.find("ongov.net") != std::string::npos)
+    currentSource = DataSource::ONGOV;
   else {
     currentSource = DataSource::UNKNOWN;
     std::cerr << Output::Colors::RED << "[Traffic] ERROR: Source domain does not match program data requirements.\n" << Output::Colors::END;
@@ -126,7 +134,7 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
   // Extract the "Content-Type" header
   std::string contentType = cURL::getContentType(headers);
   
-  // Check for valid JSON or XML response and parse
+  // Check for valid JSON, XML, or HTML response and parse
   if(contentType.find("application/json") != std::string::npos) {
     auto parsedData = JSON::parseData(data);  // Returns a Json::Value object
     parseEvents(parsedData);
@@ -140,6 +148,25 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
     // Parse the events
     parseEvents(std::move(parsedData)); // Data held by unique_ptr so transfer ownership with std::move
     // NOTE: parsedData has now been invalidated, attmpting to access will result in UB
+  } else if(contentType.find("text/html") != std::string::npos) {
+    auto parsedData = ONGOV::Gumbo::parseData(data);
+    // Check for parsing success
+    if(!parsedData) {
+      std::cerr << Output::Colors::RED << "[HTML] Error: parsing failed.\n" << Output::Colors::END;
+      return false;
+    }
+    // TODO:
+    // Process the vector of ONGOV events into Traffic events
+    // FIX: MAKE SURE TO VALIDATE DATA FIRST
+    // ALREADY HAD A RUNTIME CRASH WHEN TRYING TO STOI INVALID DATA
+    auto eventsVector = std::move(*parsedData);
+    std::cout << '\n';
+    for(const auto& event: eventsVector) {
+      auto time = Time::MMDDYYHHMM::toChrono(event.date);
+      std::tm localTime = Time::toLocalPrint(time);
+      std::cout << event.title << '\n'
+                << "  " << std::put_time(&localTime, "%T - %F") << '\n';
+    }
   } else {
     // Error and exit if invalid type returned
     std::cerr << Output::Colors::RED << "[cURL] ERROR: Unsupported \"Content-Type\": '" <<  contentType << '\n' << Output::Colors::END;
@@ -177,7 +204,7 @@ bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
   
   // Iterate throgh each event in the document tree
   for(rapidxml::xml_node<>* event = channel->first_node("item"); event; event = event->next_sibling()) {
-    processEvent(event); 
+    MCNY::processEvent(event); 
   }
   std::cout << Output::Colors::GREEN << "\n[XML] Successfully parsed root tree." << Output::Colors::END << '\n';
   
@@ -216,44 +243,6 @@ bool processEvent(const Json::Value& parsedEvent) {
   return true;
 }
 
-// Process an XML event for storage
-bool processEvent(rapidxml::xml_node<>* parsedEvent) {
-  // Extract Status and ID as a pair
-  std::pair<std::string, std::string> description = parseDescription(parsedEvent->first_node("description"));
-  auto& [status, key] = description;
-
-  // Try to insert a new Event at event, inserted = false if it already exists
-  auto [event, inserted] = mapEvents.try_emplace(key, parsedEvent, description);
-  // Check if we added a new event
-  if(!inserted) {
-    if(event->second.getStatus() != status) {
-      event->second = Event(parsedEvent, description);
-      std::cout << Output::Colors::MAGENTA << "[XML] Updated event: " << key << Output::Colors::END << '\n';
-      return true;
-    }
-    return false;
-  }
-  return true;
-}
-
-// Parse status and ID from event description field
-std::pair<std::string, std::string> parseDescription(rapidxml::xml_node<>* description) {
-  // Extract items from the description
-  std::stringstream ss(description->value());
-  std::string token;
-  std::vector<std::string> tokens;
-  
-  // Elements delimited by ','
-  while(std::getline(ss, token, ',')) {
-    tokens.push_back(token);
-  }
-
-  // First token is status
-  // Second token is ID
-  return { tokens[0].substr(tokens[0].find(":") + 2), 
-           tokens[1].substr(tokens[1].find(":") + 2) };
-}
-
 // Check if retrieved JSON data contains an event with given key
 bool containsEvent(const Json::Value& events, const std::string& key) {
   for(const auto& event : events) {
@@ -278,7 +267,7 @@ bool containsEvent(rapidxml::xml_document<>& events, const std::string& key) {
   // Iterate through the XML document
   for(rapidxml::xml_node<>* event = channel->first_node("item"); event; event = event->next_sibling()) {
     // Extract key from description
-    std::pair<std::string, std::string> description = parseDescription(event->first_node("description"));
+    std::pair<std::string, std::string> description = MCNY::parseDescription(event->first_node("description"));
     auto& [status, parsedKey] = description;
     // Check for matching key value
     if(parsedKey == key)
@@ -293,12 +282,12 @@ bool containsEvent(rapidxml::xml_document<>& events, const std::string& key) {
 bool inMarket(const Json::Value& parsedEvent) {
   // If we are a NYS event check if we are in region
   if(parsedEvent.isMember("RegionName")) {
-    if(!inRegionNY(parsedEvent))
+    if(!NYSDOT::inRegion(parsedEvent))
       return false;
   } else { // If we are and Ontario event check if we are in region 
     // Extract the location
     Location location{ parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble() };
-    if(!regionToronto.contains(location))
+    if(!ONMT::regionToronto.contains(location))
       return false;
   }
   // Check for matching incident type
@@ -306,31 +295,6 @@ bool inMarket(const Json::Value& parsedEvent) {
     return false;
   
   return true;
-}
-
-// Check if the parsed event is within an NYSDOT region
-bool inRegionNY(const Json::Value& parsedEvent) {
-  std::string region = parsedEvent["RegionName"].asString();
-  return (region == "Central Syracuse Utica Area" 
-       || region == "Finger Lakes Rochester Area" 
-       || region == "Niagara Buffalo Area" 
-       || region == "Capital Region Albany Saratoga Area" 
-       || region == "Southern Tier Homell Elmira Binghamton Area");
-}
-
-Region getRegionNY(const std::string& regionName) {
-  if(regionName == "Central Syracuse Utica Area")
-    return Region::Syracuse;
-  else if(regionName == "Finger Lakes Rochester Area")
-    return Region::Rochester;
-  else if(regionName == "Niagara Buffalo Area")
-    return Region::Buffalo;
-  else if(regionName == "Capital Region Albany Saratoga Area")
-    return Region::Albany;
-  else if(regionName == "Southern Tier Homell Elmira Binghamton Area")
-    return Region::Binghamton;
-  else
-    return Region::UNKNOWN;
 }
 
 // Check for matching incident type
@@ -349,7 +313,7 @@ std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent){
   }
   // Else return a NYSDOT time
   std::string time = parsedEvent["LastUpdated"].asString();
-  return Time::NYS511::toChrono(time);
+  return Time::DDMMYYYYHHMMSS::toChrono(time);
 }
 
 // Delete all events that match given keys from the map
@@ -383,13 +347,13 @@ Event::Event(const Json::Value& parsedEvent)
   switch(dataSource) {
     // Construct members for NYSDOT
     case DataSource::NYSDOT:
-      region = getRegionNY(parsedEvent["RegionName"].asString());
+      region = NYSDOT::getRegion(parsedEvent["RegionName"].asString());
       if(region == Region::UNKNOWN)
         std::cerr << Output::Colors::RED << "[JSON Event] Error: Failed to source dataSource member during construction\n"
                   << Output::Colors::END;
       if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
-        timeReported = Time::NYS511::toChrono(parsedEvent["Reported"].asString());
-        timeUpdated = Time::NYS511::toChrono(parsedEvent["LastUpdated"].asString());
+        timeReported = Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["Reported"].asString());
+        timeUpdated = Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["LastUpdated"].asString());
       }
       break;
     // Construct members for ONMT
@@ -479,10 +443,10 @@ Event& Event::operator=(Event&& other) noexcept {
 // Camera functions
 bool getCameras(std::string url){
   // Source API key
-  if(NYSDOT_API_KEY.empty())
-    getEnv();
-  assert(!NYSDOT_API_KEY.empty() && "Failed to retrieve API key from local environment.");
-  url += NYSDOT_API_KEY;
+  if(NYSDOT::API_KEY.empty())
+    NYSDOT::getEnv();
+  assert(!NYSDOT::API_KEY.empty() && "Failed to retrieve API key from local environment.");
+  url += NYSDOT::API_KEY;
   // Set current Data Source
   currentSource = DataSource::NYSDOT;
   
@@ -537,7 +501,7 @@ bool processCamera(const Json::Value& parsedCamera) {
   std::string key = parsedCamera["ID"].asString();
   Location location = { parsedCamera["Latitude"].asDouble(), parsedCamera["Longitude"].asDouble() };
 
-  if(!regionSyracuse.contains(location)) // TODO: Add more regions
+  if(!NYSDOT::regionSyracuse.contains(location)) // TODO: Add more regions
     return false;
 
   auto [camera, inserted] = mapCameras.try_emplace(key, parsedCamera);

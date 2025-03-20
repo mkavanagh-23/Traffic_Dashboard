@@ -34,7 +34,7 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* out
 
 // Fetch a data string from a remote source
 std::tuple<Result, std::string, std::vector<std::string>> getData(const std::string& url){
-  CURL* curl{ curl_easy_init() };   // cURL malloc
+  Handle curl;   // cURL malloc (Initialize an object via RAII)
   std::string responseData;         // Create a string to hold the data
   std::vector<std::string> headers; // Create a vector to hold the response headers
   
@@ -45,17 +45,17 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
   }
   
   // Set cURL options
-  curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // Set the cURL url
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // Set the write function
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);     // Set the data to write
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L); // Set a 10 second timeout
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
+  curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str()); // Set the cURL url
+  curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, WriteCallback); // Set the write function
+  curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &responseData);     // Set the data to write
+  curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, 10L); // Set a 10 second timeout
+  curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
   // Set up header handling
-  curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback); // Custom function to capture headers
-  curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headers);           // Pass headers vector to function
+  curl_easy_setopt(curl.get(), CURLOPT_HEADERFUNCTION, HeaderCallback); // Custom function to capture headers
+  curl_easy_setopt(curl.get(), CURLOPT_HEADERDATA, &headers);           // Pass headers vector to function
     
   // Retrieve the data
-  CURLcode res = curl_easy_perform(curl);
+  CURLcode res = curl_easy_perform(curl.get());
 
   // Check for errors
   if(res != CURLE_OK) {
@@ -70,9 +70,52 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
     else
       return { Result::REQUEST_FAILED, "", {} };
   }
+  return { Result::SUCCESS, responseData, headers };
+}
 
-  // Cleanup the cURL memory
-  curl_easy_cleanup(curl);
+// POST data to a remote endpoint
+std::tuple<Result, std::string, std::vector<std::string>> postData(const std::string& url, const std::string& postData) {
+  Handle curl;   // cURL malloc (RAII object)
+  std::string responseData;         // Create a string to hold the data
+  std::vector<std::string> headers; // Create a vector to hold the response headers
+  
+  // Check for successful initialization
+  if(!curl) {
+    std::cerr << Output::Colors::RED << "[cURL] Failed to initialize cURL." << Output::Colors::END << '\n';
+    return { Result::INIT_FAILED, "", {} };
+  }
+  
+  // Set cURL options
+  curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str()); // Set the cURL url
+  curl_easy_setopt(curl.get(), CURLOPT_POST, 1L); // Set the cURL POST method
+  curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDS, postData.c_str()); // Set the POST data
+  curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, 10L); // Set a 10 second timeout
+  curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
+  
+  // Write the callback data 
+  curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, WriteCallback); // Set the write function
+  curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &responseData);     // Set the data to write
+
+  // And write the header response
+  curl_easy_setopt(curl.get(), CURLOPT_HEADERFUNCTION, HeaderCallback); // Custom function to capture headers
+  curl_easy_setopt(curl.get(), CURLOPT_HEADERDATA, &headers);           // Pass headers vector to function
+
+  // POST the data
+  CURLcode res = curl_easy_perform(curl.get());
+  
+  // Check for errors
+  if(res != CURLE_OK) {
+    std::cerr << Output::Colors::RED << "[cURL] Error POSTing data: " << curl_easy_strerror(res) << ".\n";
+    
+    if(res == CURLE_UNSUPPORTED_PROTOCOL)
+      return { Result::UNSUPPORTED_PROTOCOL, "", {} };
+    else if(res == CURLE_URL_MALFORMAT)
+      return { Result::BAD_URL, "", {} };
+    else if(res == CURLE_OPERATION_TIMEDOUT)
+      return { Result::TIMEOUT, "", {} };
+    else
+      return { Result::REQUEST_FAILED, "", {} };
+  }
   return { Result::SUCCESS, responseData, headers };
 }
 
@@ -81,7 +124,7 @@ std::string getContentType(const std::vector<std::string>& headers) {
   // Iterate through each header
   for(const auto& header : headers) {
     // Check for the "Content-Type" header
-    if(header.find("content-type") != std::string::npos) {
+    if(header.find("content-type") != std::string::npos || header.find("Content-Type") != std::string::npos) {
       // Set an iterator to the start of the value string
       size_t pos = header.find(":");
       // Check if the key has a value
@@ -153,6 +196,8 @@ std::ostream &operator<<(std::ostream &out, const Location &location) {
 
 namespace Time {
 using namespace std::chrono;
+
+std::string offsetGMT{ "-0400" };
 
 // Create a local formatted time string for printing from a time point object
 std::tm toLocalPrint(const system_clock::time_point& time) {
@@ -249,9 +294,32 @@ std::optional<system_clock::time_point> toChrono(const std::string& rfc2822){
 }
 } // namespace RFC2822
 
-namespace NYS511 {
+namespace MMDDYYHHMM {
 
-std::string offsetGMT{ "-0500" };
+// Example string: "03/20/25 07:04"
+
+system_clock::time_point toChrono(const std::string& timeStr) {
+  int parsedMonth = std::stoi(timeStr.substr(0, 2));
+  int parsedDay = std::stoi(timeStr.substr(3, 2));
+  int parsedYear = std::stoi(timeStr.substr(6, 2)) + 2000;  // Adjust year for current century
+  int parsedHours = std::stoi(timeStr.substr(9, 2));
+  int parsedMinutes = std::stoi(timeStr.substr(12, 2));
+
+  // Create a local time point object
+  system_clock::time_point timePoint = sys_days(year_month_day(year(parsedYear), month(parsedMonth), day(parsedDay)))
+                                     + hours(parsedHours) + minutes(parsedMinutes);
+  
+  // Apply GMT-offset to convert to UTC 
+  toUTC(timePoint, offsetGMT);
+
+  return timePoint;
+}
+
+} // namespace MMDDYYHHMM
+
+namespace DDMMYYYYHHMMSS {
+
+// Example string: "26/04/2025 10:30:00"
 
 system_clock::time_point toChrono(const std::string& timeStr) {
   // Extract time components into ints
@@ -272,5 +340,5 @@ system_clock::time_point toChrono(const std::string& timeStr) {
   return timePoint;
 }
 
-} // namespace NYS511
+} // namespace DDMMYYYYHHMMSS
 } // namespace Time
