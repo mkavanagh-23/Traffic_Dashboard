@@ -76,29 +76,66 @@ bool getCameras(std::string url);
 bool parseCameras(const std::string& data);
 bool processCamera(const Json::Value& parsedCamera);
 
-class Event {
+//class Event {
+//private:
+//  std::string ID; // OTT - Convert from int
+//  DataSource dataSource;
+//  std::string status{ "Active" };
+//  Region region;
+//  std::string roadwayName{ "Unknown" }; // OTT - Parse from 'headline'
+//  std::string directionOfTravel{ "None" };  // OTT - Parse from 'headline'
+//  std::string description;  // MCNY 'title' field -- OTT 'message' field
+//  std::chrono::system_clock::time_point timeReported; // OTT 'created' "2025-03-11 12:45:00"
+//  std::chrono::system_clock::time_point timeUpdated;  // OTT 'updated' "2025-03-11 12:45:00"
+//  Location location;  // OTT - 'geodata'{'coordinates'"[double_Latitude, double_Longitude]"}
+//  //std::vector<Camera> cameras;
+//
+//public:
+//  // Constructors
+//  Event(const Json::Value& parsedEvent);
+//  Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &description);
+//  Event(Event&& other) noexcept;
+//  Event& operator=(Event&& other) noexcept;
+//
+//  // Operators
+//  friend std::ostream &operator<<(std::ostream &out, const Event &event);
+//
+//  // Accessors
+//  std::string_view getID() const { return ID; }
+//  DataSource getSource() const { return dataSource; }
+//  std::string_view getStatus() const { return status; }
+//  std::chrono::system_clock::time_point getLastUpdated() const { return timeUpdated; }
+//  Region getRegion() const { return region; }
+//  Location getLocation() const { return location; }
+//  std::string_view getDescription() const { return description; }
+//  //const std::vector<Camera>& getCameras() const { return cameras; } // Return by const reference, ensure no dangling references!!!
+//}; // class Event
+
+class Event2 {
 private:
-  std::string ID; // OTT - Convert from int
+  std::string ID;
+  std::string URL{ "N/A" };
   DataSource dataSource;
-  std::string status{ "Active" };
   Region region;
-  std::string roadwayName{ "Unknown" }; // OTT - Parse from 'headline'
-  std::string directionOfTravel{ "None" };  // OTT - Parse from 'headline'
-  std::string description;  // MCNY 'title' field -- OTT 'message' field
+  std::string title{ "N/A" };
+  std::string status{ "Active" };
+  std::string mainStreet{ "N/A" };
+  std::string crossStreet{ "N/A" };
+  std::string direction{ "N/A" };
+  std::string description{ "N/A" }; // Holds full unformatted event string
+  Location location;
   std::chrono::system_clock::time_point timeReported; // OTT 'created' "2025-03-11 12:45:00"
   std::chrono::system_clock::time_point timeUpdated;  // OTT 'updated' "2025-03-11 12:45:00"
-  Location location;  // OTT - 'geodata'{'coordinates'"[double_Latitude, double_Longitude]"}
-  //std::vector<Camera> cameras;
 
 public:
   // Constructors
-  Event(const Json::Value& parsedEvent);
-  Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &description);
-  Event(Event&& other) noexcept;
-  Event& operator=(Event&& other) noexcept;
+  Event2(const Json::Value& parsedEvent);
+  Event2(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &description);
+  Event2(Event2&& other) noexcept;
 
   // Operators
-  friend std::ostream &operator<<(std::ostream &out, const Event &event);
+  Event2& operator=(Event2&& other) noexcept;
+  friend std::ostream &operator<<(std::ostream &out, const Event2 &event);
 
   // Accessors
   std::string_view getID() const { return ID; }
@@ -108,11 +145,11 @@ public:
   Region getRegion() const { return region; }
   Location getLocation() const { return location; }
   std::string_view getDescription() const { return description; }
-  //const std::vector<Camera>& getCameras() const { return cameras; } // Return by const reference, ensure no dangling references!!!
-}; // class Event
+};
 
 // Define extern event data structures
-extern std::unordered_map<std::string, Event> mapEvents;
+//extern std::unordered_map<std::string, Event> mapEvents;
+extern std::unordered_map<std::string, Event2> mapEvents2;
 
 // Get events from all sources
 void fetchEvents();
