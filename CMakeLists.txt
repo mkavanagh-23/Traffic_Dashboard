@@ -40,7 +40,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Attempt to find system libraries first
 find_package(CURL QUIET)
-find_package(jsoncpp QUIET)
+find_package(JsonCpp QUIET)
 find_package(RapidXML QUIET)
 find_package(Gumbo QUIET)
 find_package(Poco COMPONENTS Net Foundation Util QUIET)
@@ -73,10 +73,10 @@ else()
 endif()
 
 # JsonCpp setup (only if not found in system)
-if(NOT jsoncpp_FOUND)
+if(NOT JsonCpp_FOUND)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(JSONCPP jsoncpp)
-    if(NOT jsoncpp_FOUND)
+  if(NOT JSONCPP_FOUND)
         message(STATUS "JsonCpp not found, will be downloaded and built")
         FetchContent_Declare(
             jsoncpp
@@ -224,7 +224,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE
     ${CURL_LIBRARIES}
-    jsoncpp_lib
+    ${JSONCPP_LIBRARIES}
     ${RAPIDXML_LIBRARIES}
     ${GUMBO_LIBRARIES}
     Poco::Net
