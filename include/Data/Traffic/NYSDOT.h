@@ -1,9 +1,14 @@
 #ifndef NYSDOT_H
 #define NYSDOT_H
 
-#include <jsoncpp/json/json.h>
 #include <string>
 #include "Traffic.h"
+
+#ifdef JSONCPP_WITH_SUBDIR
+#include <jsoncpp/json/json.h>
+#else
+#include <json/json.h>
+#endif
 
 namespace Traffic {
 namespace NYSDOT {

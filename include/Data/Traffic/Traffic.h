@@ -4,7 +4,6 @@
 #include "DataUtils.h"
 #include "Output.h"
 #include <iostream>
-#include <jsoncpp/json/json.h>
 #include <memory>
 #include <rapidxml.hpp>
 #include <string>
@@ -13,6 +12,12 @@
 #include <vector>
 #include <chrono>
 #include <iostream>
+
+#ifdef JSONCPP_WITH_SUBDIR
+#include <jsoncpp/json/json.h>
+#else
+#include <json/json.h>
+#endif
 
 namespace Traffic {
 
