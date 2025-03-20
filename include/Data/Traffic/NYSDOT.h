@@ -1,7 +1,7 @@
 #ifndef NYSDOT_H
 #define NYSDOT_H
 
-#include <json/json.h>
+#include <jsoncpp/json/json.h>
 #include <string>
 #include "Traffic.h"
 

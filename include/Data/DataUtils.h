@@ -2,7 +2,7 @@
 #define DATA_H
 
 #include <curl/curl.h>
-#include <json/json.h>
+#include <jsoncpp/json/json.h>
 #include <rapidxml.hpp>
 #include <gumbo.h>
 #include <string>
