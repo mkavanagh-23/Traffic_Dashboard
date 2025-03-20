@@ -9,13 +9,9 @@
 #include <regex>
 #include <chrono>
 #include <curl/curl.h>
+#include <json/json.h>
 #include <rapidxml.hpp>
 
-#ifdef JSONCPP_WITH_SUBDIR
-#include <jsoncpp/json/json.h>
-#else
-#include <json/json.h>
-#endif
 
 namespace cURL {
 

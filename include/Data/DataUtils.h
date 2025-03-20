@@ -2,6 +2,7 @@
 #define DATA_H
 
 #include <curl/curl.h>
+#include <json/json.h>
 #include <rapidxml.hpp>
 #include <gumbo.h>
 #include <string>
@@ -11,11 +12,6 @@
 #include <tuple>
 #include <chrono>
 
-#ifdef JSONCPP_WITH_SUBDIR
-#include <jsoncpp/json/json.h>
-#else
-#include <json/json.h>
-#endif
 
 // This file holds all functionality for retrieving and filtering basic data from CURL in XML and JSON formats
 
