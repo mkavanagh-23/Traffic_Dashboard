@@ -73,6 +73,52 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
   return { Result::SUCCESS, responseData, headers };
 }
 
+// POST data to a remote endpoint
+std::tuple<Result, std::string, std::vector<std::string>> postData(const std::string& url, const std::string& postData) {
+  Handle curl;   // cURL malloc (RAII object)
+  std::string responseData;         // Create a string to hold the data
+  std::vector<std::string> headers; // Create a vector to hold the response headers
+  
+  // Check for successful initialization
+  if(!curl) {
+    std::cerr << Output::Colors::RED << "[cURL] Failed to initialize cURL." << Output::Colors::END << '\n';
+    return { Result::INIT_FAILED, "", {} };
+  }
+  
+  // Set cURL options
+  curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str()); // Set the cURL url
+  curl_easy_setopt(curl.get(), CURLOPT_POST, 1L); // Set the cURL POST method
+  curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDS, postData.c_str()); // Set the POST data
+  curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, 10L); // Set a 10 second timeout
+  curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
+  
+  // Write the callback data 
+  curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, WriteCallback); // Set the write function
+  curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &responseData);     // Set the data to write
+
+  // And write the header response
+  curl_easy_setopt(curl.get(), CURLOPT_HEADERFUNCTION, HeaderCallback); // Custom function to capture headers
+  curl_easy_setopt(curl.get(), CURLOPT_HEADERDATA, &headers);           // Pass headers vector to function
+
+  // POST the data
+  CURLcode res = curl_easy_perform(curl.get());
+  
+  // Check for errors
+  if(res != CURLE_OK) {
+    std::cerr << Output::Colors::RED << "[cURL] Error POSTing data: " << curl_easy_strerror(res) << ".\n";
+    
+    if(res == CURLE_UNSUPPORTED_PROTOCOL)
+      return { Result::UNSUPPORTED_PROTOCOL, "", {} };
+    else if(res == CURLE_URL_MALFORMAT)
+      return { Result::BAD_URL, "", {} };
+    else if(res == CURLE_OPERATION_TIMEDOUT)
+      return { Result::TIMEOUT, "", {} };
+    else
+      return { Result::REQUEST_FAILED, "", {} };
+  }
+  return { Result::SUCCESS, responseData, headers };
+}
+
 // Extract the content-type header from the response
 std::string getContentType(const std::vector<std::string>& headers) {
   // Iterate through each header
