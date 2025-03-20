@@ -30,6 +30,7 @@ std::ostream& operator<<(std::ostream& out, const Region& region);
 
 enum class DataSource {
   NYSDOT,
+  ONGOV,
   ONMT,
   MCNY,
   OTT,

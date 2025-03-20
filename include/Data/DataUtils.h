@@ -4,6 +4,7 @@
 #include <curl/curl.h>
 #include <json/json.h>
 #include <rapidxml.hpp>
+#include <gumbo.h>
 #include <string>
 #include <vector>
 #include <memory>
@@ -60,6 +61,36 @@ Json::Value parseData(const std::string& jsonData);
 namespace XML {
 std::unique_ptr<rapidxml::xml_document<>> parseData(std::string& xmlData);
 } // namespace XML
+
+namespace HTML {
+
+struct Event {
+  std::string agency{"N/A"};
+  std::string date{"N/A"};
+  std::string title{"N/A"};
+  std::string address{"N/A"};
+  std::string region{"N/A"};
+  std::string xstreet{"N/A"};
+};
+
+// Create a wrapper for GumboOutput objects to maintain RAII
+class GumboOutputWrapper {
+private:
+  GumboOutput* output;
+public:
+  explicit GumboOutputWrapper(const std::string& html) : output(gumbo_parse(html.c_str())) {}
+  ~GumboOutputWrapper() { if(output) gumbo_destroy_output(&kGumboDefaultOptions, output); }
+
+  GumboOutput* get() { return output; }
+  GumboNode* root() { return output ? output->root : nullptr; }
+  operator bool() const { return output != nullptr; }
+
+  // Delete the copy constructor and assignment operator
+  GumboOutputWrapper(const GumboOutputWrapper&) = delete;
+  GumboOutputWrapper& operator=(const GumboOutputWrapper&) = delete;
+};
+
+}// namespace HTML
 
 
 // Define shared data for various traffic event sources

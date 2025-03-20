@@ -124,7 +124,7 @@ std::string getContentType(const std::vector<std::string>& headers) {
   // Iterate through each header
   for(const auto& header : headers) {
     // Check for the "Content-Type" header
-    if(header.find("content-type") != std::string::npos) {
+    if(header.find("content-type") != std::string::npos || header.find("Content-Type") != std::string::npos) {
       // Set an iterator to the start of the value string
       size_t pos = header.find(":");
       // Check if the key has a value

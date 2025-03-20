@@ -59,8 +59,8 @@ void fetchEvents() {
   getEvents(ONMT::EVENTS_URL);
 
   // TODO:
-  //std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
-  //getEvents(ONGOV::EVENTS_URL);
+  std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
+  getEvents(ONGOV::EVENTS_URL);
   //std::cout << "\nFetching Ottawa events:\n\n";
   //getEvents(OTT::EVENTS_URL);
   //std::cout << "\nFetching Montreal events:\n\n";
@@ -94,6 +94,8 @@ bool getEvents(std::string url) {
     currentSource = DataSource::ONMT;
   else if(url.find("monroecounty.gov") != std::string::npos)
     currentSource = DataSource::MCNY;
+  else if(url.find("ongov.net") != std::string::npos)
+    currentSource = DataSource::ONGOV;
   else {
     currentSource = DataSource::UNKNOWN;
     std::cerr << Output::Colors::RED << "[Traffic] ERROR: Source domain does not match program data requirements.\n" << Output::Colors::END;
@@ -132,7 +134,7 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
   // Extract the "Content-Type" header
   std::string contentType = cURL::getContentType(headers);
   
-  // Check for valid JSON or XML response and parse
+  // Check for valid JSON, XML, or HTML response and parse
   if(contentType.find("application/json") != std::string::npos) {
     auto parsedData = JSON::parseData(data);  // Returns a Json::Value object
     parseEvents(parsedData);
@@ -146,6 +148,19 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
     // Parse the events
     parseEvents(std::move(parsedData)); // Data held by unique_ptr so transfer ownership with std::move
     // NOTE: parsedData has now been invalidated, attmpting to access will result in UB
+  } else if(contentType.find("text/html") != std::string::npos) {
+    auto parsedData = ONGOV::Gumbo::parseData(data);
+    // Check for parsing success
+    if(!parsedData) {
+      std::cerr << Output::Colors::RED << "[HTML] Error: parsing failed.\n" << Output::Colors::END;
+      return false;
+    }
+    // TODO:
+    // Process the vector of ONGOV events into Traffic events
+    auto eventsVector = std::move(*parsedData);
+    for(const auto& event: eventsVector) {
+      std::cout << event.title << '\n';
+    }
   } else {
     // Error and exit if invalid type returned
     std::cerr << Output::Colors::RED << "[cURL] ERROR: Unsupported \"Content-Type\": '" <<  contentType << '\n' << Output::Colors::END;
