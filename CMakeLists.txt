@@ -41,27 +41,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # Attempt to find system libraries first
 find_package(CURL QUIET)
 find_package(JsonCpp QUIET)
-if(NOT JsonCpp_FOUND)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(JSONCPP jsoncpp)
-endif()
 find_package(RapidXML QUIET)
 find_package(Gumbo QUIET)
-if(NOT Gumbo_FOUND)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GUMBO gumbo)
-endif()
 find_package(Poco COMPONENTS Net Foundation Util QUIET)
-
-# Check for JsonCPP include style
-if(JsonCpp_FOUND OR JSONCPP_FOUND)
-    include(CheckIncludeFileCXX)
-    check_include_file_cxx("json/json/json.h" HAVE_JSONCPP_SUBDIR)
-
-    if(HAVE_JSONCPP_SUBDIR)
-        target_compile_definitions(${PROJECT_NAME} PRIVATE JSONCPP_WITH_SUBDIR)
-    endif()
-endif()
 
 # External dependencies directory
 set(EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external")
@@ -91,15 +73,21 @@ else()
 endif()
 
 # JsonCpp setup (only if not found in system)
-if(NOT JsonCpp_FOUND AND NOT JSONCPP_FOUND)
-    message(STATUS "JsonCpp not found, will be downloaded and built")
-    FetchContent_Declare(
-        jsoncpp
-        GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp.git
-        GIT_TAG 1.9.5  # Use a stable version
-        GIT_SHALLOW TRUE
-    )
-    FetchContent_MakeAvailable(jsoncpp)
+if(NOT JsonCpp_FOUND)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(JSONCPP jsoncpp)
+  if(NOT JSONCPP_FOUND)
+        message(STATUS "JsonCpp not found, will be downloaded and built")
+        FetchContent_Declare(
+            jsoncpp
+            GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp.git
+            GIT_TAG 1.9.5  # Use a stable version
+            GIT_SHALLOW TRUE
+        )
+        FetchContent_MakeAvailable(jsoncpp)
+    else()
+        message(STATUS "JsonCpp found, using system version ${jsoncpp_VERSION}")
+    endif()
 else()
     message(STATUS "JsonCpp found, using system version ${jsoncpp_VERSION}")
 endif()
@@ -119,15 +107,21 @@ else()
 endif()
 
 # Gumbo Parser setup (only if not found)
-if(NOT Gumbo_FOUND AND NOT GUMBO_FOUND)
-    message(STATUS "Gumbo Parser not found, will be downloaded")
-    FetchContent_Declare(
-        gumbo
-        GIT_REPOSITORY https://github.com/google/gumbo-parser.git
-        GIT_TAG master # You might want to use a specific tag/commit for stability
-        GIT_SHALLOW TRUE
-    )
-    FetchContent_MakeAvailable(gumbo)
+if(NOT Gumbo_FOUND)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GUMBO gumbo)
+    if(NOT GUMBO_FOUND)
+        message(STATUS "Gumbo Parser not found, will be downloaded")
+        FetchContent_Declare(
+            gumbo
+            GIT_REPOSITORY https://github.com/google/gumbo-parser.git
+            GIT_TAG master # You might want to use a specific tag/commit for stability
+            GIT_SHALLOW TRUE
+        )
+        FetchContent_MakeAvailable(gumbo)
+    else()
+        message(STATUS "Gumbo Parser found, using system version ${RapidXML_VERSION}")
+    endif()
 else()
     message(STATUS "Gumbo Parser found, using system version ${RapidXML_VERSION}")
 endif()
