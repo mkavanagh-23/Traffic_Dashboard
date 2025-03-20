@@ -181,8 +181,8 @@ else()
     set(CURL_INCLUDE_DIRS "${curl_SOURCE_DIR}/include")
 endif()
 
-if(JSONCPP_FOUND)
-    set(JSONCPP_INCLUDE_DIRS "${JSONCPP_INCLUDE_DIR}")
+if(JSONCPP_FOUND OR JsonCpp_FOUND)
+    set(JSONCPP_INCLUDE_DIRS "${JSONCPP_INCLUDE_DIRS}")
 else()
     set(JSONCPP_INCLUDE_DIRS "${jsoncpp_SOURCE_DIR}/include")
 endif()
@@ -193,7 +193,7 @@ else()
     set(RAPIDXML_INCLUDE_DIRS "${rapidxml_SOURCE_DIR}")  # RapidXML is typically header-only
 endif()
 
-if(Gumbo_FOUND)
+if(Gumbo_FOUND OR GUMBO_FOUND)
     set(GUMBO_INCLUDE_DIRS "${GUMBO_INCLUDE_DIR}")
 else()
     set(GUMBO_INCLUDE_DIRS "${Gumbo_SOURCE_DIR}/src")
@@ -215,7 +215,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/include/Data
     ${CMAKE_SOURCE_DIR}/include/Data/Traffic
     ${CURL_INCLUDE_DIRS}
-    ${JSONCPP_INCLUDE_DIRS}
+    "${JSONCPP_INCLUDE_DIRS}"
     ${RAPIDXML_INCLUDE_DIRS}
     ${GUMBO_INCLUDE_DIRS}
     ${POCO_INCLUDE_DIRS}
