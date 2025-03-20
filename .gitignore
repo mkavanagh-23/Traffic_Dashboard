@@ -1,9 +1,3 @@
 .cache
 build/
 Traffic_Dashboard*
-SDL2.dll
-lib*
-curl
-json*
-error.txt
-log*

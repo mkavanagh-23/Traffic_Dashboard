@@ -22,7 +22,7 @@ The build script currently works on Linux with experimental functionality for bo
 ```
 
 ## Usage
-This program requires you to provide your own API key for NYSDOT/511NY. Be sure to run this program with the env variable 'NYSDOT_API_KEY' properly set.
+This program requires you to provide your own API key for NYSDOT/511NY. Be sure to run this program with the env variable `NYSDOT_API_KEY` properly set.
 
 Once running, the program will spin up a web server at the user's specified port where it will listen for API requests.
 
