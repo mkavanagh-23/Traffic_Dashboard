@@ -1,6 +1,7 @@
 #ifndef DATA_H
 #define DATA_H
 
+#include <curl/curl.h>
 #include <json/json.h>
 #include <rapidxml.hpp>
 #include <string>
@@ -21,6 +22,22 @@ enum class Result {
   BAD_URL,
   TIMEOUT,
   REQUEST_FAILED
+};
+
+// Create a handler for CURL* objects to maintain RAII
+class Handle {
+private:
+  CURL* handle;     // Handler manages a CURL*
+public:
+  Handle() : handle(curl_easy_init()) {}    // Initialize curl memory on construction
+  ~Handle() { if(handle) curl_easy_cleanup(handle); }   // And delete it when we go out of scope
+
+  CURL* get() { return handle; }    // Return the pointer
+  operator bool() const { return handle != nullptr; }   // Check for valid intiialization
+
+  // Explicitly delete the copy constructor and assignment operators
+  Handle(const Handle&) = delete;
+  Handle& operator=(const Handle&) = delete;
 };
 
 // Callback function for writing the header data

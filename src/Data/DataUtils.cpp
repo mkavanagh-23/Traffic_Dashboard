@@ -34,7 +34,7 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* out
 
 // Fetch a data string from a remote source
 std::tuple<Result, std::string, std::vector<std::string>> getData(const std::string& url){
-  CURL* curl{ curl_easy_init() };   // cURL malloc
+  Handle curl;   // cURL malloc (Initialize an object via RAII)
   std::string responseData;         // Create a string to hold the data
   std::vector<std::string> headers; // Create a vector to hold the response headers
   
@@ -45,17 +45,17 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
   }
   
   // Set cURL options
-  curl_easy_setopt(curl, CURLOPT_URL, url.c_str()); // Set the cURL url
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback); // Set the write function
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);     // Set the data to write
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L); // Set a 10 second timeout
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
+  curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str()); // Set the cURL url
+  curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, WriteCallback); // Set the write function
+  curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &responseData);     // Set the data to write
+  curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, 10L); // Set a 10 second timeout
+  curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
   // Set up header handling
-  curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, HeaderCallback); // Custom function to capture headers
-  curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headers);           // Pass headers vector to function
+  curl_easy_setopt(curl.get(), CURLOPT_HEADERFUNCTION, HeaderCallback); // Custom function to capture headers
+  curl_easy_setopt(curl.get(), CURLOPT_HEADERDATA, &headers);           // Pass headers vector to function
     
   // Retrieve the data
-  CURLcode res = curl_easy_perform(curl);
+  CURLcode res = curl_easy_perform(curl.get());
 
   // Check for errors
   if(res != CURLE_OK) {
@@ -70,9 +70,6 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
     else
       return { Result::REQUEST_FAILED, "", {} };
   }
-
-  // Cleanup the cURL memory
-  curl_easy_cleanup(curl);
   return { Result::SUCCESS, responseData, headers };
 }
 
