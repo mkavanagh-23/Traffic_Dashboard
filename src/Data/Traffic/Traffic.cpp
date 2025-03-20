@@ -157,9 +157,15 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
     }
     // TODO:
     // Process the vector of ONGOV events into Traffic events
+    // FIX: MAKE SURE TO VALIDATE DATA FIRST
+    // ALREADY HAD A RUNTIME CRASH WHEN TRYING TO STOI INVALID DATA
     auto eventsVector = std::move(*parsedData);
+    std::cout << '\n';
     for(const auto& event: eventsVector) {
-      std::cout << event.title << '\n';
+      auto time = Time::MMDDYYHHMM::toChrono(event.date);
+      std::tm localTime = Time::toLocalPrint(time);
+      std::cout << event.title << '\n'
+                << "  " << std::put_time(&localTime, "%T - %F") << '\n';
     }
   } else {
     // Error and exit if invalid type returned

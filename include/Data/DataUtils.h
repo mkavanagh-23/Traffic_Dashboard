@@ -139,6 +139,10 @@ std::optional<system_clock::time_point> toChrono(const std::string& rfc2822);
 
 } // namespace RFC2822
 
+namespace MMDDYYHHMM {
+system_clock::time_point toChrono(const std::string& timeStr);
+}
+
 namespace DDMMYYYYHHMMSS {
 
 system_clock::time_point toChrono(const std::string& timeStr);

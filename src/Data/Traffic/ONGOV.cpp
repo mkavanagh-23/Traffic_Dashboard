@@ -1,4 +1,5 @@
 #include "ONGOV.h"
+#include "Output.h"
 #include <gumbo.h>
 #include <iostream>
 #include <string>
@@ -15,7 +16,7 @@ std::optional<std::vector<HTML::Event>>parseData(const std::string& htmlData) {
   HTML::GumboOutputWrapper output(htmlData);
 
   if(!output) {
-    std::cerr << "Failed to parse HTML content\n";
+    std::cerr << Output::Colors::RED << "[HTML] ERROR: Failed to parse HTML content\n" << Output::Colors::END;
     return std::nullopt;
   }
 
@@ -23,7 +24,7 @@ std::optional<std::vector<HTML::Event>>parseData(const std::string& htmlData) {
 
   // Check for valid HTML root node
   if(rootNode->type != GUMBO_NODE_ELEMENT) {
-    std::cerr << "Root node is not an element node\n";
+    std::cerr << Output::Colors::RED << "[HTML] ERROR: Root node is not an element node\n" << Output::Colors::END;
     return std::nullopt;
   }
 
@@ -31,11 +32,11 @@ std::optional<std::vector<HTML::Event>>parseData(const std::string& htmlData) {
 
   // Verify that <html> is the root element
   if(rootElement->tag != GUMBO_TAG_HTML) {
-    std::cerr << "Root tag is not <html>\n";
+    std::cerr << Output::Colors::RED << "[HTML] ERROR: Root tag is not <html>\n" << Output::Colors::END;
     return std::nullopt;
   }
   // Else Parsing Success!
-  std::cout << "HTML Parsing Success!\n";
+  std::cout << Output::Colors::GREEN << "[HTML] HTML Parsing Success!\n" << Output::Colors::END;
 
   // Find the table with class "dataTableEx" and store them in a tables vector
   std::vector<GumboNode*> tables;
@@ -43,7 +44,7 @@ std::optional<std::vector<HTML::Event>>parseData(const std::string& htmlData) {
 
   // Check that we found a matching table
   if(tables.empty()) {
-    std::cerr << "No matching tables found\n";
+    std::cerr << Output::Colors::RED << "[HTML] ERROR: No matching tables found\n" << Output::Colors::END;
     return std::nullopt;
   }
 
@@ -71,7 +72,7 @@ void searchForTable(GumboNode* rootNode, const std::string& targetClass, std::ve
         std::string value = attr->value;
         if (attribute == "class" && value == targetClass) {
           // If we find a match, store the table node
-          std::cout << "Found a matching table!\n";
+          std::cout << Output::Colors::GREEN << "[HTML] Found a matching table!\n" << Output::Colors::END;
           tables.push_back(rootNode);
           return;  // Stop searching since we found the target table
         }

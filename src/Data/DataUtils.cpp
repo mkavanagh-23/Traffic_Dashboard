@@ -197,7 +197,7 @@ std::ostream &operator<<(std::ostream &out, const Location &location) {
 namespace Time {
 using namespace std::chrono;
 
-std::string offsetGMT{ "-0500" };
+std::string offsetGMT{ "-0400" };
 
 // Create a local formatted time string for printing from a time point object
 std::tm toLocalPrint(const system_clock::time_point& time) {
@@ -301,7 +301,7 @@ namespace MMDDYYHHMM {
 system_clock::time_point toChrono(const std::string& timeStr) {
   int parsedMonth = std::stoi(timeStr.substr(0, 2));
   int parsedDay = std::stoi(timeStr.substr(3, 2));
-  int parsedYear = std::stoi(timeStr.substr(6, 2)) + 2000;
+  int parsedYear = std::stoi(timeStr.substr(6, 2)) + 2000;  // Adjust year for current century
   int parsedHours = std::stoi(timeStr.substr(9, 2));
   int parsedMinutes = std::stoi(timeStr.substr(12, 2));
 
