@@ -197,6 +197,8 @@ std::ostream &operator<<(std::ostream &out, const Location &location) {
 namespace Time {
 using namespace std::chrono;
 
+std::string offsetGMT{ "-0500" };
+
 // Create a local formatted time string for printing from a time point object
 std::tm toLocalPrint(const system_clock::time_point& time) {
   auto utcTime = system_clock::to_time_t(time);
@@ -292,9 +294,32 @@ std::optional<system_clock::time_point> toChrono(const std::string& rfc2822){
 }
 } // namespace RFC2822
 
+namespace MMDDYYHHMM {
+
+// Example string: "03/20/25 07:04"
+
+system_clock::time_point toChrono(const std::string& timeStr) {
+  int parsedMonth = std::stoi(timeStr.substr(0, 2));
+  int parsedDay = std::stoi(timeStr.substr(3, 2));
+  int parsedYear = std::stoi(timeStr.substr(6, 2)) + 2000;
+  int parsedHours = std::stoi(timeStr.substr(9, 2));
+  int parsedMinutes = std::stoi(timeStr.substr(12, 2));
+
+  // Create a local time point object
+  system_clock::time_point timePoint = sys_days(year_month_day(year(parsedYear), month(parsedMonth), day(parsedDay)))
+                                     + hours(parsedHours) + minutes(parsedMinutes);
+  
+  // Apply GMT-offset to convert to UTC 
+  toUTC(timePoint, offsetGMT);
+
+  return timePoint;
+}
+
+} // namespace MMDDYYHHMM
+
 namespace DDMMYYYYHHMMSS {
 
-std::string offsetGMT{ "-0500" };
+// Example string: "26/04/2025 10:30:00"
 
 system_clock::time_point toChrono(const std::string& timeStr) {
   // Extract time components into ints
