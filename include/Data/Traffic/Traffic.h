@@ -25,6 +25,7 @@ enum class Region {
   Binghamton,
   Toronto,
   Ottawa,
+  Montreal,
   UNKNOWN
 };
 std::ostream& operator<<(std::ostream& out, const Region& region);
@@ -32,9 +33,10 @@ std::ostream& operator<<(std::ostream& out, const Region& region);
 enum class DataSource {
   NYSDOT,
   ONGOV,
-  ONMT,
   MCNY,
+  ONMT,
   OTT,
+  MTL,
   UNKNOWN
 };
 std::ostream& operator<<(std::ostream& os, const DataSource& dataSource);
@@ -115,8 +117,8 @@ class Event2 {
 private:
   std::string ID;
   std::string URL{ "N/A" };
-  DataSource dataSource;
-  Region region;
+  DataSource dataSource{ DataSource::UNKNOWN };
+  Region region{ Region::UNKNOWN };
   std::string title{ "N/A" };
   std::string status{ "Active" };
   std::string mainStreet{ "N/A" };

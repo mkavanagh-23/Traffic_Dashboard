@@ -43,7 +43,8 @@
 namespace Traffic {
 
 // Data structures
-std::unordered_map<std::string, Event> mapEvents;
+//std::unordered_map<std::string, Event> mapEvents;
+std::unordered_map<std::string, Event2> mapEvents2;
 std::unordered_map<std::string, Camera> mapCameras;
 
 // Static object to store data source for current iteration
