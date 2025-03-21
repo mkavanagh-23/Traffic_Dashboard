@@ -17,16 +17,15 @@ int main(int argc, char* argv[]) {
   // TODO: Asynchronously call this in a loop in its own thread
   // We want this to be spun off into a bg thread while the REST server runs in main
   
-  Traffic::fetchEvents();
   // Get cameras
-  Traffic::fetchCameras();
-  Traffic::printEvents();
+  //Traffic::fetchCameras();
   
   while(true) {
+    Traffic::fetchEvents();
+    Traffic::printEvents();
     auto time = Output::currentTime();
     std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << '\n' << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(60));
-    Traffic::fetchEvents();
   }
 
   // Create and start the API server

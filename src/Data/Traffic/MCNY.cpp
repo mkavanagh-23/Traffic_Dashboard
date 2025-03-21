@@ -17,11 +17,11 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
   auto& [status, key] = description;
 
   // Try to insert a new Event at event, inserted = false if it already exists
-  auto [event, inserted] = mapEvents.try_emplace(key, parsedEvent, description);
+  auto [event, inserted] = mapEvents2.try_emplace(key, parsedEvent, description);
   // Check if we added a new event
   if(!inserted) {
     if(event->second.getStatus() != status) {
-      event->second = Event(parsedEvent, description);
+      event->second = Event2(parsedEvent, description);
       std::cout << Output::Colors::MAGENTA << "[XML] Updated event: " << key << Output::Colors::END << '\n';
       return true;
     }

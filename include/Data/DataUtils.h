@@ -14,6 +14,7 @@
 
 
 // This file holds all functionality for retrieving and filtering basic data from CURL in XML and JSON formats
+std::string sanitizeString(const std::string& input);
 
 namespace cURL {
 
@@ -66,12 +67,14 @@ std::unique_ptr<rapidxml::xml_document<>> parseData(std::string& xmlData);
 namespace HTML {
 
 struct Event {
+  std::string ID{"N/A"};
   std::string agency{"N/A"};
   std::string date{"N/A"};
   std::string title{"N/A"};
   std::string address{"N/A"};
   std::string region{"N/A"};
   std::string xstreet{"N/A"};
+  void createID();
 };
 
 // Create a wrapper for GumboOutput objects to maintain RAII

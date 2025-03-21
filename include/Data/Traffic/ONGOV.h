@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <optional>
+#include <utility>
 
 namespace Traffic {
 namespace ONGOV {
@@ -25,6 +26,11 @@ std::string getFirstSpanId(GumboElement* tableData);
 // Extract data from the table data element into the reference string
 void getData(GumboElement* tableData, std::string& element);
 }
+
+// Process Address into and street name and (optional) direction
+std::optional<std::pair<std::string, std::optional<std::string>>> processAddress(const std::string& address);
+// Process cross street value into main street and (optional) cross street
+std::optional<std::pair<std::string, std::optional<std::string>>> processCrossAsAddress(const std::string& address);
 
 }
 }

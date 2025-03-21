@@ -133,6 +133,7 @@ public:
   // Constructors
   Event2(const Json::Value& parsedEvent);
   Event2(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &description);
+  Event2(const HTML::Event& parsedEvent);
   Event2(Event2&& other) noexcept;
 
   // Operators
@@ -161,9 +162,11 @@ bool getEvents(std::string url);
 bool processData(std::string& data, const std::vector<std::string>& headers);   // XML must be able to manipulate data
 bool parseEvents(const Json::Value& parsedData);
 bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData);
+bool parseEvents(const std::vector<HTML::Event>& parsedData);
 bool processEvent(const Json::Value& parsedEvent);
 bool containsEvent(const Json::Value& events, const std::string& key);
 bool containsEvent(rapidxml::xml_document<>& events, const std::string& key);
+bool containsEvent(const std::vector<HTML::Event>& events, const std::string& key);
 bool inMarket(const Json::Value& parsedEvent);
 bool isIncident(const Json::Value& parsedEvent);
 std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent);
@@ -175,13 +178,13 @@ void clearEvents(T& events) {
   // Create a vector to store the keys to be deleted
   std::vector<std::string> keysToDelete;
   // Iterate through the event map
-  for(const auto& [key, event] : mapEvents) {
+  for(const auto& [key, event] : mapEvents2) {
     // Only match with current source events
     if(event.getSource() == currentSource) {
       // Check for matching key
       if(!containsEvent(events, key)) {
         keysToDelete.push_back(key);
-      std::cout << Output::Colors::YELLOW << "[Events] Marked event for deletion: " << key << Output::Colors::END << '\n'; 
+        std::cout << Output::Colors::YELLOW << "[Events] Marked event for deletion: " << key << Output::Colors::END << '\n'; 
       }
     }
   }

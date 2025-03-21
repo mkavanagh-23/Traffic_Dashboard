@@ -43,7 +43,6 @@
 namespace Traffic {
 
 // Data structures
-//std::unordered_map<std::string, Event> mapEvents;
 std::unordered_map<std::string, Event2> mapEvents2;
 std::unordered_map<std::string, Camera> mapCameras;
 
@@ -52,12 +51,12 @@ DataSource currentSource;
 
 // Get events from all URLs
 void fetchEvents() {
-  std::cout << "\nFetching NYS 511 events:\n\n";
-  getEvents(NYSDOT::EVENTS_URL);
-  std::cout << "\nFetching Monroe County 911 events:\n\n";
-  getEvents(MCNY::EVENTS_URL);
-  std::cout << "\nFetching Ontario 511 events:\n\n";
-  getEvents(ONMT::EVENTS_URL);
+  //std::cout << "\nFetching NYS 511 events:\n\n";
+  //getEvents(NYSDOT::EVENTS_URL);
+  //std::cout << "\nFetching Monroe County 911 events:\n\n";
+  //getEvents(MCNY::EVENTS_URL);
+  //std::cout << "\nFetching Ontario 511 events:\n\n";
+  //getEvents(ONMT::EVENTS_URL);
 
   // TODO:
   std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
@@ -75,7 +74,7 @@ void fetchCameras() {
 
 // Print all events in the map
 void printEvents() {
-  for(const auto& [key, event] : mapEvents) {
+  for(const auto& [key, event] : mapEvents2) {
     std::cout << event;
   }
 }
@@ -156,18 +155,7 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
       std::cerr << Output::Colors::RED << "[HTML] Error: parsing failed.\n" << Output::Colors::END;
       return false;
     }
-    // TODO:
-    // Process the vector of ONGOV events into Traffic events
-    // FIX: MAKE SURE TO VALIDATE DATA FIRST
-    // ALREADY HAD A RUNTIME CRASH WHEN TRYING TO STOI INVALID DATA
-    auto eventsVector = std::move(*parsedData);
-    std::cout << '\n';
-    for(const auto& event: eventsVector) {
-      auto time = Time::MMDDYYHHMM::toChrono(event.date);
-      std::tm localTime = Time::toLocalPrint(time);
-      std::cout << event.title << '\n'
-                << "  " << std::put_time(&localTime, "%T - %F") << '\n';
-    }
+    parseEvents(*parsedData);
   } else {
     // Error and exit if invalid type returned
     std::cerr << Output::Colors::RED << "[cURL] ERROR: Unsupported \"Content-Type\": '" <<  contentType << '\n' << Output::Colors::END;
@@ -214,6 +202,19 @@ bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
   return true;
 }
 
+// Parse events from an array of temp HTML events
+bool parseEvents(const std::vector<HTML::Event>& parsedData) {
+  // Iterate through each parsed event in the vector
+  for(const auto& parsedEvent : parsedData) {
+    // Try to insert it on the vector
+    // Will not add if it already exists
+    mapEvents2.try_emplace(parsedEvent.ID, parsedEvent);
+  }
+  // Clean up cleared events while our data is still in scope
+  clearEvents(parsedData);  // NOTE: Make sure to pass the dereferenced events data here as parsedData is invalid
+  return true;
+}
+
 // Process a parsed JSON event for storage
 bool processEvent(const Json::Value& parsedEvent) {
   if(!parsedEvent.isMember("ID")) {
@@ -230,7 +231,7 @@ bool processEvent(const Json::Value& parsedEvent) {
 
   // Add the event
   // Try to insert a new Event at event, inserted = false if it already exists
-  auto [event, inserted] = mapEvents.try_emplace(key, parsedEvent);
+  auto [event, inserted] = mapEvents2.try_emplace(key, parsedEvent);
   // Check if we added a new event
   if(!inserted) {
     // Check for updated timestamp
@@ -279,6 +280,15 @@ bool containsEvent(rapidxml::xml_document<>& events, const std::string& key) {
   return false;
 }
 
+// Check if parsed HTML events contains an event with the given key
+bool containsEvent(const std::vector<HTML::Event>& events, const std::string& key) {
+  for(const auto& event : events) {
+    if(event.ID == key)
+      return true;
+  }
+  return false;
+}
+
 // Check if an event is both in market and of valid type
 bool inMarket(const Json::Value& parsedEvent) {
   // If we are a NYS event check if we are in region
@@ -321,23 +331,28 @@ std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent){
 // Called by templated "Clean Events" function
 void deleteEvents(std::vector<std::string> keys) {
   for(const auto& key : keys) {
-    mapEvents.erase(key);
+    mapEvents2.erase(key);
     std::cout << Output::Colors::RED << "[Traffic] Deleted event: " << key << Output::Colors::END << '\n'; 
   }
 }
 
 // Constructor objects
 // Construct an event from an JSON object
-Event::Event(const Json::Value& parsedEvent)
+// TODO:
+// HAND TRACE and REDEFINE
+// Define OTTAWA logic
+Event2::Event2(const Json::Value& parsedEvent)
 : dataSource{ currentSource }
 {
   // Construct shared members
   if(parsedEvent.isMember("ID"))
     ID = parsedEvent["ID"].asString();
+  if(parsedEvent.isMember("EventType"))
+    title = parsedEvent["EventType"].asString();
   if(parsedEvent.isMember("RoadwayName"))
-    roadwayName = parsedEvent["RoadwayName"].asString();
+    mainStreet = parsedEvent["RoadwayName"].asString();
   if(parsedEvent.isMember("DirectionOfTravel"))
-    directionOfTravel = parsedEvent["DirectionOfTravel"].asString();
+    direction = parsedEvent["DirectionOfTravel"].asString();
   if(parsedEvent.isMember("Description"))
     description = parsedEvent["Description"].asString();
   if(parsedEvent.isMember("Latitude") && parsedEvent.isMember("Latitude")) {
@@ -376,9 +391,12 @@ Event::Event(const Json::Value& parsedEvent)
 }
 
 // Construct an event from an XML object
-Event::Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &parsedDescription)
-: ID{ parsedDescription.second }, dataSource{ DataSource::MCNY }, status{ parsedDescription.first },
-  region{Region::Rochester}, timeUpdated{ std::chrono::system_clock::now() }
+// TODO:
+// HAND TRACE and REDEFINE
+// Define MONTREAL logic
+Event2::Event2(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &parsedDescription)
+: ID{ parsedDescription.second }, dataSource{ DataSource::MCNY }, region{Region::Rochester}, 
+  status{ parsedDescription.first }, timeUpdated{ std::chrono::system_clock::now() }
 {
   if(rapidxml::xml_node<> *title = item->first_node("title")){
     description = title->value();
@@ -402,18 +420,78 @@ Event::Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std:
             << '\n' << Output::Colors::END << description << '\n';
 }
 
+// Construct an event from an HTML event
+Event2::Event2(const HTML::Event& parsedEvent)
+: ID{ parsedEvent.ID }, URL{ "https://911events.ongov.net/CADInet/app/events.jsp" }, dataSource{ DataSource::ONGOV },
+  region{ Region::Syracuse }, location{ Location(43.05, 76.15) }, timeUpdated{ std::chrono::system_clock::now() }
+{
+  bool hasMain{ false };    // Flag to check if main address exists
+  std::string descStr{ "" };    // Create a string to build and hold the description
+
+  if(parsedEvent.title != "N/A") {
+    // Process the event title
+    title = parsedEvent.title;
+    // Add the title to the string followed by " at "
+    descStr += parsedEvent.title + " at ";
+  }
+  if(parsedEvent.address != "N/A") {
+    // Process the main street
+    auto parsedAddress = ONGOV::processAddress(parsedEvent.address);
+    if(parsedAddress) {
+      auto [parsedStreet, parsedDir] = *parsedAddress;
+      if(parsedDir)
+        direction = *parsedDir;
+      mainStreet = parsedStreet;
+    }
+    // Add the address to the string followed by
+    descStr += parsedEvent.address + ' ';
+    hasMain = true;
+  }
+  if(parsedEvent.xstreet != "N/A") {
+    if(!hasMain) {
+      // Process cross street as main
+      auto parsedCross = ONGOV::processCrossAsAddress(parsedEvent.xstreet);
+      if(parsedCross) {
+        auto [mainRoad, crossRoad] = *parsedCross;
+        if(crossRoad)
+          crossStreet = *crossRoad;
+        mainStreet = mainRoad;
+      }
+    } else {
+      // Process cross street as cross
+      crossStreet = parsedEvent.xstreet;
+    }
+    // Add the cross street to the string
+    descStr += "( X: " + parsedEvent.xstreet + " ) ";
+  }
+  if(parsedEvent.date != "N/A") {
+    // Process the event date
+    timeReported = Time::MMDDYYHHMM::toChrono(parsedEvent.date);
+    // Add the date to the string
+    descStr += "[ " + parsedEvent.date + " ]";
+  }
+
+  description = std::move(descStr);
+  
+  std::cout << Output::Colors::YELLOW << "\n[JSON Event] Constructed event: " << ID
+            << '\n' << Output::Colors::END << description << '\n';
+}
+
 // Move constructor for an event object
-Event::Event(Event&& other) noexcept 
+Event2::Event2(Event2&& other) noexcept 
 : ID(std::move(other.ID)),
+  URL(std::move(other.URL)),
   dataSource(other.dataSource),
-  status(std::move(other.status)),
   region(other.region),
-  roadwayName(std::move(other.roadwayName)),
-  directionOfTravel(std::move(other.directionOfTravel)),
+  title(std::move(other.title)),
+  status(std::move(other.status)),
+  mainStreet(std::move(other.mainStreet)),
+  crossStreet(std::move(other.crossStreet)),
+  direction(std::move(other.direction)),
   description(std::move(other.description)),
+  location(other.location),
   timeReported(std::move(other.timeReported)),
-  timeUpdated(std::move(other.timeUpdated)),
-  location(other.location)
+  timeUpdated(std::move(other.timeUpdated))
 {
   std::cout << Output::Colors::BLUE << "[Event] Moved event: " << ID  << "  |  " << region
             << '\n' << Output::Colors::END << description << '\n';
@@ -421,16 +499,20 @@ Event::Event(Event&& other) noexcept
 }
 
 // Move assignment operator for event object
-Event& Event::operator=(Event&& other) noexcept {
+Event2& Event2::operator=(Event2&& other) noexcept {
   // Check for self-assignment
   if(this != &other) {
     ID = std::move(other.ID);
+    URL = std::move(other.URL);
     dataSource = other.dataSource;
-    status = std::move(other.status);
     region = other.region;
-    roadwayName = std::move(other.roadwayName);
-    directionOfTravel = std::move(other.directionOfTravel);
+    title = std::move(other.title);
+    status = std::move(other.status);
+    mainStreet = std::move(other.mainStreet);
+    crossStreet = std::move(other.crossStreet);
+    direction = std::move(other.direction);
     description = std::move(other.description);
+    location = other.location;
     timeReported = std::move(other.timeReported);
     timeUpdated = std::move(other.timeUpdated);
   }
@@ -603,6 +685,9 @@ std::ostream& operator<<(std::ostream& out, const Region& region) {
     case Region::Ottawa:
       out << "Ottawa, ON";
       break;
+    case Region::Montreal:
+      out << "Montreal, QC";
+      break;
     default:
       out << "Unknown";
       break;
@@ -615,11 +700,20 @@ std::ostream& operator<<(std::ostream& out, const DataSource& dataSource) {
     case DataSource::NYSDOT:
       out << "NYS 511";
       break;
-    case DataSource::ONMT:
-      out << "Ontario 511";
+    case DataSource::ONGOV:
+      out << "Onondaga Counmty 911";
       break;
     case DataSource::MCNY:
       out << "Monroe County 911";
+      break;
+    case DataSource::ONMT:
+      out << "Ontario 511";
+      break;
+    case DataSource::OTT:
+      out << "Ottawa City";
+      break;
+    case DataSource::MTL:
+      out << "Quebec 511";
       break;
     default:
       out << "Unknown";
@@ -628,13 +722,15 @@ std::ostream& operator<<(std::ostream& out, const DataSource& dataSource) {
   return out;
 }
 
-std::ostream &operator<<(std::ostream &out, const Event &event){
+std::ostream &operator<<(std::ostream &out, const Event2 &event){
   std::tm timeReported = Time::toLocalPrint(event.timeReported);
   std::tm timeUpdated = Time::toLocalPrint(event.timeUpdated);
 
   out << '\n' << event.region << " (" << event.dataSource << ")  |  " << event.ID << "  |  " << event.status << '\n'
-      << event.roadwayName << "  |  " << event.directionOfTravel << "  |  " << event.location << '\n'
+      << event.title << '\n'
+      << event.mainStreet << "(" << event.direction << ") at " << event.crossStreet << "  |  " << event.location << '\n'
       << event.description << '\n'
+      << event.URL << '\n'
       << "Reported: " << std::put_time(&timeReported, "%T - %F") << "  |  Updated: " << std::put_time(&timeUpdated, "%T - %F")
       << std::endl;
   return out;
