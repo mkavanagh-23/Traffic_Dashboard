@@ -210,6 +210,7 @@ bool parseEvents(const std::vector<HTML::Event>& parsedData) {
     // Will not add if it already exists
     mapEvents2.try_emplace(parsedEvent.ID, parsedEvent);
   }
+  std::cout << Output::Colors::GREEN << "\n[HTML] Successfully parsed HTML document." << Output::Colors::END << '\n';
   // Clean up cleared events while our data is still in scope
   clearEvents(parsedData);  // NOTE: Make sure to pass the dereferenced events data here as parsedData is invalid
   return true;
