@@ -51,16 +51,16 @@ DataSource currentSource;
 
 // Get events from all URLs
 void fetchEvents() {
-  //std::cout << "\nFetching NYS 511 events:\n\n";
-  //getEvents(NYSDOT::EVENTS_URL);
+  std::cout << "\nFetching NYS 511 events:\n\n";
+  getEvents(NYSDOT::EVENTS_URL);
   //std::cout << "\nFetching Monroe County 911 events:\n\n";
   //getEvents(MCNY::EVENTS_URL);
   //std::cout << "\nFetching Ontario 511 events:\n\n";
   //getEvents(ONMT::EVENTS_URL);
-
-  // TODO:
   std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
   getEvents(ONGOV::EVENTS_URL);
+  
+  // TODO:
   //std::cout << "\nFetching Ottawa events:\n\n";
   //getEvents(OTT::EVENTS_URL);
   //std::cout << "\nFetching Montreal events:\n\n";
@@ -338,9 +338,6 @@ void deleteEvents(std::vector<std::string> keys) {
 
 // Constructor objects
 // Construct an event from an JSON object
-// TODO:
-// HAND TRACE and REDEFINE
-// Define OTTAWA logic
 Event2::Event2(const Json::Value& parsedEvent)
 : dataSource{ currentSource }
 {
@@ -363,10 +360,13 @@ Event2::Event2(const Json::Value& parsedEvent)
   switch(dataSource) {
     // Construct members for NYSDOT
     case DataSource::NYSDOT:
+      URL = "https://511ny.org/";
       region = NYSDOT::getRegion(parsedEvent["RegionName"].asString());
       if(region == Region::UNKNOWN)
         std::cerr << Output::Colors::RED << "[JSON Event] Error: Failed to source dataSource member during construction\n"
                   << Output::Colors::END;
+      if(parsedEvent.isMember("PrimaryLocation"))
+        crossStreet = parsedEvent["PrimaryLocation"].asString();
       if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
         timeReported = Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["Reported"].asString());
         timeUpdated = Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["LastUpdated"].asString());
@@ -473,7 +473,7 @@ Event2::Event2(const HTML::Event& parsedEvent)
 
   description = std::move(descStr);
   
-  std::cout << Output::Colors::YELLOW << "\n[JSON Event] Constructed event: " << ID
+  std::cout << Output::Colors::YELLOW << "\n[HTML Event] Constructed event: " << ID
             << '\n' << Output::Colors::END << description << '\n';
 }
 
