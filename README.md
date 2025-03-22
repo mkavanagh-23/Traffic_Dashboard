@@ -21,7 +21,7 @@ The build script currently works on Linux with experimental functionality for bo
 ```
 ./build.sh [release|debug]
 ```
-
+---
 ### Docker (Cross-Platform)
 Docker is the easiest and recommended way to install the program.
 1. Ensure Docker engine is installed
