@@ -11,6 +11,7 @@
 #include <optional>
 #include <tuple>
 #include <chrono>
+#include <ctime>
 
 
 // This file holds all functionality for retrieving and filtering basic data from CURL in XML and JSON formats
@@ -120,6 +121,9 @@ struct BoundingBox {
 
 namespace Time {
 using namespace std::chrono;
+
+system_clock::time_point currentTime();
+std::time_t currentTime_t();
 
 // Create a local formatted time string for printing from a time point object
 std::tm toLocalPrint(const system_clock::time_point& time);

@@ -19,7 +19,7 @@
 // TODO:
 // NYSDOT:
 //  Check reported time against current time to filter out future (planned) events
-//    i.e. if(timeReported >= currentTime)
+//    i.e. if(timeReported >= std::chrono::system_clock::now())
 // ONGOV:
 //  Add logic to account for multiple pages
 //    Probably need to modify to POST request and investigate payloads in-browser
@@ -394,7 +394,7 @@ Event2::Event2(const Json::Value& parsedEvent)
 // Construct an event from an XML object
 Event2::Event2(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &parsedDescription)
 : ID{ parsedDescription.second }, dataSource{ DataSource::MCNY }, region{Region::Rochester}, 
-  status{ parsedDescription.first }, timeUpdated{ std::chrono::system_clock::now() }
+  status{ parsedDescription.first }, timeUpdated{ Time::currentTime() }
 {
   if(rapidxml::xml_node<> *url = item->first_node("guid")){
     URL = url->value();
@@ -435,7 +435,7 @@ Event2::Event2(const rapidxml::xml_node<>* item, const std::pair<std::string, st
 // Construct an event from an HTML event
 Event2::Event2(const HTML::Event& parsedEvent)
 : ID{ parsedEvent.ID }, URL{ "https://911events.ongov.net/CADInet/app/events.jsp" }, dataSource{ DataSource::ONGOV },
-  region{ Region::Syracuse }, location{ Location(43.05, 76.15) }, timeUpdated{ std::chrono::system_clock::now() }
+  region{ Region::Syracuse }, location{ Location(43.05, 76.15) }, timeUpdated{ Time::currentTime() }
 {
   bool hasMain{ false };    // Flag to check if main address exists
   std::string descStr{ "" };    // Create a string to build and hold the description

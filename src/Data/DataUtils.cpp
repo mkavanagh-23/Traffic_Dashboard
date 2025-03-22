@@ -253,6 +253,15 @@ using namespace std::chrono;
 
 std::string offsetGMT{ "-0400" };
 
+system_clock::time_point currentTime() {
+  return system_clock::now();
+}
+
+std::time_t currentTime_t() {
+  auto time = system_clock::to_time_t(currentTime());
+  return time;
+}
+
 // Create a local formatted time string for printing from a time point object
 std::tm toLocalPrint(const system_clock::time_point& time) {
   auto utcTime = system_clock::to_time_t(time);
