@@ -16,29 +16,25 @@
 #include <cassert>
 #include <unordered_map>
 
-// TODO: 
-// Integrate regex parsing of MCNY event titles (already built externally)
-//  Do we also need to use REGEX to parse through NYSDOT and ONMT event titles?
-// Add logic for ONGOV events
-//  Returns HTML
-//  Parse through each table row
-//  Add logic to detect multiple pages
-//  Refine cleanup logic to account for frequent downtime
-//  Need to develop a method for creating a unique ID string
-// Add logic for Ottawa events
+// TODO:
+// NYSDOT:
+//  Check reported time against current time to filter out future (planned) events
+//    i.e. if(timeReported >= currentTime)
+// ONGOV:
+//  Add logic to account for multiple pages
+//    Probably need to modify to POST request and investigate payloads in-browser
+//    Do we need to establish a session and maintain state?
+//  Modify cleanup to only run if we get valid table data
+// ONMT: Normalize data for Ontario events
+//  After normalization has been completed, we can refactor Event2 into Event and remove the old implementation
+// OTT: Add logic for Ottawa events
 //  Returns JSON
-// Add logic for montreal events
+// MTL: Add logic for montreal events
 //  Returns XML
 // Serializing to JSON 
 //  We should serialize time to an ISO6801-formatted string
 // Serve serialized JSON via RESTful endpoints
-//
-// We may want to modify constructors to take in the currentSource variable as well
-// This way we can have a separate constructor for each source
-// We can also define base constructors for XML/JSON shared objects
-// Since currentSource is set at the start of each functional branch, this simplifies logic
-// Note that this limits us to sequential rather than concurrent data fetching
-
+//  Implement robust filtering via query params
 
 namespace Traffic {
 
@@ -84,9 +80,13 @@ bool getEvents(std::string url) {
   // Check for Data Source
   if(url.find("511ny.org") != std::string::npos) {
     // Source API key
-    if(NYSDOT::API_KEY.empty())
+    if(NYSDOT::API_KEY.empty()) {
       NYSDOT::getEnv();
-    assert(!NYSDOT::API_KEY.empty() && "Failed to retrieve API key from local environment.");
+      if(NYSDOT::API_KEY.empty()) {
+        std::cerr << Output::Colors::RED << "[Traffic] ERROR: Failed to retrieve NYSDOT API Key from local environment.\n" << Output::Colors::END;
+        return false;
+      }
+    }
     url += NYSDOT::API_KEY;
     // Set current Data Source
     currentSource = DataSource::NYSDOT;
