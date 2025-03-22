@@ -51,14 +51,14 @@ DataSource currentSource;
 
 // Get events from all URLs
 void fetchEvents() {
-  std::cout << "\nFetching NYS 511 events:\n\n";
-  getEvents(NYSDOT::EVENTS_URL);
-  //std::cout << "\nFetching Monroe County 911 events:\n\n";
-  //getEvents(MCNY::EVENTS_URL);
-  //std::cout << "\nFetching Ontario 511 events:\n\n";
-  //getEvents(ONMT::EVENTS_URL);
   std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
   getEvents(ONGOV::EVENTS_URL);
+  std::cout << "\nFetching NYS 511 events:\n\n";
+  getEvents(NYSDOT::EVENTS_URL);
+  std::cout << "\nFetching Monroe County 911 events:\n\n";
+  getEvents(MCNY::EVENTS_URL);
+  //std::cout << "\nFetching Ontario 511 events:\n\n";
+  //getEvents(ONMT::EVENTS_URL);
   
   // TODO:
   //std::cout << "\nFetching Ottawa events:\n\n";
@@ -392,15 +392,26 @@ Event2::Event2(const Json::Value& parsedEvent)
 }
 
 // Construct an event from an XML object
-// TODO:
-// HAND TRACE and REDEFINE
-// Define MONTREAL logic
 Event2::Event2(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &parsedDescription)
 : ID{ parsedDescription.second }, dataSource{ DataSource::MCNY }, region{Region::Rochester}, 
   status{ parsedDescription.first }, timeUpdated{ std::chrono::system_clock::now() }
 {
+  if(rapidxml::xml_node<> *url = item->first_node("guid")){
+    URL = url->value();
+  }
   if(rapidxml::xml_node<> *title = item->first_node("title")){
     description = title->value();
+    // Use regex to extract Title, street, direction(optional), and cross(optional)
+    auto parsedDescription = MCNY::processTitle(description);
+    if(parsedDescription) {
+      auto [parsedTitle, parsedStreet, parsedDirection, parsedCross] = *parsedDescription;
+      if(parsedDirection)
+        direction = *parsedDirection;
+      if(parsedCross)
+        crossStreet = *parsedCross;
+      this->title = parsedTitle;        // Make sure to dereference the "this" member rather than our node*
+      mainStreet = parsedStreet;
+    }
   }
   if(rapidxml::xml_node<> *pubDate = item->first_node("pubDate")){
     // Try to convert to a time object

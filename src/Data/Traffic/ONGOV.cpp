@@ -242,7 +242,7 @@ std::optional<std::pair<std::string, std::optional<std::string>>> processAddress
   cleanedAddress = std::regex_replace(cleanedAddress, multipleSpace, " ");
    
   // Define the matching pattern
-  std::regex pattern("(?:(EB|WB|NB|SB) )?((?:ROUTE\\s+\\d+)|(?:I\\s+\\d+)|(?:[^\\s].*?\\s+(?:LN|ST|AVE|DR|CT|CANALWAY|PATH|BLVD|TER|KING|CIR|RD|STREET|ROWE|FARM|TRAIL)))(\\s+.*)?");
+  std::regex pattern("(?:(EB|WB|NB|SB) )?((?:ROUTE\\s+\\d+)|(?:I\\s+\\d+)|(?:[^\\s].*?\\s+(?:LN|ST|AVE|DR|CT|CANALWAY|PATH|BLVD|TER|KING|CIR|RD|STREET|ROWE|FARM|TRAIL|TPKE)))(\\s+.*)?");
   std::smatch matches;
   /*
    *    matches[1] = Direction (Optional)
@@ -256,7 +256,7 @@ std::optional<std::pair<std::string, std::optional<std::string>>> processAddress
       return std::make_pair(matches[2], std::nullopt);
   }
   
-  std::cerr << Output::Colors::RED << "[REGEX] ERROR: ONGOV main street does not match.\n" << Output::Colors::END;
+  std::cerr << Output::Colors::RED << "[REGEX] ERROR: ONGOV main street does not match: " << address << '\n' << Output::Colors::END;
   return std::nullopt;
 }
 
@@ -279,7 +279,7 @@ std::optional<std::pair<std::string, std::optional<std::string>>> processCrossAs
       return std::make_pair(matches[1], std::nullopt);
   }
   
-  std::cerr << Output::Colors::RED << "[REGEX] ERROR: ONGOV cross street does not match.\n" << Output::Colors::END;
+  std::cerr << Output::Colors::RED << "[REGEX] ERROR: ONGOV cross street does not match" << address << '\n' << Output::Colors::END;
   return std::nullopt;
 }
 
