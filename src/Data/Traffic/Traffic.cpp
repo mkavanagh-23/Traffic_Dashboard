@@ -16,30 +16,40 @@
 #include <cassert>
 #include <unordered_map>
 
-// TODO:
-// ONGOV:
-//  Investigate REST API
-//    Possible workarounds for geo-restriction
-//    Do we need to proxy requests locally on client?
-//  Add logic to account for multiple pages
-//    Probably need to modify to POST request and investigate payloads in-browser
-//    Do we need to establish a session and maintain state?
-//  Modify cleanup to only run if we get valid table data
-//  Create an async function which can be run every few minutes to set geo-coordinates
-//    If we use openstreetmap we are limited to one request per second.
-//    Setup an atomic timer!
-// ONMT: Normalize data for Ontario events
-//  Need to extract optional side road if it exists, rest seems to be parsing fine
-//  Check reported time against current time to filter out future (planned) events
-//  After normalization has been completed, we can refactor Event2 into Event and remove the old implementation
-// OTT: Add logic for Ottawa events
-//  Returns JSON
-// MTL: Add logic for montreal events
-//  Returns XML
-// Serializing to JSON 
-//  We should serialize time to an ISO6801-formatted string
-// Serve serialized JSON via RESTful endpoints
-//  Implement robust filtering via query params
+/* 
+TODO:
+ *
+ * ONGOV:
+ *  Investigate REST API
+ *    Possible workarounds for geo-restriction
+ *    Do we need to proxy requests locally on client?
+ *  Add logic to account for multiple pages
+ *    Probably need to modify to POST request and investigate payloads in-browser
+ *    Do we need to establish a session and maintain state?
+ *    Modify cleanup to only run if we get valid table data
+ *  Create an async function which can be run every few minutes to set geo-coordinates
+ *    If we use openstreetmap we are limited to one request per second.
+ *    Setup an atomic timer!
+ *
+ * ONMT: 
+ *  Normalize data for Ontario events
+ *    Need to extract optional side road if it exists, rest seems to be parsing fine
+ *    Check reported time against current time to filter out future (planned) events
+ *    After normalization has been completed, we can refactor Event2 into Event and remove the old implementation
+ *
+ * OTT: 
+ *  Add logic for Ottawa events
+ *    Returns JSON
+ *
+ * MTL: 
+ *  Add logic for montreal events
+ *    Returns XML
+ *  
+ * Serializing to JSON:
+ *  We should serialize time to an ISO6801-formatted string
+ *  Serve serialized JSON via RESTful endpoints
+ *  Implement robust filtering via query params
+ */
 
 namespace Traffic {
 
