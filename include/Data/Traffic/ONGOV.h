@@ -6,9 +6,11 @@
 #include <string>
 #include <vector>
 #include <optional>
+#include <utility>
 
 namespace Traffic {
 namespace ONGOV {
+using addressDir = std::pair<std::string, std::optional<std::string>>;
 extern const std::string EVENTS_URL;
 
 namespace Gumbo {
@@ -25,6 +27,11 @@ std::string getFirstSpanId(GumboElement* tableData);
 // Extract data from the table data element into the reference string
 void getData(GumboElement* tableData, std::string& element);
 }
+
+// Process Address into and street name and (optional) direction
+std::optional<addressDir> processAddress(const std::string& address);
+// Process cross street value into main street and (optional) cross street
+std::optional<std::pair<addressDir, std::optional<std::string>>> processCrossAsAddress(const std::string& address);
 
 }
 }

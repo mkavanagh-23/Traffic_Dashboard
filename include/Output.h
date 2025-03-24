@@ -14,8 +14,6 @@ namespace Colors {
   const std::string CYAN = "\033[36m";
   const std::string END = "\033[0m";
 }
-
-std::time_t currentTime();
 }
 
 #endif

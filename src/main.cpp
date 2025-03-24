@@ -1,6 +1,6 @@
-#include "Output.h"
 #include "RestAPI.h"
 #include "Traffic.h"
+#include "DataUtils.h"
 #include <ctime>
 #include <chrono>
 #include <cstdlib>
@@ -15,18 +15,17 @@
 int main(int argc, char* argv[]) {
   // Get all Traffic events
   // TODO: Asynchronously call this in a loop in its own thread
-  // We want this to be spun off into a bg thread while the REST server runs in main
+  // We want to run an update thread, a worker thread for queued processing, a listen thread for the REST server
+  // Going to need to design a soultion with mutexes to avoid UB
   
-  Traffic::fetchEvents();
   // Get cameras
-  Traffic::fetchCameras();
-  Traffic::printEvents();
+  //Traffic::fetchCameras();
   
   while(true) {
-    auto time = Output::currentTime();
+    Traffic::fetchEvents();
+    auto time = Time::currentTime_t();
     std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << '\n' << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(60));
-    Traffic::fetchEvents();
   }
 
   // Create and start the API server

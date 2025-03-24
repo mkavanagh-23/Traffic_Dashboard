@@ -94,14 +94,20 @@ endif()
 
 # RapidXML setup (only if not found in system, note: header-only library)
 if(NOT RapidXML_FOUND)
-    message(STATUS "RapidXML not found, will be downloaded")
-    FetchContent_Declare(
-        rapidxml
-        GIT_REPOSITORY https://github.com/discord/rapidxml.git
-        GIT_TAG master
-        GIT_SHALLOW TRUE
-    )
-    FetchContent_MakeAvailable(rapidxml)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(RAPIDXML rapidxml)
+    if(NOT RAPIDXML_FOUND)
+        message(STATUS "RapidXML not found, will be downloaded")
+        FetchContent_Declare(
+            rapidxml
+            GIT_REPOSITORY https://github.com/discord/rapidxml.git
+            GIT_TAG master
+            GIT_SHALLOW TRUE
+        )
+        FetchContent_MakeAvailable(rapidxml)
+    else()
+      message(STATUS "RapidXML found, using system version ${RapidXML_VERSION}")
+    endif()
 else()
     message(STATUS "RapidXML found, using system version ${RapidXML_VERSION}")
 endif()
@@ -187,7 +193,7 @@ else()
     set(JSONCPP_INCLUDE_DIRS "${jsoncpp_SOURCE_DIR}/include")
 endif()
 
-if(RapidXML_FOUND)
+if(RapidXML_FOUND OR RAPIDXML_FOUND)
     set(RAPIDXML_INCLUDE_DIRS "${RAPIDXML_INCLUDE_DIR}")
 else()
     set(RAPIDXML_INCLUDE_DIRS "${rapidxml_SOURCE_DIR}")  # RapidXML is typically header-only

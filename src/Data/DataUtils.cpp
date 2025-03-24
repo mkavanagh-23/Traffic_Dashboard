@@ -6,12 +6,24 @@
 #include <vector>
 #include <tuple>
 #include <iostream>
+#include <algorithm>
+#include <cctype>
 #include <regex>
 #include <chrono>
 #include <curl/curl.h>
 #include <json/json.h>
 #include <rapidxml.hpp>
 
+// Helper function to remove spaces and special characters from a string
+std::string sanitizeString(const std::string& input) {
+    std::string result;
+    for (char c : input) {
+        if (std::isalnum(c)) {
+            result += c;
+        }
+    }
+    return result;
+}
 
 namespace cURL {
 
@@ -180,6 +192,47 @@ std::unique_ptr<rapidxml::xml_document<>> parseData(std::string& xmlData) {
 
 } // namespace XML
 
+// Create a unique key for the event object
+void HTML::Event::createID() {
+  std::string id{"ONGOV-"};
+  // Start with the region code
+  id += sanitizeString(region);
+  // Add date component
+  id += sanitizeString(date);
+  // Add abridged agency
+  std::string agen = sanitizeString(agency);
+  if(agen.length() >= 3) {
+    id += agen.substr(0, 3);
+    id += agen.substr(agen.length() - 3, 3);
+  } else 
+    id += agen;
+  // Add abridged title
+  std::string titl = sanitizeString(title);
+  if(titl.length() >= 3) {
+    id += titl.substr(0, 3);
+    id += titl.substr(titl.length() - 3, 3);
+  } else
+    id += titl;
+  // Add abridged street
+  std::string addr = sanitizeString(address);
+  if(addr.length() >= 3) {
+    id += addr.substr(0, 3);
+    id += addr.substr(addr.length() - 3, 3);
+  } else
+    id += addr;
+  // Add cross-street
+  std::string cross = sanitizeString(xstreet);
+  if(cross.length() >= 3) {
+    id += cross.substr(0, 3);
+    id += cross.substr(cross.length() - 3, 3);
+  } else
+    id += cross;
+  // Convert to all upper
+  std::transform(id.begin(), id.end(), id.begin(), [](unsigned char c){ return std::toupper(c); });
+  // And move the string onto the object 
+  ID = std::move(id);
+}
+
 namespace Traffic {
 bool BoundingBox::contains(const Location& coordinate) const {
   auto& [latitude, longitude] = coordinate;
@@ -199,6 +252,15 @@ namespace Time {
 using namespace std::chrono;
 
 std::string offsetGMT{ "-0400" };
+
+system_clock::time_point currentTime() {
+  return system_clock::now();
+}
+
+std::time_t currentTime_t() {
+  auto time = system_clock::to_time_t(currentTime());
+  return time;
+}
 
 // Create a local formatted time string for printing from a time point object
 std::tm toLocalPrint(const system_clock::time_point& time) {

@@ -16,29 +16,43 @@
 #include <cassert>
 #include <unordered_map>
 
-// TODO: 
-// Integrate regex parsing of MCNY event titles (already built externally)
-//  Do we also need to use REGEX to parse through NYSDOT and ONMT event titles?
-// Add logic for ONGOV events
-//  Returns HTML
-//  Parse through each table row
-//  Add logic to detect multiple pages
-//  Refine cleanup logic to account for frequent downtime
-//  Need to develop a method for creating a unique ID string
-// Add logic for Ottawa events
-//  Returns JSON
-// Add logic for montreal events
-//  Returns XML
-// Serializing to JSON 
-//  We should serialize time to an ISO6801-formatted string
-// Serve serialized JSON via RESTful endpoints
-//
-// We may want to modify constructors to take in the currentSource variable as well
-// This way we can have a separate constructor for each source
-// We can also define base constructors for XML/JSON shared objects
-// Since currentSource is set at the start of each functional branch, this simplifies logic
-// Note that this limits us to sequential rather than concurrent data fetching
-
+/* 
+TODO:
+ *
+ * ONGOV:
+ *  Investigate REST API
+ *    Possible workarounds for geo-restriction
+ *    Do we need to proxy requests locally on client?
+ *  Add logic to account for multiple pages
+ *    Probably need to modify to POST request and investigate payloads in-browser
+ *    Do we need to establish a session and maintain state?
+ *    Modify cleanup to only run if we get valid table data
+ *  Create an async function which can be run every few minutes to set geo-coordinates
+ *    If we use openstreetmap we are limited to one request per second.
+ *    Setup an atomic timer!
+ *
+ * ONMT: 
+ *  Normalize data for Ontario events
+ *    Need to extract optional side road if it exists, rest seems to be parsing fine
+ *    Check reported time against current time to filter out future (planned) events
+ *
+ * OTT: 
+ *  Add logic for Ottawa events
+ *    Returns JSON
+ *    Filter by "eventType" - We want "INCIDENT"
+ *    brief overview in "headline"
+ *
+ * MTL: 
+ *  Add logic for montreal events
+ *    Returns XML
+ *    Filter by <category> - we want "Warning"
+ *    Use REGEX to parse description
+ *  
+ * Serializing to JSON:
+ *  We should serialize time to an ISO6801-formatted string
+ *  Serve serialized JSON via RESTful endpoints
+ *  Implement robust filtering via query params
+ */
 
 namespace Traffic {
 
@@ -51,16 +65,16 @@ DataSource currentSource;
 
 // Get events from all URLs
 void fetchEvents() {
+  std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
+  getEvents(ONGOV::EVENTS_URL);
   std::cout << "\nFetching NYS 511 events:\n\n";
   getEvents(NYSDOT::EVENTS_URL);
   std::cout << "\nFetching Monroe County 911 events:\n\n";
   getEvents(MCNY::EVENTS_URL);
   std::cout << "\nFetching Ontario 511 events:\n\n";
   getEvents(ONMT::EVENTS_URL);
-
+  
   // TODO:
-  std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
-  getEvents(ONGOV::EVENTS_URL);
   //std::cout << "\nFetching Ottawa events:\n\n";
   //getEvents(OTT::EVENTS_URL);
   //std::cout << "\nFetching Montreal events:\n\n";
@@ -84,9 +98,13 @@ bool getEvents(std::string url) {
   // Check for Data Source
   if(url.find("511ny.org") != std::string::npos) {
     // Source API key
-    if(NYSDOT::API_KEY.empty())
+    if(NYSDOT::API_KEY.empty()) {
       NYSDOT::getEnv();
-    assert(!NYSDOT::API_KEY.empty() && "Failed to retrieve API key from local environment.");
+      if(NYSDOT::API_KEY.empty()) {
+        std::cerr << Output::Colors::RED << "[Traffic] ERROR: Failed to retrieve NYSDOT API Key from local environment.\n" << Output::Colors::END;
+        return false;
+      }
+    }
     url += NYSDOT::API_KEY;
     // Set current Data Source
     currentSource = DataSource::NYSDOT;
@@ -155,18 +173,7 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
       std::cerr << Output::Colors::RED << "[HTML] Error: parsing failed.\n" << Output::Colors::END;
       return false;
     }
-    // TODO:
-    // Process the vector of ONGOV events into Traffic events
-    // FIX: MAKE SURE TO VALIDATE DATA FIRST
-    // ALREADY HAD A RUNTIME CRASH WHEN TRYING TO STOI INVALID DATA
-    auto eventsVector = std::move(*parsedData);
-    std::cout << '\n';
-    for(const auto& event: eventsVector) {
-      auto time = Time::MMDDYYHHMM::toChrono(event.date);
-      std::tm localTime = Time::toLocalPrint(time);
-      std::cout << event.title << '\n'
-                << "  " << std::put_time(&localTime, "%T - %F") << '\n';
-    }
+    parseEvents(*parsedData);
   } else {
     // Error and exit if invalid type returned
     std::cerr << Output::Colors::RED << "[cURL] ERROR: Unsupported \"Content-Type\": '" <<  contentType << '\n' << Output::Colors::END;
@@ -213,6 +220,20 @@ bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
   return true;
 }
 
+// Parse events from an array of temp HTML events
+bool parseEvents(const std::vector<HTML::Event>& parsedData) {
+  // Iterate through each parsed event in the vector
+  for(const auto& parsedEvent : parsedData) {
+    // Try to insert it on the vector
+    // Will not add if it already exists
+    mapEvents.try_emplace(parsedEvent.ID, parsedEvent);
+  }
+  std::cout << Output::Colors::GREEN << "\n[HTML] Successfully parsed HTML document." << Output::Colors::END << '\n';
+  // Clean up cleared events while our data is still in scope
+  clearEvents(parsedData);  // NOTE: Make sure to pass the dereferenced events data here as parsedData is invalid
+  return true;
+}
+
 // Process a parsed JSON event for storage
 bool processEvent(const Json::Value& parsedEvent) {
   if(!parsedEvent.isMember("ID")) {
@@ -226,6 +247,7 @@ bool processEvent(const Json::Value& parsedEvent) {
   // Check if the event is within one of our markets
   if(!inMarket(parsedEvent))
     return false;
+
 
   // Add the event
   // Try to insert a new Event at event, inserted = false if it already exists
@@ -278,6 +300,15 @@ bool containsEvent(rapidxml::xml_document<>& events, const std::string& key) {
   return false;
 }
 
+// Check if parsed HTML events contains an event with the given key
+bool containsEvent(const std::vector<HTML::Event>& events, const std::string& key) {
+  for(const auto& event : events) {
+    if(event.ID == key)
+      return true;
+  }
+  return false;
+}
+
 // Check if an event is both in market and of valid type
 bool inMarket(const Json::Value& parsedEvent) {
   // If we are a NYS event check if we are in region
@@ -287,7 +318,7 @@ bool inMarket(const Json::Value& parsedEvent) {
   } else { // If we are and Ontario event check if we are in region 
     // Extract the location
     Location location{ parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble() };
-    if(!ONMT::regionToronto.contains(location))
+    if(!ONMT::regionToronto.contains(location) && !ONMT::regionOttawa.contains(location))
       return false;
   }
   // Check for matching incident type
@@ -333,10 +364,12 @@ Event::Event(const Json::Value& parsedEvent)
   // Construct shared members
   if(parsedEvent.isMember("ID"))
     ID = parsedEvent["ID"].asString();
+  if(parsedEvent.isMember("EventType"))
+    title = parsedEvent["EventType"].asString();
   if(parsedEvent.isMember("RoadwayName"))
-    roadwayName = parsedEvent["RoadwayName"].asString();
+    mainStreet = parsedEvent["RoadwayName"].asString();
   if(parsedEvent.isMember("DirectionOfTravel"))
-    directionOfTravel = parsedEvent["DirectionOfTravel"].asString();
+    direction = parsedEvent["DirectionOfTravel"].asString();
   if(parsedEvent.isMember("Description"))
     description = parsedEvent["Description"].asString();
   if(parsedEvent.isMember("Latitude") && parsedEvent.isMember("Latitude")) {
@@ -347,10 +380,13 @@ Event::Event(const Json::Value& parsedEvent)
   switch(dataSource) {
     // Construct members for NYSDOT
     case DataSource::NYSDOT:
+      URL = "https://511ny.org/";
       region = NYSDOT::getRegion(parsedEvent["RegionName"].asString());
       if(region == Region::UNKNOWN)
         std::cerr << Output::Colors::RED << "[JSON Event] Error: Failed to source dataSource member during construction\n"
                   << Output::Colors::END;
+      if(parsedEvent.isMember("PrimaryLocation"))
+        crossStreet = parsedEvent["PrimaryLocation"].asString();
       if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
         timeReported = Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["Reported"].asString());
         timeUpdated = Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["LastUpdated"].asString());
@@ -358,7 +394,12 @@ Event::Event(const Json::Value& parsedEvent)
       break;
     // Construct members for ONMT
     case DataSource::ONMT:
-      region = Region::Toronto;
+      URL = "https://511on.ca/";
+      // Determine the region
+      if(ONMT::regionToronto.contains(location))
+        region = Region::Toronto;
+      if(ONMT::regionOttawa.contains(location))
+        region = Region::Ottawa;
       if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
         timeReported = Time::UNIX::toChrono(parsedEvent["Reported"].asDouble(), std::nullopt);
         timeUpdated = Time::UNIX::toChrono(parsedEvent["LastUpdated"].asDouble(), std::nullopt);
@@ -376,11 +417,25 @@ Event::Event(const Json::Value& parsedEvent)
 
 // Construct an event from an XML object
 Event::Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &parsedDescription)
-: ID{ parsedDescription.second }, dataSource{ DataSource::MCNY }, status{ parsedDescription.first },
-  region{Region::Rochester}, timeUpdated{ std::chrono::system_clock::now() }
+: ID{ parsedDescription.second }, dataSource{ DataSource::MCNY }, region{Region::Rochester}, 
+  status{ parsedDescription.first }, timeUpdated{ Time::currentTime() }
 {
+  if(rapidxml::xml_node<> *url = item->first_node("guid")){
+    URL = url->value();
+  }
   if(rapidxml::xml_node<> *title = item->first_node("title")){
     description = title->value();
+    // Use regex to extract Title, street, direction(optional), and cross(optional)
+    auto parsedDescription = MCNY::processTitle(description);
+    if(parsedDescription) {
+      auto [parsedTitle, parsedStreet, parsedDirection, parsedCross] = *parsedDescription;
+      if(parsedDirection)
+        direction = *parsedDirection;
+      if(parsedCross)
+        crossStreet = *parsedCross;
+      this->title = parsedTitle;        // Make sure to dereference the "this" member rather than our node*
+      mainStreet = parsedStreet;
+    }
   }
   if(rapidxml::xml_node<> *pubDate = item->first_node("pubDate")){
     // Try to convert to a time object
@@ -394,25 +449,91 @@ Event::Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std:
   if(latitude && longitude){
     std::string parsedLat = latitude->value();
     std::string parsedLong = longitude->value();
-    location = { std::stof(parsedLat.substr(1)), std::stof(parsedLong.substr(1)) };
+    location = { std::stof(parsedLat.substr(1)), std::stof(parsedLong.substr(1)) * -1 };
   }   
   
   std::cout << Output::Colors::YELLOW << "\n[XML Event] Constructed event: " << ID << "  |  " << region
             << '\n' << Output::Colors::END << description << '\n';
 }
 
+// Construct an event from an HTML event
+Event::Event(const HTML::Event& parsedEvent)
+: ID{ parsedEvent.ID }, URL{ "https://911events.ongov.net/CADInet/app/events.jsp" }, dataSource{ DataSource::ONGOV },
+  region{ Region::Syracuse }, location{ Location(43.05, -76.15) }, timeUpdated{ Time::currentTime() }
+{
+  bool hasMain{ false };    // Flag to check if main address exists
+  std::string descStr{ "" };    // Create a string to build and hold the description
+
+  if(parsedEvent.title != "N/A") {
+    // Process the event title
+    title = parsedEvent.title;
+    // Add the title to the string followed by " at "
+    descStr += parsedEvent.title + " at ";
+  }
+  if(parsedEvent.address != "N/A") {
+    // Process the main street
+    auto parsedAddress = ONGOV::processAddress(parsedEvent.address);
+    if(parsedAddress) {
+      auto [parsedStreet, parsedDir] = *parsedAddress;
+      if(parsedDir)
+        direction = *parsedDir;
+      mainStreet = parsedStreet;
+    }
+    // Add the address to the string followed by
+    descStr += parsedEvent.address + ' ';
+    hasMain = true;
+  }
+  if(parsedEvent.xstreet != "N/A") {
+    if(!hasMain) {
+      // Process cross street as main
+      auto parsedCross = ONGOV::processCrossAsAddress(parsedEvent.xstreet); // Returns an optional pair of an addressDir and a crossStreet
+      if(parsedCross) {
+        auto [mainRoadDir, crossRoad] = *parsedCross;
+
+        mainStreet = mainRoadDir.first;
+        std::optional<std::string>dir = mainRoadDir.second;
+
+        if(dir) {
+          direction = *dir;        }
+
+        if(crossRoad)
+          crossStreet = *crossRoad;
+      }
+    } else {
+      // Process cross street as cross
+      crossStreet = parsedEvent.xstreet;
+    }
+    // Add the cross street to the string
+    descStr += "( X: " + parsedEvent.xstreet + " ) ";
+  }
+  if(parsedEvent.date != "N/A") {
+    // Process the event date
+    timeReported = Time::MMDDYYHHMM::toChrono(parsedEvent.date);
+    // Add the date to the string
+    descStr += "[ " + parsedEvent.date + " ]";
+  }
+
+  description = std::move(descStr);
+  
+  std::cout << Output::Colors::YELLOW << "\n[HTML Event] Constructed event: " << ID
+            << '\n' << Output::Colors::END << description << '\n';
+}
+
 // Move constructor for an event object
 Event::Event(Event&& other) noexcept 
 : ID(std::move(other.ID)),
+  URL(std::move(other.URL)),
   dataSource(other.dataSource),
-  status(std::move(other.status)),
   region(other.region),
-  roadwayName(std::move(other.roadwayName)),
-  directionOfTravel(std::move(other.directionOfTravel)),
+  title(std::move(other.title)),
+  status(std::move(other.status)),
+  mainStreet(std::move(other.mainStreet)),
+  crossStreet(std::move(other.crossStreet)),
+  direction(std::move(other.direction)),
   description(std::move(other.description)),
+  location(other.location),
   timeReported(std::move(other.timeReported)),
-  timeUpdated(std::move(other.timeUpdated)),
-  location(other.location)
+  timeUpdated(std::move(other.timeUpdated))
 {
   std::cout << Output::Colors::BLUE << "[Event] Moved event: " << ID  << "  |  " << region
             << '\n' << Output::Colors::END << description << '\n';
@@ -424,12 +545,16 @@ Event& Event::operator=(Event&& other) noexcept {
   // Check for self-assignment
   if(this != &other) {
     ID = std::move(other.ID);
+    URL = std::move(other.URL);
     dataSource = other.dataSource;
-    status = std::move(other.status);
     region = other.region;
-    roadwayName = std::move(other.roadwayName);
-    directionOfTravel = std::move(other.directionOfTravel);
+    title = std::move(other.title);
+    status = std::move(other.status);
+    mainStreet = std::move(other.mainStreet);
+    crossStreet = std::move(other.crossStreet);
+    direction = std::move(other.direction);
     description = std::move(other.description);
+    location = other.location;
     timeReported = std::move(other.timeReported);
     timeUpdated = std::move(other.timeUpdated);
   }
@@ -602,6 +727,9 @@ std::ostream& operator<<(std::ostream& out, const Region& region) {
     case Region::Ottawa:
       out << "Ottawa, ON";
       break;
+    case Region::Montreal:
+      out << "Montreal, QC";
+      break;
     default:
       out << "Unknown";
       break;
@@ -614,11 +742,20 @@ std::ostream& operator<<(std::ostream& out, const DataSource& dataSource) {
     case DataSource::NYSDOT:
       out << "NYS 511";
       break;
-    case DataSource::ONMT:
-      out << "Ontario 511";
+    case DataSource::ONGOV:
+      out << "Onondaga Counmty 911";
       break;
     case DataSource::MCNY:
       out << "Monroe County 911";
+      break;
+    case DataSource::ONMT:
+      out << "Ontario 511";
+      break;
+    case DataSource::OTT:
+      out << "Ottawa City";
+      break;
+    case DataSource::MTL:
+      out << "Quebec 511";
       break;
     default:
       out << "Unknown";
@@ -632,8 +769,10 @@ std::ostream &operator<<(std::ostream &out, const Event &event){
   std::tm timeUpdated = Time::toLocalPrint(event.timeUpdated);
 
   out << '\n' << event.region << " (" << event.dataSource << ")  |  " << event.ID << "  |  " << event.status << '\n'
-      << event.roadwayName << "  |  " << event.directionOfTravel << "  |  " << event.location << '\n'
+      << event.title << '\n'
+      << event.mainStreet << "(" << event.direction << ") at " << event.crossStreet << "  |  " << event.location << '\n'
       << event.description << '\n'
+      << event.URL << '\n'
       << "Reported: " << std::put_time(&timeReported, "%T - %F") << "  |  Updated: " << std::put_time(&timeUpdated, "%T - %F")
       << std::endl;
   return out;

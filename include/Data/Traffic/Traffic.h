@@ -25,6 +25,7 @@ enum class Region {
   Binghamton,
   Toronto,
   Ottawa,
+  Montreal,
   UNKNOWN
 };
 std::ostream& operator<<(std::ostream& out, const Region& region);
@@ -32,9 +33,10 @@ std::ostream& operator<<(std::ostream& out, const Region& region);
 enum class DataSource {
   NYSDOT,
   ONGOV,
-  ONMT,
   MCNY,
+  ONMT,
   OTT,
+  MTL,
   UNKNOWN
 };
 std::ostream& operator<<(std::ostream& os, const DataSource& dataSource);
@@ -78,27 +80,30 @@ bool processCamera(const Json::Value& parsedCamera);
 
 class Event {
 private:
-  std::string ID; // OTT - Convert from int
-  DataSource dataSource;
+  std::string ID;
+  std::string URL{ "N/A" };
+  DataSource dataSource{ DataSource::UNKNOWN };
+  Region region{ Region::UNKNOWN };
+  std::string title{ "N/A" };
   std::string status{ "Active" };
-  Region region;
-  std::string roadwayName{ "Unknown" }; // OTT - Parse from 'headline'
-  std::string directionOfTravel{ "None" };  // OTT - Parse from 'headline'
-  std::string description;  // MCNY 'title' field -- OTT 'message' field
+  std::string mainStreet{ "N/A" };
+  std::string crossStreet{ "N/A" };
+  std::string direction{ "N/A" };
+  std::string description{ "N/A" }; // Holds full unformatted event string
+  Location location;
   std::chrono::system_clock::time_point timeReported; // OTT 'created' "2025-03-11 12:45:00"
   std::chrono::system_clock::time_point timeUpdated;  // OTT 'updated' "2025-03-11 12:45:00"
-  Location location;  // OTT - 'geodata'{'coordinates'"[double_Latitude, double_Longitude]"}
-  //std::vector<Camera> cameras;
 
 public:
   // Constructors
   Event(const Json::Value& parsedEvent);
   Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &description);
+  Event(const HTML::Event& parsedEvent);
   Event(Event&& other) noexcept;
-  Event& operator=(Event&& other) noexcept;
 
   // Operators
-  friend std::ostream &operator<<(std::ostream &out, const Event &event);
+  Event& operator=(Event&& other) noexcept;
+  friend std::ostream &operator<<(std::ostream &out, const Event& event);
 
   // Accessors
   std::string_view getID() const { return ID; }
@@ -108,10 +113,10 @@ public:
   Region getRegion() const { return region; }
   Location getLocation() const { return location; }
   std::string_view getDescription() const { return description; }
-  //const std::vector<Camera>& getCameras() const { return cameras; } // Return by const reference, ensure no dangling references!!!
-}; // class Event
+};
 
 // Define extern event data structures
+//extern std::unordered_map<std::string, Event> mapEvents;
 extern std::unordered_map<std::string, Event> mapEvents;
 
 // Get events from all sources
@@ -122,9 +127,11 @@ bool getEvents(std::string url);
 bool processData(std::string& data, const std::vector<std::string>& headers);   // XML must be able to manipulate data
 bool parseEvents(const Json::Value& parsedData);
 bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData);
+bool parseEvents(const std::vector<HTML::Event>& parsedData);
 bool processEvent(const Json::Value& parsedEvent);
 bool containsEvent(const Json::Value& events, const std::string& key);
 bool containsEvent(rapidxml::xml_document<>& events, const std::string& key);
+bool containsEvent(const std::vector<HTML::Event>& events, const std::string& key);
 bool inMarket(const Json::Value& parsedEvent);
 bool isIncident(const Json::Value& parsedEvent);
 std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent);
@@ -142,7 +149,7 @@ void clearEvents(T& events) {
       // Check for matching key
       if(!containsEvent(events, key)) {
         keysToDelete.push_back(key);
-      std::cout << Output::Colors::YELLOW << "[Events] Marked event for deletion: " << key << Output::Colors::END << '\n'; 
+        std::cout << Output::Colors::YELLOW << "[Events] Marked event for deletion: " << key << Output::Colors::END << '\n'; 
       }
     }
   }

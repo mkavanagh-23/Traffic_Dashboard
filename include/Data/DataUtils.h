@@ -11,9 +11,11 @@
 #include <optional>
 #include <tuple>
 #include <chrono>
+#include <ctime>
 
 
 // This file holds all functionality for retrieving and filtering basic data from CURL in XML and JSON formats
+std::string sanitizeString(const std::string& input);
 
 namespace cURL {
 
@@ -66,12 +68,14 @@ std::unique_ptr<rapidxml::xml_document<>> parseData(std::string& xmlData);
 namespace HTML {
 
 struct Event {
+  std::string ID{"N/A"};
   std::string agency{"N/A"};
   std::string date{"N/A"};
   std::string title{"N/A"};
   std::string address{"N/A"};
   std::string region{"N/A"};
   std::string xstreet{"N/A"};
+  void createID();
 };
 
 // Create a wrapper for GumboOutput objects to maintain RAII
@@ -117,6 +121,9 @@ struct BoundingBox {
 
 namespace Time {
 using namespace std::chrono;
+
+system_clock::time_point currentTime();
+std::time_t currentTime_t();
 
 // Create a local formatted time string for printing from a time point object
 std::tm toLocalPrint(const system_clock::time_point& time);
