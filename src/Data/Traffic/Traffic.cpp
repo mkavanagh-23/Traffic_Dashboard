@@ -17,9 +17,6 @@
 #include <unordered_map>
 
 // TODO:
-// NYSDOT:
-//  Check reported time against current time to filter out future (planned) events
-//    i.e. if(timeReported >= std::chrono::system_clock::now())
 // ONGOV:
 //  Investigate REST API
 //    Possible workarounds for geo-restriction
@@ -29,6 +26,8 @@
 //    Do we need to establish a session and maintain state?
 //  Modify cleanup to only run if we get valid table data
 // ONMT: Normalize data for Ontario events
+//  Need to extract optional side road if it exists, rest seems to be parsing fine
+//  Check reported time against current time to filter out future (planned) events
 //  After normalization has been completed, we can refactor Event2 into Event and remove the old implementation
 // OTT: Add logic for Ottawa events
 //  Returns JSON
@@ -56,8 +55,8 @@ void fetchEvents() {
   getEvents(NYSDOT::EVENTS_URL);
   std::cout << "\nFetching Monroe County 911 events:\n\n";
   getEvents(MCNY::EVENTS_URL);
-  //std::cout << "\nFetching Ontario 511 events:\n\n";
-  //getEvents(ONMT::EVENTS_URL);
+  std::cout << "\nFetching Ontario 511 events:\n\n";
+  getEvents(ONMT::EVENTS_URL);
   
   // TODO:
   //std::cout << "\nFetching Ottawa events:\n\n";
@@ -235,8 +234,8 @@ bool processEvent(const Json::Value& parsedEvent) {
 
   // TODO:
   // Check if it is a future event
-  if(inFuture(parsedEvent))
-    return false;
+  //if(inFuture(parsedEvent))
+  //  return false;
 
   // Add the event
   // Try to insert a new Event at event, inserted = false if it already exists
@@ -386,6 +385,7 @@ Event2::Event2(const Json::Value& parsedEvent)
       break;
     // Construct members for ONMT
     case DataSource::ONMT:
+      URL = "https://511on.ca/";
       region = Region::Toronto;
       if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
         timeReported = Time::UNIX::toChrono(parsedEvent["Reported"].asDouble(), std::nullopt);
