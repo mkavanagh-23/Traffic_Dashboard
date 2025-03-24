@@ -25,6 +25,9 @@
 //    Probably need to modify to POST request and investigate payloads in-browser
 //    Do we need to establish a session and maintain state?
 //  Modify cleanup to only run if we get valid table data
+//  Create an async function which can be run every few minutes to set geo-coordinates
+//    If we use openstreetmap we are limited to one request per second.
+//    Setup an atomic timer!
 // ONMT: Normalize data for Ontario events
 //  Need to extract optional side road if it exists, rest seems to be parsing fine
 //  Check reported time against current time to filter out future (planned) events
@@ -436,7 +439,7 @@ Event2::Event2(const rapidxml::xml_node<>* item, const std::pair<std::string, st
   if(latitude && longitude){
     std::string parsedLat = latitude->value();
     std::string parsedLong = longitude->value();
-    location = { std::stof(parsedLat.substr(1)), std::stof(parsedLong.substr(1)) };
+    location = { std::stof(parsedLat.substr(1)), std::stof(parsedLong.substr(1)) * -1 };
   }   
   
   std::cout << Output::Colors::YELLOW << "\n[XML Event] Constructed event: " << ID << "  |  " << region
@@ -446,7 +449,7 @@ Event2::Event2(const rapidxml::xml_node<>* item, const std::pair<std::string, st
 // Construct an event from an HTML event
 Event2::Event2(const HTML::Event& parsedEvent)
 : ID{ parsedEvent.ID }, URL{ "https://911events.ongov.net/CADInet/app/events.jsp" }, dataSource{ DataSource::ONGOV },
-  region{ Region::Syracuse }, location{ Location(43.05, 76.15) }, timeUpdated{ Time::currentTime() }
+  region{ Region::Syracuse }, location{ Location(43.05, -76.15) }, timeUpdated{ Time::currentTime() }
 {
   bool hasMain{ false };    // Flag to check if main address exists
   std::string descStr{ "" };    // Create a string to build and hold the description
