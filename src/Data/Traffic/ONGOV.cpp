@@ -11,6 +11,11 @@
 
 namespace Traffic {
 namespace ONGOV {
+
+// TODO:
+// Check for IP/origin restrictions on cURL requests
+// Geo-blocked? Data center traffic?
+
 extern const std::string EVENTS_URL{ "https://911events.ongov.net/CADInet/app/events.jsp" };
 
 namespace Gumbo {
@@ -234,7 +239,7 @@ void getData(GumboElement* tableData, std::string& element) {
 } // namespace Gumbo
 
 // Process Address into and street name and (optional) direction
-std::optional<std::pair<std::string, std::optional<std::string>>> processAddress(const std::string& address) {
+std::optional<addressDir> processAddress(const std::string& address) {
   std::string cleanedAddress = address.substr(1);
     
   // Replace double spaces with single spaces first
@@ -242,7 +247,7 @@ std::optional<std::pair<std::string, std::optional<std::string>>> processAddress
   cleanedAddress = std::regex_replace(cleanedAddress, multipleSpace, " ");
    
   // Define the matching pattern
-  std::regex pattern("(?:(EB|WB|NB|SB) )?((?:ROUTE\\s+\\d+)|(?:I\\s+\\d+)|(?:[^\\s].*?\\s+(?:LN|ST|AVE|DR|CT|CANALWAY|PATH|BLVD|TER|KING|CIR|RD|STREET|ROWE|FARM|TRAIL|TPKE)))(\\s+.*)?");
+  std::regex pattern("(?:(EB|WB|NB|SB)\\s*)?((?:ROUTE\\s+\\d+)|(?:I\\s+\\d+)|(?:[^\\s].*?\\s+(?:LN|ST|AVE|DR|CT|CANALWAY|PATH|BLVD|TER|KING|CIR|RD|STREET|ROWE|FARM|TRAIL|TPKE|PKWY)))(\\s+.*)?");
   std::smatch matches;
   /*
    *    matches[1] = Direction (Optional)
@@ -261,7 +266,9 @@ std::optional<std::pair<std::string, std::optional<std::string>>> processAddress
 }
 
 // Process cross street value into main street and (optional) cross street
-std::optional<std::pair<std::string, std::optional<std::string>>> processCrossAsAddress(const std::string& address) {
+// TODO: Modify to take (opyional) Direction input string before main street
+// SAMPLE: "SB I 81 & OLD LIVERPOOL RD TO SB I 81 RAMP"
+std::optional<std::pair<addressDir, std::optional<std::string>>> processCrossAsAddress(const std::string& address) {
   // Define the matching pattern
   std::regex pattern("^(.*?)\\s*&\\s*(.*)?$");
   std::smatch matches;
@@ -273,10 +280,13 @@ std::optional<std::pair<std::string, std::optional<std::string>>> processCrossAs
    *            string end      = $
    */
   if(std::regex_search(address, matches, pattern)) {
-    if(matches[2].matched)
-      return std::make_pair(matches[1], matches[2]);
-    else
-      return std::make_pair(matches[1], std::nullopt);
+    auto mainStreet = processAddress(matches[1]);
+    if(mainStreet) {
+      if(matches[2].matched)
+        return std::make_pair(*mainStreet, matches[2]);
+      else
+        return std::make_pair(*mainStreet, std::nullopt);
+    }
   }
   
   std::cerr << Output::Colors::RED << "[REGEX] ERROR: ONGOV cross street does not match" << address << '\n' << Output::Colors::END;

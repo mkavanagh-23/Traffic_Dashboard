@@ -21,6 +21,9 @@
 //  Check reported time against current time to filter out future (planned) events
 //    i.e. if(timeReported >= std::chrono::system_clock::now())
 // ONGOV:
+//  Investigate REST API
+//    Possible workarounds for geo-restriction
+//    Do we need to proxy requests locally on client?
 //  Add logic to account for multiple pages
 //    Probably need to modify to POST request and investigate payloads in-browser
 //    Do we need to establish a session and maintain state?
@@ -462,12 +465,18 @@ Event2::Event2(const HTML::Event& parsedEvent)
   if(parsedEvent.xstreet != "N/A") {
     if(!hasMain) {
       // Process cross street as main
-      auto parsedCross = ONGOV::processCrossAsAddress(parsedEvent.xstreet);
+      auto parsedCross = ONGOV::processCrossAsAddress(parsedEvent.xstreet); // Returns an optional pair of an addressDir and a crossStreet
       if(parsedCross) {
-        auto [mainRoad, crossRoad] = *parsedCross;
+        auto [mainRoadDir, crossRoad] = *parsedCross;
+
+        mainStreet = mainRoadDir.first;
+        std::optional<std::string>dir = mainRoadDir.second;
+
+        if(dir) {
+          direction = *dir;        }
+
         if(crossRoad)
           crossStreet = *crossRoad;
-        mainStreet = mainRoad;
       }
     } else {
       // Process cross street as cross
