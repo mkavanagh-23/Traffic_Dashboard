@@ -78,7 +78,7 @@ bool getCameras(std::string url);
 bool parseCameras(const std::string& data);
 bool processCamera(const Json::Value& parsedCamera);
 
-class Event2 {
+class Event {
 private:
   std::string ID;
   std::string URL{ "N/A" };
@@ -96,14 +96,14 @@ private:
 
 public:
   // Constructors
-  Event2(const Json::Value& parsedEvent);
-  Event2(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &description);
-  Event2(const HTML::Event& parsedEvent);
-  Event2(Event2&& other) noexcept;
+  Event(const Json::Value& parsedEvent);
+  Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &description);
+  Event(const HTML::Event& parsedEvent);
+  Event(Event&& other) noexcept;
 
   // Operators
-  Event2& operator=(Event2&& other) noexcept;
-  friend std::ostream &operator<<(std::ostream &out, const Event2 &event);
+  Event& operator=(Event&& other) noexcept;
+  friend std::ostream &operator<<(std::ostream &out, const Event& event);
 
   // Accessors
   std::string_view getID() const { return ID; }
@@ -117,7 +117,7 @@ public:
 
 // Define extern event data structures
 //extern std::unordered_map<std::string, Event> mapEvents;
-extern std::unordered_map<std::string, Event2> mapEvents2;
+extern std::unordered_map<std::string, Event> mapEvents;
 
 // Get events from all sources
 void fetchEvents();
@@ -143,7 +143,7 @@ void clearEvents(T& events) {
   // Create a vector to store the keys to be deleted
   std::vector<std::string> keysToDelete;
   // Iterate through the event map
-  for(const auto& [key, event] : mapEvents2) {
+  for(const auto& [key, event] : mapEvents) {
     // Only match with current source events
     if(event.getSource() == currentSource) {
       // Check for matching key

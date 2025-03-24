@@ -1,5 +1,4 @@
 #include "ONGOV.h"
-#include "Traffic.h"
 #include "Output.h"
 #include <gumbo.h>
 #include <iostream>
@@ -247,7 +246,7 @@ std::optional<addressDir> processAddress(const std::string& address) {
   cleanedAddress = std::regex_replace(cleanedAddress, multipleSpace, " ");
    
   // Define the matching pattern
-  std::regex pattern("(?:(EB|WB|NB|SB)\\s*)?((?:ROUTE\\s+\\d+)|(?:I\\s+\\d+)|(?:[^\\s].*?\\s+(?:LN|ST|AVE|DR|CT|CANALWAY|PATH|BLVD|TER|KING|CIR|RD|STREET|ROWE|FARM|TRAIL|TPKE|PKWY)))(\\s+.*)?");
+  std::regex pattern("(?:(EB|WB|NB|SB)\\s*)?((?:ROUTE\\s+\\d+)|(?:I\\s+\\d+)|(?:[^\\s].*?\\s+(?:LN|ST|AVE|DR|CT|CANALWAY|PATH|BLVD|TER|KING|CIR|RD|STREET|ROWE|FARM|TRAIL|TRL|TPKE|PKWY)))(\\s+.*)?");
   std::smatch matches;
   /*
    *    matches[1] = Direction (Optional)

@@ -59,7 +59,7 @@ TODO:
 namespace Traffic {
 
 // Data structures
-std::unordered_map<std::string, Event2> mapEvents2;
+std::unordered_map<std::string, Event> mapEvents;
 std::unordered_map<std::string, Camera> mapCameras;
 
 // Static object to store data source for current iteration
@@ -90,7 +90,7 @@ void fetchCameras() {
 
 // Print all events in the map
 void printEvents() {
-  for(const auto& [key, event] : mapEvents2) {
+  for(const auto& [key, event] : mapEvents) {
     std::cout << event;
   }
 }
@@ -228,7 +228,7 @@ bool parseEvents(const std::vector<HTML::Event>& parsedData) {
   for(const auto& parsedEvent : parsedData) {
     // Try to insert it on the vector
     // Will not add if it already exists
-    mapEvents2.try_emplace(parsedEvent.ID, parsedEvent);
+    mapEvents.try_emplace(parsedEvent.ID, parsedEvent);
   }
   std::cout << Output::Colors::GREEN << "\n[HTML] Successfully parsed HTML document." << Output::Colors::END << '\n';
   // Clean up cleared events while our data is still in scope
@@ -253,7 +253,7 @@ bool processEvent(const Json::Value& parsedEvent) {
 
   // Add the event
   // Try to insert a new Event at event, inserted = false if it already exists
-  auto [event, inserted] = mapEvents2.try_emplace(key, parsedEvent);
+  auto [event, inserted] = mapEvents.try_emplace(key, parsedEvent);
   // Check if we added a new event
   if(!inserted) {
     // Check for updated timestamp
@@ -353,14 +353,14 @@ std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent){
 // Called by templated "Clean Events" function
 void deleteEvents(std::vector<std::string> keys) {
   for(const auto& key : keys) {
-    mapEvents2.erase(key);
+    mapEvents.erase(key);
     std::cout << Output::Colors::RED << "[Traffic] Deleted event: " << key << Output::Colors::END << '\n'; 
   }
 }
 
 // Constructor objects
 // Construct an event from an JSON object
-Event2::Event2(const Json::Value& parsedEvent)
+Event::Event(const Json::Value& parsedEvent)
 : dataSource{ currentSource }
 {
   // Construct shared members
@@ -418,7 +418,7 @@ Event2::Event2(const Json::Value& parsedEvent)
 }
 
 // Construct an event from an XML object
-Event2::Event2(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &parsedDescription)
+Event::Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &parsedDescription)
 : ID{ parsedDescription.second }, dataSource{ DataSource::MCNY }, region{Region::Rochester}, 
   status{ parsedDescription.first }, timeUpdated{ Time::currentTime() }
 {
@@ -459,7 +459,7 @@ Event2::Event2(const rapidxml::xml_node<>* item, const std::pair<std::string, st
 }
 
 // Construct an event from an HTML event
-Event2::Event2(const HTML::Event& parsedEvent)
+Event::Event(const HTML::Event& parsedEvent)
 : ID{ parsedEvent.ID }, URL{ "https://911events.ongov.net/CADInet/app/events.jsp" }, dataSource{ DataSource::ONGOV },
   region{ Region::Syracuse }, location{ Location(43.05, -76.15) }, timeUpdated{ Time::currentTime() }
 {
@@ -522,7 +522,7 @@ Event2::Event2(const HTML::Event& parsedEvent)
 }
 
 // Move constructor for an event object
-Event2::Event2(Event2&& other) noexcept 
+Event::Event(Event&& other) noexcept 
 : ID(std::move(other.ID)),
   URL(std::move(other.URL)),
   dataSource(other.dataSource),
@@ -543,7 +543,7 @@ Event2::Event2(Event2&& other) noexcept
 }
 
 // Move assignment operator for event object
-Event2& Event2::operator=(Event2&& other) noexcept {
+Event& Event::operator=(Event&& other) noexcept {
   // Check for self-assignment
   if(this != &other) {
     ID = std::move(other.ID);
@@ -766,7 +766,7 @@ std::ostream& operator<<(std::ostream& out, const DataSource& dataSource) {
   return out;
 }
 
-std::ostream &operator<<(std::ostream &out, const Event2 &event){
+std::ostream &operator<<(std::ostream &out, const Event &event){
   std::tm timeReported = Time::toLocalPrint(event.timeReported);
   std::tm timeUpdated = Time::toLocalPrint(event.timeUpdated);
 
