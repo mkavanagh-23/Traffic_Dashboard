@@ -233,6 +233,11 @@ bool processEvent(const Json::Value& parsedEvent) {
   if(!inMarket(parsedEvent))
     return false;
 
+  // TODO:
+  // Check if it is a future event
+  if(inFuture(parsedEvent))
+    return false;
+
   // Add the event
   // Try to insert a new Event at event, inserted = false if it already exists
   auto [event, inserted] = mapEvents2.try_emplace(key, parsedEvent);
@@ -311,6 +316,9 @@ bool inMarket(const Json::Value& parsedEvent) {
   
   return true;
 }
+
+// Check if an event takes place in the future (is planned)
+bool inFuture(const Json::Value& parsedEvent) { return Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["Reported"].asString()) > Time::currentTime(); }
 
 // Check for matching incident type
 bool isIncident(const Json::Value& parsedEvent){

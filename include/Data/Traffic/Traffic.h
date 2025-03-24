@@ -168,6 +168,7 @@ bool containsEvent(const Json::Value& events, const std::string& key);
 bool containsEvent(rapidxml::xml_document<>& events, const std::string& key);
 bool containsEvent(const std::vector<HTML::Event>& events, const std::string& key);
 bool inMarket(const Json::Value& parsedEvent);
+bool inFuture(const Json::Value& parsedEvent);
 bool isIncident(const Json::Value& parsedEvent);
 std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent);
 void deleteEvents(std::vector<std::string> keys);
