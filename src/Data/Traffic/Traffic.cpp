@@ -19,8 +19,6 @@
 /* 
 TODO:
  *
- * FIX Event2 Class naming
- *
  * ONGOV:
  *  Investigate REST API
  *    Possible workarounds for geo-restriction
