@@ -19,6 +19,8 @@
 /* 
 TODO:
  *
+ * FIX Event2 Class naming
+ *
  * ONGOV:
  *  Investigate REST API
  *    Possible workarounds for geo-restriction
@@ -35,15 +37,18 @@ TODO:
  *  Normalize data for Ontario events
  *    Need to extract optional side road if it exists, rest seems to be parsing fine
  *    Check reported time against current time to filter out future (planned) events
- *    After normalization has been completed, we can refactor Event2 into Event and remove the old implementation
  *
  * OTT: 
  *  Add logic for Ottawa events
  *    Returns JSON
+ *    Filter by "eventType" - We want "INCIDENT"
+ *    brief overview in "headline"
  *
  * MTL: 
  *  Add logic for montreal events
  *    Returns XML
+ *    Filter by <category> - we want "Warning"
+ *    Use REGEX to parse description
  *  
  * Serializing to JSON:
  *  We should serialize time to an ISO6801-formatted string
@@ -245,10 +250,6 @@ bool processEvent(const Json::Value& parsedEvent) {
   if(!inMarket(parsedEvent))
     return false;
 
-  // TODO:
-  // Check if it is a future event
-  //if(inFuture(parsedEvent))
-  //  return false;
 
   // Add the event
   // Try to insert a new Event at event, inserted = false if it already exists
@@ -319,7 +320,7 @@ bool inMarket(const Json::Value& parsedEvent) {
   } else { // If we are and Ontario event check if we are in region 
     // Extract the location
     Location location{ parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble() };
-    if(!ONMT::regionToronto.contains(location))
+    if(!ONMT::regionToronto.contains(location) && !ONMT::regionOttawa.contains(location))
       return false;
   }
   // Check for matching incident type
@@ -328,9 +329,6 @@ bool inMarket(const Json::Value& parsedEvent) {
   
   return true;
 }
-
-// Check if an event takes place in the future (is planned)
-bool inFuture(const Json::Value& parsedEvent) { return Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["Reported"].asString()) > Time::currentTime(); }
 
 // Check for matching incident type
 bool isIncident(const Json::Value& parsedEvent){
@@ -399,7 +397,11 @@ Event2::Event2(const Json::Value& parsedEvent)
     // Construct members for ONMT
     case DataSource::ONMT:
       URL = "https://511on.ca/";
-      region = Region::Toronto;
+      // Determine the region
+      if(ONMT::regionToronto.contains(location))
+        region = Region::Toronto;
+      if(ONMT::regionOttawa.contains(location))
+        region = Region::Ottawa;
       if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
         timeReported = Time::UNIX::toChrono(parsedEvent["Reported"].asDouble(), std::nullopt);
         timeUpdated = Time::UNIX::toChrono(parsedEvent["LastUpdated"].asDouble(), std::nullopt);
