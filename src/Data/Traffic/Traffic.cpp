@@ -65,18 +65,18 @@ DataSource currentSource;
 
 // Get events from all URLs
 void fetchEvents() {
-  std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
-  getEvents(ONGOV::EVENTS_URL);
-  std::cout << "\nFetching NYS 511 events:\n\n";
-  getEvents(NYSDOT::EVENTS_URL);
-  std::cout << "\nFetching Monroe County 911 events:\n\n";
-  getEvents(MCNY::EVENTS_URL);
-  std::cout << "\nFetching Ontario 511 events:\n\n";
-  getEvents(ONMT::EVENTS_URL);
+  //std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
+  //getEvents(ONGOV::EVENTS_URL);
+  //std::cout << "\nFetching NYS 511 events:\n\n";
+  //getEvents(NYSDOT::EVENTS_URL);
+  //std::cout << "\nFetching Monroe County 911 events:\n\n";
+  //getEvents(MCNY::EVENTS_URL);
+  //std::cout << "\nFetching Ontario 511 events:\n\n";
+  //getEvents(ONMT::EVENTS_URL);
+  std::cout << "\nFetching Ottawa events:\n\n";
+  getEvents(OTT::EVENTS_URL);
   
   // TODO:
-  //std::cout << "\nFetching Ottawa events:\n\n";
-  //getEvents(OTT::EVENTS_URL);
   //std::cout << "\nFetching Montreal events:\n\n";
   //getEvents(MTL::EVENTS_URL);
 }
@@ -108,12 +108,15 @@ bool getEvents(std::string url) {
     url += NYSDOT::API_KEY;
     // Set current Data Source
     currentSource = DataSource::NYSDOT;
-  } else if(url.find("511on.ca") != std::string::npos)
+  } 
+  else if(url.find("511on.ca") != std::string::npos)
     currentSource = DataSource::ONMT;
   else if(url.find("monroecounty.gov") != std::string::npos)
     currentSource = DataSource::MCNY;
   else if(url.find("ongov.net") != std::string::npos)
     currentSource = DataSource::ONGOV;
+  else if(url.find("ottawa.ca") != std::string::npos)
+    currentSource = DataSource::OTT;
   else {
     currentSource = DataSource::UNKNOWN;
     std::cerr << Output::Colors::RED << "[Traffic] ERROR: Source domain does not match program data requirements.\n" << Output::Colors::END;
@@ -236,18 +239,21 @@ bool parseEvents(const std::vector<HTML::Event>& parsedData) {
 
 // Process a parsed JSON event for storage
 bool processEvent(const Json::Value& parsedEvent) {
-  if(!parsedEvent.isMember("ID")) {
+
+  // Extract the key and confiorm we have a valid event
+  std::string key{""};
+  if(parsedEvent.isMember("ID"))
+    key = parsedEvent["ID"].asString();
+  else if(parsedEvent.isMember("id"))
+    key = parsedEvent["id"].asString();
+  else {
     std::cerr << Output::Colors::RED << "[JSON] Error: No 'ID' member present in JSON event.\n" << Output::Colors::END;
     return false;
   }
 
-  // Extract key/ID from the event
-  std::string key = parsedEvent["ID"].asString();
-
   // Check if the event is within one of our markets
   if(!inMarket(parsedEvent))
     return false;
-
 
   // Add the event
   // Try to insert a new Event at event, inserted = false if it already exists
@@ -315,9 +321,9 @@ bool inMarket(const Json::Value& parsedEvent) {
   if(parsedEvent.isMember("RegionName")) {
     if(!NYSDOT::inRegion(parsedEvent))
       return false;
-  } else { // If we are and Ontario event check if we are in region 
+  } else { // If we are a canadian event check if we are in region 
     // Extract the location
-    Location location{ parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble() };
+    Location location = getLocation(parsedEvent);
     if(!ONMT::regionToronto.contains(location) && !ONMT::regionOttawa.contains(location))
       return false;
   }
@@ -328,15 +334,36 @@ bool inMarket(const Json::Value& parsedEvent) {
   return true;
 }
 
+// Get the location from a parsed JSOn event
+Location getLocation(const Json::Value& parsedEvent) {
+  if(currentSource == DataSource::ONMT)
+    return { parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble() };
+  else if(currentSource == DataSource::OTT)
+    // TODO:
+    // Parse location from the JSON and return it here.
+    // Location for Ottawa events is located in a geodata:coordinates sub-item as an array/pair
+    return { 0, 0 };
+  else
+      return { 0, 0 };
+
+}
+
 // Check for matching incident type
 bool isIncident(const Json::Value& parsedEvent){
   std::string type = parsedEvent["EventType"].asString();
   return (type == "accidentsAndIncidents"
-       || type == "closures");
+       || type == "closures"
+       || type == "INCIDENT");
 }
 
 // Get the last updated time from a parsed event
 std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent){
+  // Process Ottawa time
+  if(parsedEvent.isMember("updated")) {
+    std::string time = parsedEvent["updated"].asString();
+    return Time::YYYYMMDDHHMMSS::toChrono(time);
+  }
+
   // Check if we are in unixtime
   if(parsedEvent["LastUpdated"].isInt()){
     int unixtime = parsedEvent["LastUpdated"].asInt();
@@ -361,56 +388,63 @@ void deleteEvents(std::vector<std::string> keys) {
 Event::Event(const Json::Value& parsedEvent)
 : dataSource{ currentSource }
 {
-  // Construct shared members
-  if(parsedEvent.isMember("ID"))
-    ID = parsedEvent["ID"].asString();
-  if(parsedEvent.isMember("EventType"))
-    title = parsedEvent["EventType"].asString();
-  if(parsedEvent.isMember("RoadwayName"))
-    mainStreet = parsedEvent["RoadwayName"].asString();
-  if(parsedEvent.isMember("DirectionOfTravel"))
-    direction = parsedEvent["DirectionOfTravel"].asString();
-  if(parsedEvent.isMember("Description"))
-    description = parsedEvent["Description"].asString();
-  if(parsedEvent.isMember("Latitude") && parsedEvent.isMember("Latitude")) {
-    location = { parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble() }; 
-  }
+  // Process an Ottawa event
+  if(dataSource == DataSource::OTT) {
+    // TODO:
+    // Create event from OTT here
+  } else {
+    // Construct shared members for DOT events
+    if(parsedEvent.isMember("ID"))
+      ID = parsedEvent["ID"].asString();
+    if(parsedEvent.isMember("EventType"))
+      title = parsedEvent["EventType"].asString();
+    if(parsedEvent.isMember("RoadwayName"))
+      mainStreet = parsedEvent["RoadwayName"].asString();
+    if(parsedEvent.isMember("DirectionOfTravel"))
+      direction = parsedEvent["DirectionOfTravel"].asString();
+    if(parsedEvent.isMember("Description"))
+      description = parsedEvent["Description"].asString();
+    if(parsedEvent.isMember("Latitude") && parsedEvent.isMember("Latitude")) {
+      location = { parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble() }; 
+    }
 
-  // Construct members for current source
-  switch(dataSource) {
-    // Construct members for NYSDOT
-    case DataSource::NYSDOT:
-      URL = "https://511ny.org/";
-      region = NYSDOT::getRegion(parsedEvent["RegionName"].asString());
-      if(region == Region::UNKNOWN)
-        std::cerr << Output::Colors::RED << "[JSON Event] Error: Failed to source dataSource member during construction\n"
+    // Construct members for current source
+    switch(dataSource) {
+      // Construct members for NYSDOT
+      case DataSource::NYSDOT:
+        URL = "https://511ny.org/";
+        region = NYSDOT::getRegion(parsedEvent["RegionName"].asString());
+        if(region == Region::UNKNOWN)
+          std::cerr << Output::Colors::RED << "[JSON Event] Error: Failed to source dataSource member during construction\n"
+                    << Output::Colors::END;
+        if(parsedEvent.isMember("PrimaryLocation"))
+          crossStreet = parsedEvent["PrimaryLocation"].asString();
+        if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
+          timeReported = Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["Reported"].asString());
+          timeUpdated = Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["LastUpdated"].asString());
+        }
+        break;
+      // Construct members for ONMT
+      case DataSource::ONMT:
+        URL = "https://511on.ca/";
+        // Determine the region
+        if(ONMT::regionToronto.contains(location))
+          region = Region::Toronto;
+        if(ONMT::regionOttawa.contains(location))
+          region = Region::Ottawa;
+        if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
+          timeReported = Time::UNIX::toChrono(parsedEvent["Reported"].asDouble(), std::nullopt);
+          timeUpdated = Time::UNIX::toChrono(parsedEvent["LastUpdated"].asDouble(), std::nullopt);
+        }
+        break;
+      // Error out in all other cases
+      default:
+        std::cerr << Output::Colors::RED << "[JSON Event] Error: Tried to construct JSON object from invalid data source\n"
                   << Output::Colors::END;
-      if(parsedEvent.isMember("PrimaryLocation"))
-        crossStreet = parsedEvent["PrimaryLocation"].asString();
-      if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
-        timeReported = Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["Reported"].asString());
-        timeUpdated = Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["LastUpdated"].asString());
+        break;
       }
-      break;
-    // Construct members for ONMT
-    case DataSource::ONMT:
-      URL = "https://511on.ca/";
-      // Determine the region
-      if(ONMT::regionToronto.contains(location))
-        region = Region::Toronto;
-      if(ONMT::regionOttawa.contains(location))
-        region = Region::Ottawa;
-      if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
-        timeReported = Time::UNIX::toChrono(parsedEvent["Reported"].asDouble(), std::nullopt);
-        timeUpdated = Time::UNIX::toChrono(parsedEvent["LastUpdated"].asDouble(), std::nullopt);
-      }
-      break;
-    // Error out in all other cases
-    default:
-      std::cerr << Output::Colors::RED << "[JSON Event] Error: Tried to construct JSON object from invalid data source\n"
-                << Output::Colors::END;
-      break;
   }
+  
   std::cout << Output::Colors::YELLOW << "\n[JSON Event] Constructed event: " << ID << "  |  " << region 
             << '\n' << Output::Colors::END << description << '\n';
 }

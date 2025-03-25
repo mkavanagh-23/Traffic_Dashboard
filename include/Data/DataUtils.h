@@ -156,6 +156,13 @@ namespace DDMMYYYYHHMMSS {
 system_clock::time_point toChrono(const std::string& timeStr);
 
 } // namespace DDMMYYYYHHMMSS
+
+namespace YYYYMMDDHHMMSS {
+
+system_clock::time_point toChrono(const std::string& timeStr);
+
+}
+
 } // namespace Time
 
 #endif
