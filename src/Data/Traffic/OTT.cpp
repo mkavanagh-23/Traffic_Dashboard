@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <regex>
 
 namespace Traffic {
 namespace OTT {
@@ -40,6 +41,26 @@ std::optional<std::pair<double, double>> parseLocation(const std::string& coordi
   }
 
   return std::make_pair(latitude, longitude);
+}
+
+std::optional<roadwayStr> parseHeadline(const std::string& headline) {
+  std::regex pattern(R"((\S+(?:\s\S+)*?)\s*([A-Za-z/]+)?\s*(?:at\s*(.*)))");
+
+  std::smatch matches;
+  if(std::regex_match(headline, matches, pattern)) {
+    if(matches[2].matched) {
+      if(matches[3].matched)
+        return std::make_tuple(matches[1], matches[2], matches[3]);
+      else
+        return std::make_tuple(matches[1], matches[2], std::nullopt);
+    } else {
+      if(matches[3].matched)
+        return std::make_tuple(matches[1], std::nullopt, matches[3]);
+      else
+        return std::make_tuple(matches[1], std::nullopt, std::nullopt);
+    }
+  }
+  return std::nullopt;
 }
 }
 }

@@ -36,11 +36,6 @@
  *    Need to extract optional side road if it exists, rest seems to be parsing fine
  *    Check reported time against current time to filter out future (planned) events
  *
- * OTT:
- *  Finish parsing members from parsed JSON
- *    Need to extract street information from description or headline
- *  Define location matching (do we need to?)
- *
  * MTL: 
  *  Add logic for montreal events
  *    Returns XML
@@ -166,8 +161,7 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
       return false;
     }
     // Parse the events
-    parseEvents(std::move(parsedData)); // Data held by unique_ptr so transfer ownership with std::move
-    // NOTE: parsedData has now been invalidated, attmpting to access will result in UB
+    parseEvents(std::move(parsedData)); //  NOTE: parsedData has now been invalidated, attmpting to access will result in UB
   } else if(contentType.find("text/html") != std::string::npos) {
     auto parsedData = ONGOV::Gumbo::parseData(data);
     // Check for parsing success
@@ -198,11 +192,8 @@ bool parseEvents(const Json::Value& parsedData) {
       continue;
     }
   }
-  std::cout << Output::Colors::GREEN << "\n[JSON] Successfully parsed root tree.\n" << Output::Colors::END;
   
   // Clean up cleared events while our data is still in scope
-  // TODO: clearEvents needs to work when passed both levels of array
-  // Need to iterate through and check for Object/Array type when marking for deletion
   if(parsedData.isArray() && !parsedData.empty() && parsedData[0].isObject())   // Since we are recursive, need to only delete if we are at the event array
     clearEvents(parsedData);
   return true;
@@ -221,7 +212,6 @@ bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
   for(rapidxml::xml_node<>* event = channel->first_node("item"); event; event = event->next_sibling()) {
     MCNY::processEvent(event); 
   }
-  std::cout << Output::Colors::GREEN << "\n[XML] Successfully parsed root tree." << Output::Colors::END << '\n';
   
   // Clean up cleared events while our data is still in scope
   clearEvents(events);  // NOTE: Make sure to pass the dereferenced events data here as parsedData is invalid
@@ -236,9 +226,8 @@ bool parseEvents(const std::vector<HTML::Event>& parsedData) {
     // Will not add if it already exists
     mapEvents.try_emplace(parsedEvent.ID, parsedEvent);
   }
-  std::cout << Output::Colors::GREEN << "\n[HTML] Successfully parsed HTML document." << Output::Colors::END << '\n';
   // Clean up cleared events while our data is still in scope
-  clearEvents(parsedData);  // NOTE: Make sure to pass the dereferenced events data here as parsedData is invalid
+  clearEvents(parsedData);
   return true;
 }
 
@@ -253,7 +242,6 @@ bool processEvent(const Json::Value& parsedEvent) {
     key = parsedEvent["id"].asString();
   }
   else {
-    std::cerr << Output::Colors::RED << "[JSON] Error: No 'ID' member present in JSON event.\n" << Output::Colors::END;
     return false;
   }
 
@@ -354,16 +342,8 @@ bool inMarket(const Json::Value& parsedEvent) {
 
 // Get the location from a parsed JSOn event
 Location getLocation(const Json::Value& parsedEvent) {
-  if(currentSource == DataSource::ONMT)
-    return { parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble() };
-  else if(currentSource == DataSource::OTT)
-    // TODO:
-    // Parse location from the JSON and return it here.
-    // Location for Ottawa events is located in a geodata:coordinates sub-item as an array/pair
-    return { 0, 0 };
-  else
-      return { 0, 0 };
-
+  assert(currentSource != DataSource::OTT); // We should never call this if we are in OTT, no need to check
+  return { parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble() };
 }
 
 // Check for matching incident type
@@ -442,11 +422,23 @@ Event::Event(const Json::Value& parsedEvent)
       timeReported = Time::YYYYMMDDHHMMSS::toChrono(parsedEvent["created"].asString());
     if(parsedEvent.isMember("updated"))
       timeUpdated = Time::YYYYMMDDHHMMSS::toChrono(parsedEvent["updated"].asString());
-    // TODO:
-    // Create event from OTT here cause
-    /* Data Members:
-        headline
-    */
+
+// NOTE:
+//  Confirm correct regex parsing of headline
+//  We need more test cases
+
+    if(parsedEvent.isMember("headline")) {
+      auto parsedHeadline = OTT::parseHeadline(parsedEvent["headline"].asString());
+      if(parsedHeadline) {
+        auto [road, dir, cross] = *parsedHeadline;
+        mainStreet = road;
+        if(dir)
+          direction = *dir;
+        if(cross)
+          crossStreet = *cross;
+      }
+    }
+    
   } else {
     // Construct shared members for DOT events
     if(parsedEvent.isMember("ID"))
