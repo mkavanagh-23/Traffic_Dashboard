@@ -234,6 +234,16 @@ void HTML::Event::createID() {
 }
 
 namespace Traffic {
+// Construct a location from two doubles
+Location::Location(double latValue, double longValue) 
+: latitude{ latValue }, longitude{ longValue }
+{}
+
+// Construct a location from a pair of latitude and longitude values
+Location::Location(std::pair<double, double> coordinates) 
+: Location( coordinates.first, coordinates.second )
+{}
+
 bool BoundingBox::contains(const Location& coordinate) const {
   auto& [latitude, longitude] = coordinate;
   if((latitude >= latBottom && latitude <= latTop) && (longitude >= longLeft && longitude <= longRight))
@@ -402,6 +412,31 @@ system_clock::time_point toChrono(const std::string& timeStr) {
 
   return timePoint;
 }
+}
 
-} // namespace DDMMYYYYHHMMSS
+namespace YYYYMMDDHHMMSS {
+
+// Example string: 2025-03-24 10:33:00
+
+system_clock::time_point toChrono(const std::string& timeStr) {
+  
+  // Extract time components into ints
+  int parsedYear = std::stoi(timeStr.substr(0, 4));   // 4-digits
+  int parsedMonth = std::stoi(timeStr.substr(5, 2)); // 2-digits
+  int parsedDay = std::stoi(timeStr.substr(8, 2));  // 2-digits
+  int parsedHours = std::stoi(timeStr.substr(11, 2));  // 2-digits
+  int parsedMinutes = std::stoi(timeStr.substr(14, 2));  // 2-digit
+  int parsedSeconds = std::stoi(timeStr.substr(17, 2));    // 2-digit
+
+  // Create a local time point object
+  system_clock::time_point timePoint = sys_days(year_month_day(year(parsedYear), month(parsedMonth), day(parsedDay)))
+                                     + hours(parsedHours) + minutes(parsedMinutes) + seconds(parsedSeconds);
+  
+  // Apply GMT-offset to convert to UTC 
+  toUTC(timePoint, offsetGMT);
+
+  return timePoint;
+}
+
+} // namespace YYYYMMDDHHMMSS
 } // namespace Time
