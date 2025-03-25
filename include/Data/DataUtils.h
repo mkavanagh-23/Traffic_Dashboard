@@ -105,6 +105,10 @@ struct Location {
   double latitude;
   double longitude;
 
+  Location() = default;
+  Location(double latValue, double longValue);
+  Location(std::pair<double, double>);
+
   friend std::ostream &operator<<(std::ostream &out, const Location &location);
 };
 

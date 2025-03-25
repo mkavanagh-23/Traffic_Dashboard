@@ -234,6 +234,16 @@ void HTML::Event::createID() {
 }
 
 namespace Traffic {
+// Construct a location from two doubles
+Location::Location(double latValue, double longValue) 
+: latitude{ latValue }, longitude{ longValue }
+{}
+
+// Construct a location from a pair of latitude and longitude values
+Location::Location(std::pair<double, double> coordinates) 
+: Location( coordinates.first, coordinates.second )
+{}
+
 bool BoundingBox::contains(const Location& coordinate) const {
   auto& [latitude, longitude] = coordinate;
   if((latitude >= latBottom && latitude <= latTop) && (longitude >= longLeft && longitude <= longRight))

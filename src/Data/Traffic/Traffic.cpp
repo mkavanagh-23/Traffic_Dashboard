@@ -38,7 +38,7 @@
  *
  * OTT:
  *  Finish parsing members from parsed JSON
- *    Need to extract geo location from geo array
+ *    Need to extract street information from description or headline
  *  Define location matching (do we need to?)
  *
  * MTL: 
@@ -412,14 +412,32 @@ Event::Event(const Json::Value& parsedEvent)
 {
   // Process an Ottawa event
   if(dataSource == DataSource::OTT) {
+    URL = "https://traffic.ottawa.ca/en/traffic-map-data-lists-and-resources/incidents-construction-and-special-events";
+    region = Region::Ottawa;
     if(parsedEvent.isMember("id"))
       ID = parsedEvent["id"].asString();
     if(parsedEvent.isMember("eventType"))
       title = parsedEvent["eventType"].asString();
     if(parsedEvent.isMember("status"))
       status = parsedEvent["status"].asString();
-    if(parsedEvent.isMember("headline"))
-      description = parsedEvent["headline"].asString();
+    if(parsedEvent.isMember("message"))
+      description = parsedEvent["message"].asString();
+
+    // Extract the location
+    if(parsedEvent.isMember("geodata")) {
+      if(parsedEvent["geodata"].isObject()) {
+        auto geodata = parsedEvent["geodata"];
+        if(geodata.isMember("coordinates")) {
+          if(geodata["coordinates"].isString()) {
+            std::cout << "Found coordinate in geodata element\n";
+            auto parsedCoordinates = OTT::parseLocation(geodata["coordinates"].asString());
+            if(parsedCoordinates)
+              location = *parsedCoordinates;
+          }
+        }
+      }
+    }
+
     if(parsedEvent.isMember("created"))
       timeReported = Time::YYYYMMDDHHMMSS::toChrono(parsedEvent["created"].asString());
     if(parsedEvent.isMember("updated"))
@@ -427,12 +445,7 @@ Event::Event(const Json::Value& parsedEvent)
     // TODO:
     // Create event from OTT here cause
     /* Data Members:
-        eventGroupAffected
-        generation_source
-        geodata
-        message
-        priority
-        schedule
+        headline
     */
   } else {
     // Construct shared members for DOT events
