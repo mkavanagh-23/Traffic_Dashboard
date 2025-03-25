@@ -20,13 +20,14 @@ int main(int argc, char* argv[]) {
   
   // Get cameras
   //Traffic::fetchCameras();
+  Traffic::fetchEvents();
+  Traffic::printEvents();
   
   while(true) {
-    Traffic::fetchEvents();
-    Traffic::printEvents();
     auto time = Time::currentTime_t();
     std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << '\n' << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(60));
+    Traffic::fetchEvents();
   }
 
   // Create and start the API server

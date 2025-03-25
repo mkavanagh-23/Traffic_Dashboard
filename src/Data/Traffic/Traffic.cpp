@@ -36,11 +36,10 @@
  *    Need to extract optional side road if it exists, rest seems to be parsing fine
  *    Check reported time against current time to filter out future (planned) events
  *
- * OTT: 
- *  Add logic for Ottawa events
- *    Returns JSON
- *    Filter by "eventType" - We want "INCIDENT"
- *    brief overview in "headline"
+ * OTT:
+ *  Finish parsing members from parsed JSON
+ *    Need to extract geo location from geo array
+ *  Define location matching (do we need to?)
  *
  * MTL: 
  *  Add logic for montreal events
@@ -193,7 +192,7 @@ bool parseEvents(const Json::Value& parsedData) {
     if(element.isObject()) {
       processEvent(element);
     } else if(element.isArray()) {
-      parseEvents(element);
+      parseEvents(element); // Recursively parse through arrays
     } else {
       std::cerr << Output::Colors::RED << "[JSON] Failed parsing event (is the JSON valid?)\n" << Output::Colors::END;
       continue;
@@ -204,7 +203,8 @@ bool parseEvents(const Json::Value& parsedData) {
   // Clean up cleared events while our data is still in scope
   // TODO: clearEvents needs to work when passed both levels of array
   // Need to iterate through and check for Object/Array type when marking for deletion
-  //clearEvents(parsedData);
+  if(parsedData.isArray() && !parsedData.empty() && parsedData[0].isObject())   // Since we are recursive, need to only delete if we are at the event array
+    clearEvents(parsedData);
   return true;
 }
 
@@ -251,7 +251,6 @@ bool processEvent(const Json::Value& parsedEvent) {
     key = parsedEvent["ID"].asString();
   else if(parsedEvent.isMember("id")) {
     key = parsedEvent["id"].asString();
-    std::cout << "Found 'id': " << key << '\n'; 
   }
   else {
     std::cerr << Output::Colors::RED << "[JSON] Error: No 'ID' member present in JSON event.\n" << Output::Colors::END;
@@ -260,13 +259,11 @@ bool processEvent(const Json::Value& parsedEvent) {
 
   // Check if the event is within one of our markets
   if(!inMarket(parsedEvent)) {
-    std::cout << "Event not in market!\n";
     return false;
   }
 
   // Check eventType
   if(!isIncident(parsedEvent)) {
-    std::cout << "Event is not a valid type.\n";
     return false;
   }
 
@@ -289,12 +286,19 @@ bool processEvent(const Json::Value& parsedEvent) {
 // Check if retrieved JSON data contains an event with given key
 bool containsEvent(const Json::Value& events, const std::string& key) {
   for(const auto& event : events) {
-    if(!event.isObject() || !event.isMember("ID")) {
+    if(!event.isObject() || !(event.isMember("ID") || event.isMember("id"))) {
       std::cerr << Output::Colors::RED << "[JSON] Parsed event not a valid object!\n" << Output::Colors::END;
       continue;
     }
+
+    std::string id;
     // Check for matching key value
-    if(event["ID"].asString() == key)
+    if(event.isMember("ID"))
+      id = event["ID"].asString();
+    else if(event.isMember("id"))
+      id = event["id"].asString();
+    
+    if(id == key)
       return true;
     else
       continue;
@@ -408,21 +412,27 @@ Event::Event(const Json::Value& parsedEvent)
 {
   // Process an Ottawa event
   if(dataSource == DataSource::OTT) {
+    if(parsedEvent.isMember("id"))
+      ID = parsedEvent["id"].asString();
+    if(parsedEvent.isMember("eventType"))
+      title = parsedEvent["eventType"].asString();
+    if(parsedEvent.isMember("status"))
+      status = parsedEvent["status"].asString();
+    if(parsedEvent.isMember("headline"))
+      description = parsedEvent["headline"].asString();
+    if(parsedEvent.isMember("created"))
+      timeReported = Time::YYYYMMDDHHMMSS::toChrono(parsedEvent["created"].asString());
+    if(parsedEvent.isMember("updated"))
+      timeUpdated = Time::YYYYMMDDHHMMSS::toChrono(parsedEvent["updated"].asString());
     // TODO:
     // Create event from OTT here cause
     /* Data Members:
-        created
         eventGroupAffected
-        eventType
         generation_source
         geodata
-        headline
-        id
         message
         priority
         schedule
-        status
-        updated
     */
   } else {
     // Construct shared members for DOT events
