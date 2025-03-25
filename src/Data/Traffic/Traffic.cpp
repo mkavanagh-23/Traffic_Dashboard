@@ -65,14 +65,14 @@ DataSource currentSource;
 
 // Get events from all URLs
 void fetchEvents() {
-  //std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
-  //getEvents(ONGOV::EVENTS_URL);
-  //std::cout << "\nFetching NYS 511 events:\n\n";
-  //getEvents(NYSDOT::EVENTS_URL);
-  //std::cout << "\nFetching Monroe County 911 events:\n\n";
-  //getEvents(MCNY::EVENTS_URL);
-  //std::cout << "\nFetching Ontario 511 events:\n\n";
-  //getEvents(ONMT::EVENTS_URL);
+  std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
+  getEvents(ONGOV::EVENTS_URL);
+  std::cout << "\nFetching NYS 511 events:\n\n";
+  getEvents(NYSDOT::EVENTS_URL);
+  std::cout << "\nFetching Monroe County 911 events:\n\n";
+  getEvents(MCNY::EVENTS_URL);
+  std::cout << "\nFetching Ontario 511 events:\n\n";
+  getEvents(ONMT::EVENTS_URL);
   std::cout << "\nFetching Ottawa events:\n\n";
   getEvents(OTT::EVENTS_URL);
   
