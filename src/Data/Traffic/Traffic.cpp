@@ -36,6 +36,10 @@
  *    Need to extract optional side road if it exists, rest seems to be parsing fine
  *    Check reported time against current time to filter out future (planned) events
  *
+ * OTT:
+ *  Fix parsing against more test cases
+ *  Need to gather more data to test against!
+ *
  * MTL: 
  *  Add logic for montreal events
  *    Returns XML
