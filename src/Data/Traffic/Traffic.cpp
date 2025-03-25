@@ -73,10 +73,8 @@ void fetchEvents() {
   getEvents(ONMT::EVENTS_URL);
   std::cout << "\nFetching Ottawa events:\n\n";
   getEvents(OTT::EVENTS_URL);
-  
-  // TODO:
-  //std::cout << "\nFetching Montreal events:\n\n";
-  //getEvents(MTL::EVENTS_URL);
+  std::cout << "\nFetching Montreal events:\n\n";
+  getEvents(MTL::EVENTS_URL);
 }
 
 void fetchCameras() {
@@ -115,6 +113,8 @@ bool getEvents(std::string url) {
     currentSource = DataSource::ONGOV;
   else if(url.find("ottawa.ca") != std::string::npos)
     currentSource = DataSource::OTT;
+  else if(url.find("quebec511.info") != std::string::npos)
+    currentSource = DataSource::MTL;
   else {
     currentSource = DataSource::UNKNOWN;
     std::cerr << Output::Colors::RED << "[Traffic] ERROR: Source domain does not match program data requirements.\n" << Output::Colors::END;
@@ -214,7 +214,10 @@ bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
   
   // Iterate throgh each event in the document tree
   for(rapidxml::xml_node<>* event = channel->first_node("item"); event; event = event->next_sibling()) {
-    MCNY::processEvent(event); 
+    if(currentSource == DataSource::MCNY)
+      MCNY::processEvent(event); 
+    else if(currentSource == DataSource::MTL)
+      MTL::processEvent(event);
   }
   
   // Clean up cleared events while our data is still in scope
