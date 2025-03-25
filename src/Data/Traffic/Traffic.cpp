@@ -193,7 +193,7 @@ bool parseEvents(const Json::Value& parsedData) {
     if(element.isObject()) {
       processEvent(element);
     } else if(element.isArray()) {
-      processEventArr(element);
+      parseEvents(element);
     } else {
       std::cerr << Output::Colors::RED << "[JSON] Failed parsing event (is the JSON valid?)\n" << Output::Colors::END;
       continue;
@@ -282,19 +282,6 @@ bool processEvent(const Json::Value& parsedEvent) {
     // Update the event
     event->second = parsedEvent;
     std::cout << Output::Colors::MAGENTA << "[JSON] Updated event: " << key << Output::Colors::END << '\n';
-  }
-  return true;
-}
-
-// Process a parsed JSON event Array for storage
-bool processEventArr(const Json::Value& parsedArray) {
-  for(const auto& event : parsedArray) {
-    if(!event.isObject()) {
-      std::cerr << Output::Colors::RED << "[JSON] Failed parsing event (is the JSON valid?)\n" << Output::Colors::END;
-      continue;
-    } else {
-      processEvent(event);
-    }
   }
   return true;
 }
