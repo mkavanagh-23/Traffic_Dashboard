@@ -188,18 +188,23 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
 // Parse JSON events
 bool parseEvents(const Json::Value& parsedData) {
   // Iterate through each event in the parsed JSON data
-  for(const auto& event : parsedData) {
-    // Make sure the event is a valid object
-    if(!event.isObject()) {
+  for(const auto& element : parsedData) {
+    // Check for valid JSON
+    if(element.isObject()) {
+      processEvent(element);
+    } else if(element.isArray()) {
+      processEventArr(element);
+    } else {
       std::cerr << Output::Colors::RED << "[JSON] Failed parsing event (is the JSON valid?)\n" << Output::Colors::END;
-      return false;
-    } else
-      processEvent(event);
+      continue;
+    }
   }
   std::cout << Output::Colors::GREEN << "\n[JSON] Successfully parsed root tree.\n" << Output::Colors::END;
   
   // Clean up cleared events while our data is still in scope
-  clearEvents(parsedData);
+  // TODO: clearEvents needs to work when passed both levels of array
+  // Need to iterate through and check for Object/Array type when marking for deletion
+  //clearEvents(parsedData);
   return true;
 }
 
@@ -244,16 +249,26 @@ bool processEvent(const Json::Value& parsedEvent) {
   std::string key{""};
   if(parsedEvent.isMember("ID"))
     key = parsedEvent["ID"].asString();
-  else if(parsedEvent.isMember("id"))
+  else if(parsedEvent.isMember("id")) {
     key = parsedEvent["id"].asString();
+    std::cout << "Found 'id': " << key << '\n'; 
+  }
   else {
     std::cerr << Output::Colors::RED << "[JSON] Error: No 'ID' member present in JSON event.\n" << Output::Colors::END;
     return false;
   }
 
   // Check if the event is within one of our markets
-  if(!inMarket(parsedEvent))
+  if(!inMarket(parsedEvent)) {
+    std::cout << "Event not in market!\n";
     return false;
+  }
+
+  // Check eventType
+  if(!isIncident(parsedEvent)) {
+    std::cout << "Event is not a valid type.\n";
+    return false;
+  }
 
   // Add the event
   // Try to insert a new Event at event, inserted = false if it already exists
@@ -267,6 +282,19 @@ bool processEvent(const Json::Value& parsedEvent) {
     // Update the event
     event->second = parsedEvent;
     std::cout << Output::Colors::MAGENTA << "[JSON] Updated event: " << key << Output::Colors::END << '\n';
+  }
+  return true;
+}
+
+// Process a parsed JSON event Array for storage
+bool processEventArr(const Json::Value& parsedArray) {
+  for(const auto& event : parsedArray) {
+    if(!event.isObject()) {
+      std::cerr << Output::Colors::RED << "[JSON] Failed parsing event (is the JSON valid?)\n" << Output::Colors::END;
+      continue;
+    } else {
+      processEvent(event);
+    }
   }
   return true;
 }
@@ -317,6 +345,8 @@ bool containsEvent(const std::vector<HTML::Event>& events, const std::string& ke
 
 // Check if an event is both in market and of valid type
 bool inMarket(const Json::Value& parsedEvent) {
+  if(currentSource == DataSource::OTT)
+    return true;
   // If we are a NYS event check if we are in region
   if(parsedEvent.isMember("RegionName")) {
     if(!NYSDOT::inRegion(parsedEvent))
@@ -327,9 +357,6 @@ bool inMarket(const Json::Value& parsedEvent) {
     if(!ONMT::regionToronto.contains(location) && !ONMT::regionOttawa.contains(location))
       return false;
   }
-  // Check for matching incident type
-  if(!isIncident(parsedEvent))
-    return false;
   
   return true;
 }
@@ -350,7 +377,11 @@ Location getLocation(const Json::Value& parsedEvent) {
 
 // Check for matching incident type
 bool isIncident(const Json::Value& parsedEvent){
-  std::string type = parsedEvent["EventType"].asString();
+  std::string type;
+  if(parsedEvent.isMember("EventType"))
+    type = parsedEvent["EventType"].asString();
+  else if(parsedEvent.isMember("eventType"))
+    type = parsedEvent["eventType"].asString();
   return (type == "accidentsAndIncidents"
        || type == "closures"
        || type == "INCIDENT");
@@ -391,7 +422,21 @@ Event::Event(const Json::Value& parsedEvent)
   // Process an Ottawa event
   if(dataSource == DataSource::OTT) {
     // TODO:
-    // Create event from OTT here
+    // Create event from OTT here cause
+    /* Data Members:
+        created
+        eventGroupAffected
+        eventType
+        generation_source
+        geodata
+        headline
+        id
+        message
+        priority
+        schedule
+        status
+        updated
+    */
   } else {
     // Construct shared members for DOT events
     if(parsedEvent.isMember("ID"))

@@ -129,6 +129,7 @@ bool parseEvents(const Json::Value& parsedData);
 bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData);
 bool parseEvents(const std::vector<HTML::Event>& parsedData);
 bool processEvent(const Json::Value& parsedEvent);
+bool processEventArr(const Json::Value& parsedArray);
 bool containsEvent(const Json::Value& events, const std::string& key);
 bool containsEvent(rapidxml::xml_document<>& events, const std::string& key);
 bool containsEvent(const std::vector<HTML::Event>& events, const std::string& key);
