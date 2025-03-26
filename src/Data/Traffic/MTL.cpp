@@ -12,6 +12,7 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
   
   if(rapidxml::xml_node<>* title = parsedEvent->first_node("title")){
     std::string eventTitle = title->value();
+    // "Roadway : EventType"
   }
 
   if(rapidxml::xml_node<>* description = parsedEvent->first_node("description")){
@@ -19,6 +20,15 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
     // Parse description into several elements
     // Elements are delimited via new line so should be relatively simple
     auto parsedDescription = parseDescription(description);
+    /*
+     * Line 1       Town name
+     * Line 2       Main Roadway
+     * Line 3       Between [CROSS] and [CROSS]
+     * Line 4       Details (lanes/closure)
+     * Line 5
+     *
+     *
+     * */
   }
 
   if(rapidxml::xml_node<>* pubDate = parsedEvent->first_node("pubDate")){
