@@ -16,13 +16,13 @@
 
 // Helper function to remove spaces and special characters from a string
 std::string sanitizeString(const std::string& input) {
-    std::string result;
-    for (char c : input) {
-        if (std::isalnum(c)) {
-            result += c;
-        }
+  std::string result;
+  for (char c : input) {
+    if (std::isalnum(c)) {
+      result += c;
     }
-    return result;
+  }
+  return result;
 }
 
 namespace cURL {
@@ -280,8 +280,23 @@ std::tm toLocalPrint(const system_clock::time_point& time) {
 
 // Convert a local timepoint to UTC
 void toUTC(system_clock::time_point& timePoint, const std::string& offset) {
-  int offsetHours = std::stoi(offset.substr(0, 3));
-  int offsetMinutes = std::stoi(offset.substr(3, 2)) * (offsetHours < 0 ? -1 : 1);
+  int offsetHours{ 0 }, offsetMinutes{ 0 };
+
+  if(offset.length() == 3) {
+    // TODO:
+    // Add TZ offset codes
+    if(offset.find("GMT") != std::string::npos) {
+      offsetHours = 0;
+      offsetMinutes = 0;
+    } else if(offset.find("EST") != std::string::npos) {
+      offsetHours = -5;
+      offsetMinutes = 0;
+    }
+  } else if(offset.length() == 5) {
+    offsetHours = std::stoi(offset.substr(0, 3));
+    offsetMinutes = std::stoi(offset.substr(3, 2)) * (offsetHours < 0 ? -1 : 1);
+  }
+
   timePoint -= (hours(offsetHours) + minutes(offsetMinutes));
 }
 
@@ -338,7 +353,7 @@ int stoiMonth3(const std::string& month) {
 
 std::optional<system_clock::time_point> toChrono(const std::string& rfc2822){
   // Regex matching for RFC2822
-  std::regex pattern(R"((?:\w+, )?(\d{1,2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2}) ([\+\-]\d{4})?)");
+  std::regex pattern(R"((?:\w+, )?(\d{1,2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2}) ((?:[\+\-]\d{4})|(?:[A-Za-z]{3}))?)");
   // Create an object to store the matching pattern
   std::smatch matches;
 

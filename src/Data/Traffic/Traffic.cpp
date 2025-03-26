@@ -19,37 +19,42 @@
 /* 
  TODO:
  *
- * ONGOV:
- *  Investigate REST API
- *    Possible workarounds for geo-restriction
- *    Do we need to proxy requests locally on client?
- *  Add logic to account for multiple pages
- *    Probably need to modify to POST request and investigate payloads in-browser
- *    Do we need to establish a session and maintain state?
- *    Modify cleanup to only run if we get valid table data
- *  Create an async function which can be run every few minutes to set geo-coordinates
- *    If we use openstreetmap we are limited to one request per second.
- *    Setup an atomic timer!
+ * DATA COLLECTION & PROCESSING
  *
- * ONMT: 
- *  Normalize data for Ontario events
- *    Need to extract optional side road if it exists, rest seems to be parsing fine
- *    Check reported time against current time to filter out future (planned) events
+ *    ONGOV:
+ *      Investigate REST API
+ *        Possible workarounds for geo-restriction
+ *          Do we need to proxy requests locally on client?
+ *        Add logic to account for multiple pages
+ *          Probably need to modify to POST request and investigate payloads in-browser
+ *          Do we need to establish a session and maintain state?
+ *      Modify cleanup to only run if we get valid table data
+ *      Create an async function which can be run every few minutes to set geo-coordinates
+ *        If we use openstreetmap we are limited to one request per second.
+ *        Setup an atomic timer!
  *
- * OTT:
- *  Fix parsing against more test cases
- *  Need to gather more data to test against!
+ *    ONMT: 
+ *      Normalize data for Ontario events
+ *        Need to extract optional side road if it exists, rest seems to be parsing fine
+ *        Check reported time against current time to filter out future (planned) events
  *
- * MTL: 
- *  Add logic for montreal events
- *    Returns XML
- *    Filter by <category> - we want "Warning"
- *    Use REGEX to parse description
- *  
- * Serializing to JSON:
- *  We should serialize time to an ISO6801-formatted string
- *  Serve serialized JSON via RESTful endpoints
- *  Implement robust filtering via query params
+ *    OTT:
+ *      Fix parsing against more test cases
+ *        Need to gather more data to test against!
+ *
+ *    MTL: 
+ *      Use REGEX to parse description
+ *      Redefine global cleanup to work with Montreal events
+ *      Create an async function which can be run every few minutes to set geo-coordinates
+ *        If we use openstreetmap we are limited to one request per second.
+ *        Setup an atomic timer!
+ * 
+ * DATA INTERFACE
+ *    
+ *    Serializing to JSON:
+ *      We should serialize time to an ISO6801-formatted string
+ *    Serve serialized JSON via RESTful endpoints
+ *    Implement robust filtering via query params
  */
 
 namespace Traffic {
@@ -63,7 +68,7 @@ DataSource currentSource;
 
 // Get events from all URLs
 void fetchEvents() {
-  std::cout << "\nFetching NYS Onondaga County 911 events:\n\n";
+  std::cout << "\nFetching Onondaga County 911 events:\n\n";
   getEvents(ONGOV::EVENTS_URL);
   std::cout << "\nFetching NYS 511 events:\n\n";
   getEvents(NYSDOT::EVENTS_URL);
@@ -73,10 +78,8 @@ void fetchEvents() {
   getEvents(ONMT::EVENTS_URL);
   std::cout << "\nFetching Ottawa events:\n\n";
   getEvents(OTT::EVENTS_URL);
-  
-  // TODO:
-  //std::cout << "\nFetching Montreal events:\n\n";
-  //getEvents(MTL::EVENTS_URL);
+  std::cout << "\nFetching Montreal events:\n\n";
+  getEvents(MTL::EVENTS_URL);
 }
 
 void fetchCameras() {
@@ -115,6 +118,8 @@ bool getEvents(std::string url) {
     currentSource = DataSource::ONGOV;
   else if(url.find("ottawa.ca") != std::string::npos)
     currentSource = DataSource::OTT;
+  else if(url.find("quebec511.info") != std::string::npos)
+    currentSource = DataSource::MTL;
   else {
     currentSource = DataSource::UNKNOWN;
     std::cerr << Output::Colors::RED << "[Traffic] ERROR: Source domain does not match program data requirements.\n" << Output::Colors::END;
@@ -214,11 +219,18 @@ bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
   
   // Iterate throgh each event in the document tree
   for(rapidxml::xml_node<>* event = channel->first_node("item"); event; event = event->next_sibling()) {
-    MCNY::processEvent(event); 
+    if(currentSource == DataSource::MCNY)
+      MCNY::processEvent(event); 
+    else if(currentSource == DataSource::MTL)
+      MTL::processEvent(event);
   }
   
   // Clean up cleared events while our data is still in scope
-  clearEvents(events);  // NOTE: Make sure to pass the dereferenced events data here as parsedData is invalid
+  if(currentSource == DataSource::MCNY)
+    clearEvents(events);  // NOTE: Make sure to pass the dereferenced events data here as parsedData is invalid
+  // TODO:
+  // Fix definition to also work with MTL data
+  
   return true;
 }
 
@@ -413,7 +425,6 @@ Event::Event(const Json::Value& parsedEvent)
         auto geodata = parsedEvent["geodata"];
         if(geodata.isMember("coordinates")) {
           if(geodata["coordinates"].isString()) {
-            std::cout << "Found coordinate in geodata element\n";
             auto parsedCoordinates = OTT::parseLocation(geodata["coordinates"].asString());
             if(parsedCoordinates)
               location = *parsedCoordinates;
@@ -500,7 +511,7 @@ Event::Event(const Json::Value& parsedEvent)
             << '\n' << Output::Colors::END << description << '\n';
 }
 
-// Construct an event from an XML object
+// Construct an event from a Rochester XML object
 Event::Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &parsedDescription)
 : ID{ parsedDescription.second }, dataSource{ DataSource::MCNY }, region{Region::Rochester}, 
   status{ parsedDescription.first }, timeUpdated{ Time::currentTime() }
@@ -537,6 +548,80 @@ Event::Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std:
     location = { std::stof(parsedLat.substr(1)), std::stof(parsedLong.substr(1)) * -1 };
   }   
   
+  std::cout << Output::Colors::YELLOW << "\n[XML Event] Constructed event: " << ID << "  |  " << region
+            << '\n' << Output::Colors::END << description << '\n';
+}
+
+// Construct an event from a Montreal XML object
+Event::Event(const rapidxml::xml_node<>* parsedEvent) 
+: dataSource{ DataSource::MTL }, region{ Region::Montreal }, location{ Location(45.5019, -73.5674) }, timeUpdated{ Time::currentTime() }
+{
+  // Set the ID and URL
+  std::string url;
+  if(rapidxml::xml_node<>* link = parsedEvent->first_node("link")){
+    url = link->value();
+  }
+  std::string id;
+  if(!url.empty()) {
+    id = MTL::extractID(url);
+    URL = url;
+  }
+  if(!id.empty())
+    ID = id;
+
+  // Set the Title and main street
+  if(rapidxml::xml_node<>* title = parsedEvent->first_node("title")){
+    auto parsedTitle = MTL::parseTitle(title->value());
+    if(parsedTitle) {
+      auto [roadway, eventType] = *parsedTitle;
+      mainStreet = roadway;
+      if(eventType)
+        this->title = *eventType;
+    }
+  }
+
+  // Set the description
+  // Description is stored within a CDATA element
+  if(rapidxml::xml_node<>* description = parsedEvent->first_node("description")){
+    std::string details = description->value();
+    // Check if we extracted a data string or need to parse further for CDATA
+    if(details.empty()) {
+      // Parse the CDATA node
+      rapidxml::xml_node<>* cdataNode = description->first_node();
+      if(cdataNode && (cdataNode->type() == rapidxml::node_cdata)) {
+        details = cdataNode->value();
+      }
+    }
+    if(!details.empty())
+      this->description = details;
+    // TODO:
+    // Parse description into several elements
+    // Or do we want to just sanitize newline chars and store as descritpion
+    // Only use values parsed from the title instead (much easier)
+    //
+    // Elements are delimited via new line so should be relatively simple
+    //auto parsedDescription = parseDescription(details);
+    /*
+     * Line 1       Town name
+     * Line 2       Main Roadway
+     * Line 3       Between [CROSS] and [CROSS]
+     * Line 4       Details (lanes/closure)
+     * Line 5
+     *
+     *
+     * */
+    
+    // Set the cross street
+    // Set the direction
+  }
+
+  //Set the timereported
+  if(rapidxml::xml_node<>* pubDate = parsedEvent->first_node("pubDate")){
+    auto timeOpt = Time::RFC2822::toChrono(pubDate->value());
+    if(timeOpt)
+      timeReported = *timeOpt;
+  }
+
   std::cout << Output::Colors::YELLOW << "\n[XML Event] Constructed event: " << ID << "  |  " << region
             << '\n' << Output::Colors::END << description << '\n';
 }
