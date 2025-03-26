@@ -44,6 +44,7 @@
  *
  *    MTL: 
  *      Use REGEX to parse description
+ *      Redefine global cleanup to work with Montreal events
  *      Create an async function which can be run every few minutes to set geo-coordinates
  *        If we use openstreetmap we are limited to one request per second.
  *        Setup an atomic timer!
@@ -225,7 +226,11 @@ bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
   }
   
   // Clean up cleared events while our data is still in scope
-  clearEvents(events);  // NOTE: Make sure to pass the dereferenced events data here as parsedData is invalid
+  if(currentSource == DataSource::MCNY)
+    clearEvents(events);  // NOTE: Make sure to pass the dereferenced events data here as parsedData is invalid
+  // TODO:
+  // Fix definition to also work with MTL data
+  
   return true;
 }
 

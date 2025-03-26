@@ -280,7 +280,7 @@ std::tm toLocalPrint(const system_clock::time_point& time) {
 
 // Convert a local timepoint to UTC
 void toUTC(system_clock::time_point& timePoint, const std::string& offset) {
-  int offsetHours, offsetMinutes;
+  int offsetHours{ 0 }, offsetMinutes{ 0 };
 
   if(offset.length() == 3) {
     // TODO:
