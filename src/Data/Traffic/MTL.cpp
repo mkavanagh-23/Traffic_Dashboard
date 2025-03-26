@@ -1,7 +1,11 @@
 #include "MTL.h"
+#include "DataUtils.h"
 #include "Traffic.h"
+#include <chrono>
 #include <rapidxml.hpp>
+#include <sstream>
 #include <string>
+#include <vector>
 
 namespace Traffic {
 namespace MTL {
@@ -19,7 +23,7 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
     // TODO:
     // Parse description into several elements
     // Elements are delimited via new line so should be relatively simple
-    auto parsedDescription = parseDescription(description);
+    auto parsedDescription = parseDescription(description->value());
     /*
      * Line 1       Town name
      * Line 2       Main Roadway
@@ -35,6 +39,10 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
     // TODO:
     // Should be converted from RFC2822, need to slightly refine our regex matching first
     std::string date = pubDate->value();
+    auto timeOpt = Time::RFC2822::toChrono(date);
+    std::chrono::system_clock::time_point time;
+    if(timeOpt)
+      time = *timeOpt;
   }
 
   if(rapidxml::xml_node<>* link = parsedEvent->first_node("link")){
@@ -72,6 +80,22 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
   //}
 
   return true;
+}
+
+void parseDescription(const std::string& description) {
+  std::vector<std::string> lines;
+  lines.reserve(6);
+  std::istringstream stream(description);
+  std::string line;
+
+  // Split the input string by line
+  while(std::getline(stream, line))
+    lines.push_back(line);
+
+  // Process each line from the lines vector
+  for(const auto& row : lines) {
+
+  }
 }
 }
 }
