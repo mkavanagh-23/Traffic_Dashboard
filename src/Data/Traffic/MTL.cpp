@@ -13,12 +13,19 @@ extern const std::string EVENTS_URL{ "https://www.quebec511.info/Diffusion/Rss/G
 
 // Process an XML event for storage
 bool processEvent(rapidxml::xml_node<>* parsedEvent) {
+
+    // TODO:
+    //  1. Extract category to check for match, early return if not
+    //  2. Create a function to create a unique ID/Key value from an XML event
+    //  3. Try to contruct event on the map with key (try_emplace)
+    //  4. The below logic should be moved to our Event constructor:
   
   if(rapidxml::xml_node<>* title = parsedEvent->first_node("title")){
     std::string eventTitle = title->value();
     // "Roadway : EventType"
   }
-
+  
+  // Description is stored within a CDATA element
   if(rapidxml::xml_node<>* description = parsedEvent->first_node("description")){
     std::string details = description->value();
     // Check if we extracted a data string or need to parse further for CDATA
@@ -29,10 +36,11 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
         details = cdataNode->value();
       }
     }
-
-
     // TODO:
     // Parse description into several elements
+    // Or do we want to just sanitize newline chars and store as descritpion
+    // Only use values parsed from the title instead (much easier)
+    //
     // Elements are delimited via new line so should be relatively simple
     //auto parsedDescription = parseDescription(details);
     /*
@@ -67,14 +75,6 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
     std::string eventType = category->value();
   }
 
-  // Process the elements of an XML <item>
-  //    <title>
-  //    <description>   parse to lots of info - Should build a print program to collect lots of data
-  //    <pubDate>       Fri, 21 Mar 2025 20:56:29 GMT
-  //    <link>          endpoint
-  //    <category>      Filter value
-
-
   // TODO:
   // Define logic for adding a new event to the map
 
@@ -93,20 +93,20 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
   return true;
 }
 
-void parseDescription(const std::string& description) {
-  std::vector<std::string> lines;
-  lines.reserve(6);
-  std::istringstream stream(description);
-  std::string line;
-
-  // Split the input string by line
-  while(std::getline(stream, line))
-    lines.push_back(line);
-
-  // Process each line from the lines vector
-  for(const auto& row : lines) {
-
-  }
-}
+//void parseDescription(const std::string& description) {
+//  std::vector<std::string> lines;
+//  lines.reserve(6);
+//  std::istringstream stream(description);
+//  std::string line;
+//
+//  // Split the input string by line
+//  while(std::getline(stream, line))
+//    lines.push_back(line);
+//
+//  // Process each line from the lines vector
+//  for(const auto& row : lines) {
+//
+//  }
+//}
 }
 }
