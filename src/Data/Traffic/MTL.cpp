@@ -5,6 +5,7 @@
 #include <rapidxml.hpp>
 #include <sstream>
 #include <string>
+#include <sys/socket.h>
 #include <vector>
 
 namespace Traffic {
@@ -13,11 +14,40 @@ extern const std::string EVENTS_URL{ "https://www.quebec511.info/Diffusion/Rss/G
 
 // Process an XML event for storage
 bool processEvent(rapidxml::xml_node<>* parsedEvent) {
+  
+  // Check for matching event type
+  std::string eventType;
+  if(rapidxml::xml_node<>* category = parsedEvent->first_node("category")){
+    eventType = category->value();
+  }
+  if(eventType.find("Warning") == std::string::npos)
+    return false;
+
+  // Extract the url
+  std::string url;
+  if(rapidxml::xml_node<>* link = parsedEvent->first_node("link")){
+    url = link->value();
+  }
+  // And the ID
+  std::string id = extractID(url);
+  if(id.empty()) {
+    std::cerr << "[MTL] Error parsing event ID. Not adding to the map.\n";
+    return false;
+  }
+
+  // Add the event to the map
+  // Try to insert a new Event at event, inserted = false if it already exists
+  auto [event, inserted] = mapEvents.try_emplace(id, parsedEvent);
+  if(inserted)
+    return true;
+
+  return false;
+
+
+
+
 
     // TODO:
-    //  1. Extract category to check for match, early return if not
-    //  2. Create a function to create a unique ID/Key value from an XML event
-    //  3. Try to contruct event on the map with key (try_emplace)
     //  4. The below logic should be moved to our Event constructor:
   
   if(rapidxml::xml_node<>* title = parsedEvent->first_node("title")){
@@ -68,30 +98,24 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
   if(rapidxml::xml_node<>* link = parsedEvent->first_node("link")){
     std::string url = link->value();
   }
+}
 
-  if(rapidxml::xml_node<>* category = parsedEvent->first_node("category")){
-    // TODO:
-    // Extract this value first to determine whether we are of a desired type
-    // Other parsing can likely be handled via the event constructor
-    std::string eventType = category->value();
+std::string extractID(const std::string& url) {
+  // Extract the ID from the URL
+  size_t startPos = url.find("id=");
+  if(startPos == std::string::npos) {
+    std::cerr << Output::Colors::RED << "[MTL] Error: no id element found in link field.\n" << Output::Colors::END;
+    return "";
   }
-
-  // TODO:
-  // Define logic for adding a new event to the map
-
-  //// Try to insert a new Event at event, inserted = false if it already exists
-  //auto [event, inserted] = mapEvents.try_emplace(key, parsedEvent, description);
-  //// Check if we added a new event
-  //if(!inserted) {
-  //  if(event->second.getStatus() != status) {
-  //    event->second = Event(parsedEvent, description);
-  //    std::cout << Output::Colors::MAGENTA << "[XML] Updated event: " << key << Output::Colors::END << '\n';
-  //    return true;
-  //  }
-  //  return false;
-  //}
-
-  return true;
+  // Increment the iterator to the start of the id
+  startPos += 3;
+  // Find the end position, starting search from start position
+  size_t endPos = url.find('&', startPos);
+  // Check if we found end
+  if(endPos == std::string::npos)
+    endPos = url.length();
+  // Extract the id substring
+  return url.substr(startPos, endPos - startPos);
 }
 
 //void parseDescription(const std::string& description) {

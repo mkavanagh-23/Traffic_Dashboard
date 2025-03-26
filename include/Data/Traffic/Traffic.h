@@ -98,6 +98,7 @@ public:
   // Constructors
   Event(const Json::Value& parsedEvent);
   Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &description);
+  Event(const rapidxml::xml_node<>* item);
   Event(const HTML::Event& parsedEvent);
   Event(Event&& other) noexcept;
 

@@ -503,7 +503,7 @@ Event::Event(const Json::Value& parsedEvent)
             << '\n' << Output::Colors::END << description << '\n';
 }
 
-// Construct an event from an XML object
+// Construct an event from a Rochester XML object
 Event::Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std::string> &parsedDescription)
 : ID{ parsedDescription.second }, dataSource{ DataSource::MCNY }, region{Region::Rochester}, 
   status{ parsedDescription.first }, timeUpdated{ Time::currentTime() }
@@ -542,6 +542,14 @@ Event::Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std:
   
   std::cout << Output::Colors::YELLOW << "\n[XML Event] Constructed event: " << ID << "  |  " << region
             << '\n' << Output::Colors::END << description << '\n';
+}
+
+// Construct an event from a Montreal XML object
+Event::Event(const rapidxml::xml_node<>* item) 
+:
+{
+  // TODO:
+  // Define the Montreal constructor here
 }
 
 // Construct an event from an HTML event
