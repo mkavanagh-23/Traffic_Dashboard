@@ -20,10 +20,21 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
   }
 
   if(rapidxml::xml_node<>* description = parsedEvent->first_node("description")){
+    std::string details = description->value();
+    // Check if we extracted a data string or need to parse further for CDATA
+    if(details.empty()) {
+      // Parse the CDATA node
+      rapidxml::xml_node<>* cdataNode = description->first_node();
+      if(cdataNode && (cdataNode->type() == rapidxml::node_cdata)) {
+        details = cdataNode->value();
+      }
+    }
+
+
     // TODO:
     // Parse description into several elements
     // Elements are delimited via new line so should be relatively simple
-    auto parsedDescription = parseDescription(description->value());
+    //auto parsedDescription = parseDescription(details);
     /*
      * Line 1       Town name
      * Line 2       Main Roadway
