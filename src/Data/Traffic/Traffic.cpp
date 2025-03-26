@@ -44,6 +44,9 @@
  *
  *    MTL: 
  *      Use REGEX to parse description
+ *      Create an async function which can be run every few minutes to set geo-coordinates
+ *        If we use openstreetmap we are limited to one request per second.
+ *        Setup an atomic timer!
  * 
  * DATA INTERFACE
  *    
@@ -563,14 +566,16 @@ Event::Event(const rapidxml::xml_node<>* parsedEvent)
 
   // Set the Title and main street
   if(rapidxml::xml_node<>* title = parsedEvent->first_node("title")){
-    std::string eventTitle = title->value();
-    // TODO:
-    // "Roadway : EventType"
-    // Possible regex pattern: R"((.+)\s+:\s+(.+)?)"
+    auto parsedTitle = MTL::parseTitle(title->value());
+    if(parsedTitle) {
+      auto [roadway, eventType] = *parsedTitle;
+      mainStreet = roadway;
+      if(eventType)
+        this->title = *eventType;
+    }
   }
 
   // Set the description
-  // FIX: 
   // Description is stored within a CDATA element
   if(rapidxml::xml_node<>* description = parsedEvent->first_node("description")){
     std::string details = description->value();
@@ -582,6 +587,8 @@ Event::Event(const rapidxml::xml_node<>* parsedEvent)
         details = cdataNode->value();
       }
     }
+    if(!details.empty())
+      this->description = details;
     // TODO:
     // Parse description into several elements
     // Or do we want to just sanitize newline chars and store as descritpion
@@ -605,14 +612,11 @@ Event::Event(const rapidxml::xml_node<>* parsedEvent)
 
   //Set the timereported
   if(rapidxml::xml_node<>* pubDate = parsedEvent->first_node("pubDate")){
-    // TODO:
-    // Should be converted from RFC2822, need to slightly refine our regex matching first
-    std::string date = pubDate->value();
-    auto timeOpt = Time::RFC2822::toChrono(date);
+    auto timeOpt = Time::RFC2822::toChrono(pubDate->value());
     if(timeOpt)
       timeReported = *timeOpt;
   }
-  
+
   std::cout << Output::Colors::YELLOW << "\n[XML Event] Constructed event: " << ID << "  |  " << region
             << '\n' << Output::Colors::END << description << '\n';
 }

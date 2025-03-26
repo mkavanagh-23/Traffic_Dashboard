@@ -352,8 +352,6 @@ int stoiMonth3(const std::string& month) {
 
 
 std::optional<system_clock::time_point> toChrono(const std::string& rfc2822){
-  // TODO: Modify to optionally take a 3-CHAR offset code in addition to a number offset
-  // Need to test against real-world data
   // Regex matching for RFC2822
   std::regex pattern(R"((?:\w+, )?(\d{1,2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2}) ((?:[\+\-]\d{4})|(?:[A-Za-z]{3}))?)");
   // Create an object to store the matching pattern

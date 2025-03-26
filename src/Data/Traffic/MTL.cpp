@@ -2,7 +2,7 @@
 #include "Traffic.h"
 #include <rapidxml.hpp>
 #include <string>
-#include <sys/socket.h>
+#include <regex>
 
 namespace Traffic {
 namespace MTL {
@@ -58,6 +58,23 @@ std::string extractID(const std::string& url) {
     endPos = url.length();
   // Extract the id substring
   return url.substr(startPos, endPos - startPos);
+}
+
+// Parse a title into a main roadway and eventType
+std::optional<std::pair<std::string, std::optional<std::string>>> parseTitle(const std::string& title) {
+  // Example string: "Roadway : EventType"
+  // Define the matching pattern
+  std::regex pattern(R"((.+)\s+:\s+(.+)?)");
+  // matches[1] = roadway
+  // matches[2] = eventType
+  std::smatch matches;
+  if(std::regex_search(title, matches, pattern)) {
+    if(matches[2].matched)
+      return std::make_pair(matches[1], matches[2]);
+    else
+      return std::make_pair(matches[1], std::nullopt);
+  }
+  return std::nullopt;
 }
 
 //void parseDescription(const std::string& description) {
