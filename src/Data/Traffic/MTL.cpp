@@ -23,6 +23,7 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
   if(rapidxml::xml_node<>* title = parsedEvent->first_node("title")){
     std::string eventTitle = title->value();
     // "Roadway : EventType"
+    // Possible regex pattern: R"((.+)\s+:(?:\s+.+)?)"
   }
   
   // Description is stored within a CDATA element
