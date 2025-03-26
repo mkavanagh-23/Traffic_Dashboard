@@ -41,10 +41,7 @@
  *  Need to gather more data to test against!
  *
  * MTL: 
- *  Add logic for montreal events
- *    Returns XML
- *    Filter by <category> - we want "Warning"
- *    Use REGEX to parse description
+ *  Use REGEX to parse description
  *  
  * Serializing to JSON:
  *  We should serialize time to an ISO6801-formatted string
@@ -545,11 +542,74 @@ Event::Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std:
 }
 
 // Construct an event from a Montreal XML object
-Event::Event(const rapidxml::xml_node<>* item) 
-:
+Event::Event(const rapidxml::xml_node<>* parsedEvent) 
+: dataSource{ DataSource::MTL }, region{ Region::Montreal }, location{ Location(45.5019, -73.5674) }, timeUpdated{ Time::currentTime() }
 {
-  // TODO:
-  // Define the Montreal constructor here
+  // Set the ID and URL
+  std::string url;
+  if(rapidxml::xml_node<>* link = parsedEvent->first_node("link")){
+    url = link->value();
+  }
+  std::string id;
+  if(!url.empty()) {
+    id = MTL::extractID(url);
+    URL = url;
+  }
+  if(!id.empty())
+    ID = id;
+
+  // Set the Title and main street
+  if(rapidxml::xml_node<>* title = parsedEvent->first_node("title")){
+    std::string eventTitle = title->value();
+    // TODO:
+    // "Roadway : EventType"
+    // Possible regex pattern: R"((.+)\s+:\s+(.+)?)"
+  }
+
+  // Set the description
+  // FIX: 
+  // Description is stored within a CDATA element
+  if(rapidxml::xml_node<>* description = parsedEvent->first_node("description")){
+    std::string details = description->value();
+    // Check if we extracted a data string or need to parse further for CDATA
+    if(details.empty()) {
+      // Parse the CDATA node
+      rapidxml::xml_node<>* cdataNode = description->first_node();
+      if(cdataNode && (cdataNode->type() == rapidxml::node_cdata)) {
+        details = cdataNode->value();
+      }
+    }
+    // TODO:
+    // Parse description into several elements
+    // Or do we want to just sanitize newline chars and store as descritpion
+    // Only use values parsed from the title instead (much easier)
+    //
+    // Elements are delimited via new line so should be relatively simple
+    //auto parsedDescription = parseDescription(details);
+    /*
+     * Line 1       Town name
+     * Line 2       Main Roadway
+     * Line 3       Between [CROSS] and [CROSS]
+     * Line 4       Details (lanes/closure)
+     * Line 5
+     *
+     *
+     * */
+    
+    // Set the cross street
+    // Set the direction
+  }
+
+  //Set the timereported
+  if(rapidxml::xml_node<>* pubDate = parsedEvent->first_node("pubDate")){
+    // TODO:
+    // Should be converted from RFC2822, need to slightly refine our regex matching first
+    std::string date = pubDate->value();
+    auto timeOpt = Time::RFC2822::toChrono(date);
+    if(timeOpt)
+      timeReported = *timeOpt;
+  }
+
 }
 
 // Construct an event from an HTML event

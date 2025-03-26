@@ -1,16 +1,14 @@
 #include "MTL.h"
-#include "DataUtils.h"
 #include "Traffic.h"
-#include <chrono>
 #include <rapidxml.hpp>
-#include <sstream>
 #include <string>
 #include <sys/socket.h>
-#include <vector>
 
 namespace Traffic {
 namespace MTL {
-extern const std::string EVENTS_URL{ "https://www.quebec511.info/Diffusion/Rss/GenererRss.aspx?regn=13000&routes=10;13;15;19;20;25;40;112;117;125;134;136;138;335;520&lang=en" };
+extern const std::string EVENTS_URL{
+  "https://www.quebec511.info/Diffusion/Rss/GenererRss.aspx?regn=13000&routes=10;13;15;19;20;25;40;112;117;125;134;136;138;335;520&lang=en"
+};
 
 // Process an XML event for storage
 bool processEvent(rapidxml::xml_node<>* parsedEvent) {
@@ -42,62 +40,6 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
     return true;
 
   return false;
-
-
-
-
-
-    // TODO:
-    //  4. The below logic should be moved to our Event constructor:
-  
-  if(rapidxml::xml_node<>* title = parsedEvent->first_node("title")){
-    std::string eventTitle = title->value();
-    // "Roadway : EventType"
-    // Possible regex pattern: R"((.+)\s+:(?:\s+.+)?)"
-  }
-  
-  // Description is stored within a CDATA element
-  if(rapidxml::xml_node<>* description = parsedEvent->first_node("description")){
-    std::string details = description->value();
-    // Check if we extracted a data string or need to parse further for CDATA
-    if(details.empty()) {
-      // Parse the CDATA node
-      rapidxml::xml_node<>* cdataNode = description->first_node();
-      if(cdataNode && (cdataNode->type() == rapidxml::node_cdata)) {
-        details = cdataNode->value();
-      }
-    }
-    // TODO:
-    // Parse description into several elements
-    // Or do we want to just sanitize newline chars and store as descritpion
-    // Only use values parsed from the title instead (much easier)
-    //
-    // Elements are delimited via new line so should be relatively simple
-    //auto parsedDescription = parseDescription(details);
-    /*
-     * Line 1       Town name
-     * Line 2       Main Roadway
-     * Line 3       Between [CROSS] and [CROSS]
-     * Line 4       Details (lanes/closure)
-     * Line 5
-     *
-     *
-     * */
-  }
-
-  if(rapidxml::xml_node<>* pubDate = parsedEvent->first_node("pubDate")){
-    // TODO:
-    // Should be converted from RFC2822, need to slightly refine our regex matching first
-    std::string date = pubDate->value();
-    auto timeOpt = Time::RFC2822::toChrono(date);
-    std::chrono::system_clock::time_point time;
-    if(timeOpt)
-      time = *timeOpt;
-  }
-
-  if(rapidxml::xml_node<>* link = parsedEvent->first_node("link")){
-    std::string url = link->value();
-  }
 }
 
 std::string extractID(const std::string& url) {
