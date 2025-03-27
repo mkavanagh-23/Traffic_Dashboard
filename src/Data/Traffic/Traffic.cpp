@@ -89,8 +89,10 @@ void fetchCameras() {
 
 // Print all events in the map
 void printEvents() {
-  for(const auto& [key, event] : mapEvents) {
-    std::cout << event;
+  for(auto& [key, event] : mapEvents) {
+    if(!event.hasPrinted()) {
+      event.print();
+    }
   }
 }
 
@@ -629,7 +631,7 @@ Event::Event(const rapidxml::xml_node<>* parsedEvent)
 // Construct an event from an HTML event
 Event::Event(const HTML::Event& parsedEvent)
 : ID{ parsedEvent.ID }, URL{ "https://911events.ongov.net/CADInet/app/events.jsp" }, dataSource{ DataSource::ONGOV },
-  region{ Region::Syracuse }, location{ Location(43.05, -76.15) }, timeUpdated{ Time::currentTime() }
+  region{ Region::Syracuse }, location{ Location(43.0495, -76.1474) }, timeUpdated{ Time::currentTime() }
 {
   bool hasMain{ false };    // Flag to check if main address exists
   std::string descStr{ "" };    // Create a string to build and hold the description
@@ -677,8 +679,11 @@ Event::Event(const HTML::Event& parsedEvent)
     descStr += "( X: " + parsedEvent.xstreet + " ) ";
   }
   if(parsedEvent.date != "N/A") {
-    // Process the event date
-    timeReported = Time::MMDDYYHHMM::toChrono(parsedEvent.date);
+    // Prevent crashes! check for strlength
+    if(parsedEvent.date.length() == 14) {
+      // Process the event date
+      timeReported = Time::MMDDYYHHMM::toChrono(parsedEvent.date);
+    }
     // Add the date to the string
     descStr += "[ " + parsedEvent.date + " ]";
   }
@@ -731,6 +736,12 @@ Event& Event::operator=(Event&& other) noexcept {
   std::cout << Output::Colors::BLUE << "[Event] Invoked move assignment: " << ID << "  |  " << region
             << '\n' << Output::Colors::END << description << '\n';
   return *this;
+}
+
+//
+void Event::print() {
+  std::cout << *this;
+  printed = true;
 }
 
 
@@ -913,7 +924,7 @@ std::ostream& operator<<(std::ostream& out, const DataSource& dataSource) {
       out << "NYS 511";
       break;
     case DataSource::ONGOV:
-      out << "Onondaga Counmty 911";
+      out << "Onondaga County 911";
       break;
     case DataSource::MCNY:
       out << "Monroe County 911";
@@ -938,7 +949,7 @@ std::ostream &operator<<(std::ostream &out, const Event &event){
   std::tm timeReported = Time::toLocalPrint(event.timeReported);
   std::tm timeUpdated = Time::toLocalPrint(event.timeUpdated);
 
-  out << '\n' << event.region << " (" << event.dataSource << ")  |  " << event.ID << "  |  " << event.status << '\n'
+  out << '\n' << Output::Colors::CYAN << event.region << " (" << event.dataSource << ")  |  " << event.ID << "  |  " << event.status << Output::Colors::END << '\n'
       << event.title << '\n'
       << event.mainStreet << "(" << event.direction << ") at " << event.crossStreet << "  |  " << event.location << '\n'
       << event.description << '\n'

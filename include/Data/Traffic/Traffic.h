@@ -93,7 +93,7 @@ private:
   Location location;
   std::chrono::system_clock::time_point timeReported; // OTT 'created' "2025-03-11 12:45:00"
   std::chrono::system_clock::time_point timeUpdated;  // OTT 'updated' "2025-03-11 12:45:00"
-
+  bool printed{ false };
 public:
   // Constructors
   Event(const Json::Value& parsedEvent);
@@ -107,6 +107,8 @@ public:
   friend std::ostream &operator<<(std::ostream &out, const Event& event);
 
   // Accessors
+  void print();
+  bool hasPrinted() const { return printed; }
   std::string_view getID() const { return ID; }
   DataSource getSource() const { return dataSource; }
   std::string_view getStatus() const { return status; }

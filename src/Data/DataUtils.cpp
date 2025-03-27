@@ -291,6 +291,9 @@ void toUTC(system_clock::time_point& timePoint, const std::string& offset) {
     } else if(offset.find("EST") != std::string::npos) {
       offsetHours = -5;
       offsetMinutes = 0;
+    } else if(offset.find("EDT") != std::string::npos) {
+      offsetHours = -4;
+      offsetMinutes = 0;
     }
   } else if(offset.length() == 5) {
     offsetHours = std::stoi(offset.substr(0, 3));
