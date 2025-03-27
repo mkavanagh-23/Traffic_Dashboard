@@ -228,10 +228,7 @@ bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
   }
   
   // Clean up cleared events while our data is still in scope
-  if(currentSource == DataSource::MCNY)
-    clearEvents(events);  // NOTE: Make sure to pass the dereferenced events data here as parsedData is invalid
-  // TODO:
-  // Fix definition to also work with MTL data
+  clearEvents(events);  // NOTE: Make sure to pass the dereferenced events data here as parsedData is invalid
   
   return true;
 }
@@ -318,15 +315,37 @@ bool containsEvent(rapidxml::xml_document<>& events, const std::string& key) {
   rapidxml::xml_node<>* channel = root->first_node("channel"); // Navigate to channel
 
   // Iterate through the XML document
-  for(rapidxml::xml_node<>* event = channel->first_node("item"); event; event = event->next_sibling()) {
-    // Extract key from description
-    std::pair<std::string, std::string> description = MCNY::parseDescription(event->first_node("description"));
-    auto& [status, parsedKey] = description;
-    // Check for matching key value
-    if(parsedKey == key)
-      return true;
-    else
-      continue;
+  // Process for MCNY
+  if(currentSource == DataSource::MCNY) {
+    for(rapidxml::xml_node<>* event = channel->first_node("item"); event; event = event->next_sibling()) {
+      // Extract key from description
+      std::pair<std::string, std::string> description = MCNY::parseDescription(event->first_node("description"));
+      auto& [status, parsedKey] = description;
+      // Check for matching key value
+      if(parsedKey == key)
+        return true;
+      else
+        continue;
+    }
+    // Process for MTL
+  } else if(currentSource == DataSource::MTL) {
+    for(rapidxml::xml_node<>* event = channel->first_node("item"); event; event = event->next_sibling()) {
+      // Extract the url
+      std::string url;
+      if(rapidxml::xml_node<>* link = event->first_node("link")){
+        url = link->value();
+      }
+      // And the ID
+      std::string id = MTL::extractID(url);
+      if(id.empty()) {
+        continue;
+      }
+      // Check for matching key value
+      if(id == key)
+        return true;
+      else
+        continue;
+    }
   }
   return false;
 }
