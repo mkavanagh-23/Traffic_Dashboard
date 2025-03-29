@@ -246,7 +246,7 @@ std::optional<addressDir> processAddress(const std::string& address) {
   cleanedAddress = std::regex_replace(cleanedAddress, multipleSpace, " ");
    
   // Define the matching pattern
-  std::regex pattern("(?:(EB|WB|NB|SB)\\s*)?((?:ROUTE\\s+\\d+)|(?:I\\s+\\d+)|(?:[^\\s].*?\\s+(?:LN|ST|AVE|DR|CT|PL|CANALWAY|PATH|BLVD|TER|KING|CIR|RD|STREET|ROWE|FARM|TRAIL|TRL|TPKE|PKWY|CRSE)))(\\s+.*)?");
+  std::regex pattern("(?:(EB|WB|NB|SB)\\s*)?((?:ROUTE\\s+\\d+)|(?:I\\s+\\d+)|(?:[^\\s].*?\\s+(?:LN|ST|AVE|DR|CT|PL|CANALWAY|PATH|BLVD|TER|KING|CIR|RD|STREET|ROWE|FARM|TRAIL|TRL|TPKE|PKWY|CRSE|WAY)))(\\s+.*)?");
   std::smatch matches;
   /*
    *    matches[1] = Direction (Optional)

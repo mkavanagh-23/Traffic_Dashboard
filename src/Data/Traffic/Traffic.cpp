@@ -41,6 +41,7 @@
  *    OTT:
  *      Fix parsing against more test cases
  *        Need to gather more data to test against!
+ *        Should we parse against the headline or the full description?
  *
  *    MTL: 
  *      Use REGEX to parse description
@@ -144,10 +145,10 @@ bool getEvents(std::string url) {
   } else {
     switch(result) {
       case cURL::Result::TIMEOUT:
-        std::cerr << Output::Colors::RED << "[cURL] Timed out retrieving data from remote stream. Retrying in 60 seconds..." << Output::Colors::END;
+        std::cerr << Output::Colors::RED << "[cURL] Timed out retrieving data from remote stream. Retrying in 60 seconds...\n" << Output::Colors::END;
         break;
       default:
-        std::cerr << Output::Colors::RED << "[cURL] Critical error retrieiving data from remote stream. Terminating program." << Output::Colors::END;
+        std::cerr << Output::Colors::RED << "[cURL] Critical error retrieiving data from remote stream. Terminating program.\n" << Output::Colors::END;
         return false;
     }
   }
