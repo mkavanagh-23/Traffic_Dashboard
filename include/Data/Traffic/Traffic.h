@@ -116,6 +116,10 @@ public:
   Region getRegion() const { return region; }
   Location getLocation() const { return location; }
   std::string_view getDescription() const { return description; }
+
+  // Rest API
+  // Serialize a traffic event into a Json object
+  friend Json::Value serializeToJSON(const std::unordered_map<std::string, Event> event);
 };
 
 // Define extern event data structures

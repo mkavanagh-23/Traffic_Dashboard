@@ -75,6 +75,16 @@ Poco::Net::HTTPRequestHandler* RequestHandlerFactory::createRequestHandler(const
   return new RequestHandler;
 }
 
+//void startApiServer() {
+//  Poco::Net::ServerSocket socket(6969);
+//  Poco::Net::HTTPServer server(new RequestHandlerFactory, socket, new Poco::Net::HTTPServerParams);
+//  server.start();
+//  std::cout << "API Server running on port 8080..." << std::endl;
+//  while (true) {
+//      std::this_thread::sleep_for(std::chrono::seconds(1));
+//  }
+//}
+
 int ServerApp::main(const std::vector<std::string>& args) {
   (void)args;
   // Create a socket for the server to listen on

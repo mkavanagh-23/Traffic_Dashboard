@@ -9,6 +9,7 @@
 #include "Output.h"
 #include "rapidxml.hpp"
 #include <chrono>
+#include <json/value.h>
 #include <optional>
 #include <string>
 #include <iostream>
@@ -422,6 +423,63 @@ void deleteEvents(std::vector<std::string> keys) {
     std::cout << Output::Colors::RED << "[Traffic] Deleted event: " << key << Output::Colors::END << '\n'; 
   }
 }
+
+// Serialize a traffic event into a Json object
+Json::Value serializeToJSON(const std::unordered_map<std::string, Event> data){
+  // Create the root JSON object
+  Json::Value root;
+  
+  // Serialize the data
+  for(const auto& [key, event] : data) {
+    Json::Value item;
+
+    // Store fields in JSON
+    // String fields
+    item["id"] = event.ID;
+
+    if(event.URL == "N/A")
+      item["url"] = Json::nullValue;
+    else
+      item["url"] = event.URL;
+
+    if(event.title == "N/A")
+      item["title"] = Json::nullValue;
+    else
+      item["title"] = event.title;
+
+    item["status"] = event.status;
+
+    if(event.mainStreet == "N/A")
+      item["main"] = Json::nullValue;
+    else
+      item["main"] = event.mainStreet;
+
+    if(event.crossStreet == "N/A")
+      item["secondary"] = Json::nullValue;
+    else
+      item["secondary"] = event.crossStreet;
+
+    if(event.direction == "N/A")
+      item["direction"] = Json::nullValue;
+    else
+      item["direction"] = event.direction;
+
+    if(event.description == "N/A")
+      item["description"] = Json::nullValue;
+    else
+      item["description"] = event.description;
+
+    // TODO:
+    // Handle processing of non-string types
+
+    // Add the item to the root object
+    root[key] = item;
+  }
+
+  // Return the root JSON object
+  return root;
+}
+
 
 // Constructor objects
 // Construct an event from an JSON object
