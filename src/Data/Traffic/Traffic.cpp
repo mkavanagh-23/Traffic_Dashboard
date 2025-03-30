@@ -11,6 +11,7 @@
 #include <chrono>
 #include <json/value.h>
 #include <optional>
+#include <mutex>    
 #include <string>
 #include <iostream>
 #include <iomanip>
@@ -62,6 +63,7 @@
 namespace Traffic {
 
 // Data structures
+std::mutex eventsMutex;
 std::unordered_map<std::string, Event> mapEvents;
 std::unordered_map<std::string, Camera> mapCameras;
 

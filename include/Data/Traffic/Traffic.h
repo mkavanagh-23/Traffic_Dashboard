@@ -7,6 +7,7 @@
 #include <memory>
 #include <json/json.h>
 #include <rapidxml.hpp>
+#include <mutex>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -124,7 +125,7 @@ public:
 };
 
 // Define extern event data structures
-//extern std::unordered_map<std::string, Event> mapEvents;
+extern std::mutex eventsMutex;
 extern std::unordered_map<std::string, Event> mapEvents;
 
 // Get events from all sources
