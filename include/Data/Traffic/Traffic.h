@@ -90,7 +90,7 @@ private:
   std::string crossStreet{ "N/A" };
   std::string direction{ "N/A" };
   std::string description{ "N/A" }; // Holds full unformatted event string
-  Location location;
+  Location location{ 0, 0 };
   std::chrono::system_clock::time_point timeReported; // OTT 'created' "2025-03-11 12:45:00"
   std::chrono::system_clock::time_point timeUpdated;  // OTT 'updated' "2025-03-11 12:45:00"
   bool printed{ false };
@@ -115,11 +115,12 @@ public:
   std::chrono::system_clock::time_point getLastUpdated() const { return timeUpdated; }
   Region getRegion() const { return region; }
   Location getLocation() const { return location; }
+  std::pair<double, double> getCoordinates() const { return std::make_pair(location.latitude, location.longitude); }
   std::string_view getDescription() const { return description; }
 
   // Rest API
   // Serialize a traffic event into a Json object
-  friend Json::Value serializeToJSON(const std::unordered_map<std::string, Event> event);
+  void serializeToJSON(Json::Value& item) const;
 };
 
 // Define extern event data structures
@@ -144,6 +145,7 @@ Location getLocation(const Json::Value& parsedEvent);
 bool isIncident(const Json::Value& parsedEvent);
 std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent);
 void deleteEvents(std::vector<std::string> keys);
+Json::Value serializeEventsToJSON();
 
 // Define a template function for clearing events from the map
 template<typename T>

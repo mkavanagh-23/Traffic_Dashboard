@@ -457,4 +457,26 @@ system_clock::time_point toChrono(const std::string& timeStr) {
 }
 
 } // namespace YYYYMMDDHHMMSS
+
+namespace ISO6801{
+// Convert a chrono object to an ISO6801 string
+std::string toString(const system_clock::time_point& time) {
+  // Convert to time_t
+  std::time_t tempTime = std::chrono::system_clock::to_time_t(time);
+  
+  // Convert to tm struct for formatting
+  std::tm* tm_info = std::gmtime(&tempTime);
+  
+  // Get milliseconds
+  auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch() % std::chrono::seconds(1)).count();
+  
+  // Format as ISO 8601 (YYYY-MM-DDThh:mm:ss.sssZ)
+  char buffer[30];
+  std::strftime(buffer, sizeof(buffer), "%Y-%m-%dT%H:%M:%S", tm_info);
+  
+  // Append milliseconds and Z for UTC
+  return { std::string(buffer) + "." + std::to_string(milliseconds).substr(0, 3) + "Z" };
+}   // namespace ISO6801
+}
+
 } // namespace Time
