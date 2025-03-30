@@ -21,14 +21,14 @@ int main(int argc, char* argv[]) {
   // Get cameras
   //Traffic::fetchCameras();
   
-  while(true) {
+//  while(true) {
     Traffic::fetchEvents();
     Traffic::printEvents();
     auto time = Time::currentTime_t();
     std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << '\n';
     std::cout << "Found " << Traffic::mapEvents.size() << " matching traffic events.\n" << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(60));
-  }
+//    std::this_thread::sleep_for(std::chrono::seconds(60));
+//  }
 
   // Create and start the API server
   RestAPI::ServerApp restServer;

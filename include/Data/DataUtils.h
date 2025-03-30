@@ -167,6 +167,11 @@ system_clock::time_point toChrono(const std::string& timeStr);
 
 }
 
+namespace ISO6801{
+// Convert a chrono object to an ISO6801 string
+std::string toString(const system_clock::time_point& time);
+}
+
 } // namespace Time
 
 #endif

@@ -9,6 +9,7 @@
 #include "Output.h"
 #include "rapidxml.hpp"
 #include <chrono>
+#include <json/value.h>
 #include <optional>
 #include <string>
 #include <iostream>
@@ -422,6 +423,139 @@ void deleteEvents(std::vector<std::string> keys) {
     std::cout << Output::Colors::RED << "[Traffic] Deleted event: " << key << Output::Colors::END << '\n'; 
   }
 }
+
+// Serialize all traffic events into Json objects
+Json::Value serializeEventsToJSON(){
+  // Create the root JSON object
+  Json::Value root;
+  
+  // Serialize the data
+  for(const auto& [key, event] : mapEvents) {
+    // Create a json item from the event
+    Json::Value item;
+    event.serializeToJSON(item);
+
+    // Add the item to the root object
+    root[key] = item;
+  }
+
+  // Return the root JSON object
+  return root;
+}
+
+void Event::serializeToJSON(Json::Value& item) const {
+  // Store fields in JSON
+  // String fields
+  item["id"] = ID;
+
+  if(URL == "N/A")
+    item["url"] = Json::nullValue;
+  else
+    item["url"] = URL;
+
+  if(title == "N/A")
+    item["title"] = Json::nullValue;
+  else
+    item["title"] = title;
+
+  item["status"] = status;
+
+  if(mainStreet == "N/A")
+    item["main"] = Json::nullValue;
+  else
+    item["main"] = mainStreet;
+
+  if(crossStreet == "N/A")
+    item["secondary"] = Json::nullValue;
+  else
+    item["secondary"] = crossStreet;
+
+  if(direction == "N/A")
+    item["direction"] = Json::nullValue;
+  else
+    item["direction"] = direction;
+
+  if(description == "N/A")
+    item["description"] = Json::nullValue;
+  else
+    item["description"] = description;
+
+  switch(dataSource) {
+    case DataSource::NYSDOT:
+      item["source"] = "NYSDOT";
+      break;
+    case DataSource::ONGOV:
+      item["source"] = "ONGOV";
+      break;
+    case DataSource::MCNY:
+      item["source"] = "MCNY";
+      break;
+    case DataSource::ONMT:
+      item["source"] = "ONTM";
+      break;
+    case DataSource::OTT:
+      item["source"] = "OTT";
+      break;
+    case DataSource::MTL:
+      item["source"] = "MTL";
+      break;
+    default:
+      item["source"] = Json::nullValue;
+      break;
+  }
+
+  switch(region) {
+    case Region::Syracuse:
+      item["region"] = "Syracuse";
+      break;
+    case Region::Rochester:
+      item["region"] = "Rochester";
+      break;
+    case Region::Buffalo:
+      item["region"] = "Buffalo";
+      break;
+    case Region::Albany:
+      item["region"] = "Albany";
+      break;
+    case Region::Binghamton:
+      item["region"] = "Binghamton";
+      break;
+    case Region::Toronto:
+      item["region"] = "Toronto";
+      break;
+    case Region::Ottawa:
+      item["region"] = "Ottawa";
+      break;
+    case Region::Montreal:
+      item["region"] = "Montreal";
+      break;
+    default:
+      item["region"] = Json::nullValue;
+      break;
+  }
+  
+  // Create a Json object to hold the latitude and longitude
+  Json::Value coordinates;
+  if(getCoordinates() == std::make_pair(0, 0)) {
+    coordinates["lat"] = Json::nullValue;
+    coordinates["long"] = Json::nullValue;
+  } else {
+    coordinates["lat"] = getLocation().latitude;
+    coordinates["long"] = getLocation().longitude;
+  }
+  item["coordinates"] = coordinates;
+
+  if(timeReported != std::chrono::system_clock::time_point{}) 
+    item["reported"] = Time::ISO6801::toString(timeReported);
+  else
+    item["reported"] = Json::nullValue;
+
+  if(timeUpdated != std::chrono::system_clock::time_point{}) 
+    item["updated"] = Time::ISO6801::toString(timeUpdated);
+  else
+    item["updated"] = Json::nullValue;
+}
+
 
 // Constructor objects
 // Construct an event from an JSON object
