@@ -438,8 +438,8 @@ void deleteEvents(std::vector<std::string> keys) {
 
 // Serialize all traffic events into Json objects
 Json::Value serializeEventsToJSON(){
-  // Create the root JSON object
-  Json::Value root;
+  // Create an array to hold all events
+  Json::Value eventsArray(Json::arrayValue);
   
   // Serialize the data
   // Lock the map to this thread for reading
@@ -451,11 +451,10 @@ Json::Value serializeEventsToJSON(){
     event.serializeToJSON(item);
 
     // Add the item to the root object
-    root[key] = item;
+    eventsArray.append(item);
   }
 
-  // Return the root JSON object
-  return root;
+  return eventsArray;
 }
 
 void Event::serializeToJSON(Json::Value& item) const {
