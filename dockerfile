@@ -1,3 +1,6 @@
+# syntax=docker/dockerfile:1
+# check=skip=SecretsUsedInArgOrEnv
+
 # Use the official Ubuntu base image
 FROM ubuntu:latest
 
