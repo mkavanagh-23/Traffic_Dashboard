@@ -32,7 +32,7 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
     std::cerr << "[MTL] Error parsing event ID. Not adding to the map.\n";
     return false;
   }
-
+  
   // Add the event to the map
   // Try to insert a new Event at event, inserted = false if it already exists
   auto [event, inserted] = mapEvents.try_emplace(id, parsedEvent);

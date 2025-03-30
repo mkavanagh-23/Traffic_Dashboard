@@ -11,6 +11,7 @@
 #include <chrono>
 #include <json/value.h>
 #include <optional>
+#include <mutex>    
 #include <string>
 #include <iostream>
 #include <iomanip>
@@ -62,6 +63,7 @@
 namespace Traffic {
 
 // Data structures
+std::mutex eventsMutex;
 std::unordered_map<std::string, Event> mapEvents;
 std::unordered_map<std::string, Camera> mapCameras;
 
@@ -91,6 +93,8 @@ void fetchCameras() {
 
 // Print all events in the map
 void printEvents() {
+  // Lock the map for reading
+  std::lock_guard<std::mutex> lock(eventsMutex);
   for(auto& [key, event] : mapEvents) {
     if(!event.hasPrinted()) {
       event.print();
@@ -223,6 +227,8 @@ bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
   
   // Iterate throgh each event in the document tree
   for(rapidxml::xml_node<>* event = channel->first_node("item"); event; event = event->next_sibling()) {
+    // Lock the map before processing the event
+    std::lock_guard<std::mutex> lock(eventsMutex);
     if(currentSource == DataSource::MCNY)
       MCNY::processEvent(event); 
     else if(currentSource == DataSource::MTL)
@@ -239,6 +245,8 @@ bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
 bool parseEvents(const std::vector<HTML::Event>& parsedData) {
   // Iterate through each parsed event in the vector
   for(const auto& parsedEvent : parsedData) {
+    // Lock the maop here
+    std::lock_guard<std::mutex> lock(eventsMutex);
     // Try to insert it on the vector
     // Will not add if it already exists
     mapEvents.try_emplace(parsedEvent.ID, parsedEvent);
@@ -271,6 +279,9 @@ bool processEvent(const Json::Value& parsedEvent) {
   if(!isIncident(parsedEvent)) {
     return false;
   }
+
+  // Lock the map before inserting
+  std::lock_guard<std::mutex> lock(eventsMutex);
 
   // Add the event
   // Try to insert a new Event at event, inserted = false if it already exists
@@ -417,6 +428,7 @@ std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent){
 
 // Delete all events that match given keys from the map
 // Called by templated "Clean Events" function
+// NOTE: Locking already implemented within clearEvents, our map is already locked at this point
 void deleteEvents(std::vector<std::string> keys) {
   for(const auto& key : keys) {
     mapEvents.erase(key);
@@ -426,21 +438,23 @@ void deleteEvents(std::vector<std::string> keys) {
 
 // Serialize all traffic events into Json objects
 Json::Value serializeEventsToJSON(){
-  // Create the root JSON object
-  Json::Value root;
+  // Create an array to hold all events
+  Json::Value eventsArray(Json::arrayValue);
   
   // Serialize the data
+  // Lock the map to this thread for reading
+  std::lock_guard<std::mutex> lock(eventsMutex);    // Must be locked before entering the loop to prevent iterator invalidation
+  // And read the map
   for(const auto& [key, event] : mapEvents) {
     // Create a json item from the event
     Json::Value item;
     event.serializeToJSON(item);
 
     // Add the item to the root object
-    root[key] = item;
+    eventsArray.append(item);
   }
 
-  // Return the root JSON object
-  return root;
+  return eventsArray;
 }
 
 void Event::serializeToJSON(Json::Value& item) const {

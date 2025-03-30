@@ -2,7 +2,6 @@
 #include "Traffic.h"
 #include "DataUtils.h"
 #include <ctime>
-#include <chrono>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
@@ -12,27 +11,35 @@
 #define JSON_DLL
 #endif
 
-int main(int argc, char* argv[]) {
-  // Get all Traffic events
-  // TODO: Asynchronously call this in a loop in its own thread
-  // We want to run an update thread, a worker thread for queued processing, a listen thread for the REST server
-  // Going to need to design a soultion with mutexes to avoid UB
-  
-  // Get cameras
-  //Traffic::fetchCameras();
-  
-//  while(true) {
+void getTrafficData() {
+  while(true) {
     Traffic::fetchEvents();
-    Traffic::printEvents();
     auto time = Time::currentTime_t();
     std::cout << "\nLast updated: " << std::put_time(localtime(&time), "%T") << '\n';
     std::cout << "Found " << Traffic::mapEvents.size() << " matching traffic events.\n" << std::endl;
-//    std::this_thread::sleep_for(std::chrono::seconds(60));
-//  }
+    std::this_thread::sleep_for(std::chrono::seconds(90));
+  }
+}
+
+// Cleanup function to join the thread
+void cleanupThread(std::thread& t) {
+    if (t.joinable()) 
+        t.join();
+}
+
+int main(int argc, char* argv[]) {
+  // TODO:
+  // Listen for exit command and clean-up before terminating
+
+  // Spin up the data selection backend
+  std::thread dataThread(getTrafficData);
 
   // Create and start the API server
   RestAPI::ServerApp restServer;
-  return restServer.run(argc, argv);
+  restServer.run(argc, argv);
+
+  // Clean up the data thread
+  cleanupThread(dataThread);
 
   return 0;
 }

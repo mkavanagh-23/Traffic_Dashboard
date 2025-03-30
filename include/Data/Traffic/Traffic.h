@@ -7,6 +7,7 @@
 #include <memory>
 #include <json/json.h>
 #include <rapidxml.hpp>
+#include <mutex>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -124,7 +125,7 @@ public:
 };
 
 // Define extern event data structures
-//extern std::unordered_map<std::string, Event> mapEvents;
+extern std::mutex eventsMutex;
 extern std::unordered_map<std::string, Event> mapEvents;
 
 // Get events from all sources
@@ -152,6 +153,8 @@ template<typename T>
 void clearEvents(T& events) {
   // Create a vector to store the keys to be deleted
   std::vector<std::string> keysToDelete;
+  // Lock the map for processing
+  std::lock_guard<std::mutex> lock(eventsMutex);
   // Iterate through the event map
   for(const auto& [key, event] : mapEvents) {
     // Only match with current source events
