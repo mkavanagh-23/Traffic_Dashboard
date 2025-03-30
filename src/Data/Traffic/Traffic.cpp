@@ -93,6 +93,8 @@ void fetchCameras() {
 
 // Print all events in the map
 void printEvents() {
+  // Lock the map for reading
+  std::lock_guard<std::mutex> lock(eventsMutex);
   for(auto& [key, event] : mapEvents) {
     if(!event.hasPrinted()) {
       event.print();
@@ -225,6 +227,8 @@ bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
   
   // Iterate throgh each event in the document tree
   for(rapidxml::xml_node<>* event = channel->first_node("item"); event; event = event->next_sibling()) {
+    // Lock the map before processing the event
+    std::lock_guard<std::mutex> lock(eventsMutex);
     if(currentSource == DataSource::MCNY)
       MCNY::processEvent(event); 
     else if(currentSource == DataSource::MTL)
@@ -241,6 +245,8 @@ bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
 bool parseEvents(const std::vector<HTML::Event>& parsedData) {
   // Iterate through each parsed event in the vector
   for(const auto& parsedEvent : parsedData) {
+    // Lock the maop here
+    std::lock_guard<std::mutex> lock(eventsMutex);
     // Try to insert it on the vector
     // Will not add if it already exists
     mapEvents.try_emplace(parsedEvent.ID, parsedEvent);
@@ -273,6 +279,9 @@ bool processEvent(const Json::Value& parsedEvent) {
   if(!isIncident(parsedEvent)) {
     return false;
   }
+
+  // Lock the map before inserting
+  std::lock_guard<std::mutex> lock(eventsMutex);
 
   // Add the event
   // Try to insert a new Event at event, inserted = false if it already exists
@@ -419,6 +428,7 @@ std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent){
 
 // Delete all events that match given keys from the map
 // Called by templated "Clean Events" function
+// NOTE: Locking already implemented within clearEvents, our map is already locked at this point
 void deleteEvents(std::vector<std::string> keys) {
   for(const auto& key : keys) {
     mapEvents.erase(key);

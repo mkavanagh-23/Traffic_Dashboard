@@ -153,6 +153,8 @@ template<typename T>
 void clearEvents(T& events) {
   // Create a vector to store the keys to be deleted
   std::vector<std::string> keysToDelete;
+  // Lock the map for processing
+  std::lock_guard<std::mutex> lock(eventsMutex);
   // Iterate through the event map
   for(const auto& [key, event] : mapEvents) {
     // Only match with current source events
