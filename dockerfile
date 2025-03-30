@@ -58,6 +58,4 @@ RUN chmod +x build.sh \
     && ./build.sh release
 
 # Set the default shell to bash
-CMD ["/bin/bash"]
-
-RUN ./Traffic_Dashboard
+CMD ["./Traffic_Dashboard"]
