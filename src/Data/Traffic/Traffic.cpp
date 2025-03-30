@@ -432,6 +432,9 @@ Json::Value serializeEventsToJSON(){
   Json::Value root;
   
   // Serialize the data
+  // Lock the map to this thread for reading
+  std::lock_guard<std::mutex> lock(eventsMutex);    // Must be locked before entering the loop to prevent iterator invalidation
+  // And read the map
   for(const auto& [key, event] : mapEvents) {
     // Create a json item from the event
     Json::Value item;
