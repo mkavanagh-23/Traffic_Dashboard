@@ -550,7 +550,7 @@ void Event::serializeToJSON(Json::Value& item) const {
   
   // Create a Json object to hold the latitude and longitude
   Json::Value coordinates;
-  if(getCoordinates() == std::make_pair(0, 0)) {
+  if(getCoordinates() == std::make_pair(0.0, 0.0)) {
     coordinates["lat"] = Json::nullValue;
     coordinates["long"] = Json::nullValue;
   } else {
