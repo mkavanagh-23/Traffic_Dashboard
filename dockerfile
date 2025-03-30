@@ -59,3 +59,5 @@ RUN chmod +x build.sh \
 
 # Set the default shell to bash
 CMD ["/bin/bash"]
+
+RUN ./Traffic_Dashboard
