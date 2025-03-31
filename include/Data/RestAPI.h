@@ -8,6 +8,7 @@
 #include <Poco/Util/ServerApplication.h>
 #include <vector>
 #include <string>
+#include <optional>
 
 namespace RestAPI{
 
@@ -28,6 +29,8 @@ protected:
   int main(const std::vector<std::string>& args) override;
 };
 
-}
+std::optional<std::string> findQueryParam(const std::vector<std::pair<std::string, std::string>>& queryParams, const std::string& param);
+
+} // namespace RestAPI
 
 #endif

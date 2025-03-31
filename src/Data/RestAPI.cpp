@@ -39,6 +39,17 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
 
       // Parse the queries
       std::vector<std::pair<std::string, std::string>> queryParams = uri.getQueryParameters();
+
+      // TODO:
+      // PASS THE PARAMS BY REFERENCE TO THE SERIALIZATION FUNCTION
+      // REGION WILL BE EXTRACTED AND CHECKED THERE
+
+      // Check for filter params
+      auto regionParam = findQueryParam(queryParams, "region");
+      if(regionParam) {
+        std::cout << Output::Colors::GREEN << "Found region filter!\n" << ::Output::Colors::END;
+        // Process the paramater
+      }
       
 
 
@@ -57,7 +68,7 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
 
 
 
-      
+
 
 
     // TODO: Add query handling:
@@ -120,4 +131,16 @@ int ServerApp::main(const std::vector<std::string>& args) {
   waitForTerminationRequest();
   return Application::EXIT_OK;    
 }
+
+// Check for a query parameter by key
+std::optional<std::string> findQueryParam(const std::vector<std::pair<std::string, std::string>>& queryParams, const std::string& param) {
+  // Search for and retrieve an iterator to our matching parameter
+  // We only want the first element that matches, subsequent entries will be ignored
+  auto it = std::find_if(queryParams.begin(), queryParams.end(), [&param](const auto& pair){ return pair.first == param; });
+  if(it != queryParams.end()) {
+    return it->second;
+  }
+  return std::nullopt;
 }
+
+}// namespace RestAPI
