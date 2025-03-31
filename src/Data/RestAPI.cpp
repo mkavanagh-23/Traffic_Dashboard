@@ -35,6 +35,29 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
     std::string path = uri.getPath();
 
     if(path.find("/events") == 0) {
+      std::cout << Output::Colors::GREEN << "Request received at: '" << uri.toString() << "'\n" << Output::Colors::END;
+
+      // Parse the queries
+      std::vector<std::pair<std::string, std::string>> queryParams = uri.getQueryParameters();
+      
+
+
+      // DEBUG Test query parsing
+      for(const auto& [param, value] : queryParams){
+        std::cout << "  Param: \"" << param << "\"  |  Value: \"" << value << "\"\n";
+      }
+
+
+
+
+
+
+
+
+
+
+
+      
 
 
     // TODO: Add query handling:
@@ -44,7 +67,7 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
     // This may involve some further processing of string values to get data types where we want them.
 
       // Serialize and output events here
-      std::cout << Output::Colors::GREEN << "Request received at: '" << uri.toString() << "'\n" << Output::Colors::END;
+      
       // Serialize to JSON body
       Json::Value jsonData = Traffic::serializeEventsToJSON();
       // Convert to a string
