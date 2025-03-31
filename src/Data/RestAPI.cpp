@@ -39,48 +39,10 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
 
       // Parse the queries
       std::vector<std::pair<std::string, std::string>> queryParams = uri.getQueryParameters();
-
-      // TODO:
-      // PASS THE PARAMS BY REFERENCE TO THE SERIALIZATION FUNCTION
-      // REGION WILL BE EXTRACTED AND CHECKED THERE
-
-      // Check for filter params
-      auto regionParam = findQueryParam(queryParams, "region");
-      if(regionParam) {
-        std::cout << Output::Colors::GREEN << "Found region filter!\n" << ::Output::Colors::END;
-        // Process the paramater
-      }
       
+      // Serialize the data based on the params
+      Json::Value jsonData = Traffic::serializeEventsToJSON(queryParams);
 
-
-      // DEBUG Test query parsing
-      for(const auto& [param, value] : queryParams){
-        std::cout << "  Param: \"" << param << "\"  |  Value: \"" << value << "\"\n";
-      }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // TODO: Add query handling:
-    // Potential filter keys: region, online, updated, etc...
-    // Endpoints should be modified so that we have a cameras and an events endpoint, the rest should be handled via query params
-    // This means we need to create a global structure for event objects
-    // This may involve some further processing of string values to get data types where we want them.
-
-      // Serialize and output events here
-      
-      // Serialize to JSON body
-      Json::Value jsonData = Traffic::serializeEventsToJSON();
       // Convert to a string
       Json::StreamWriterBuilder writer;
       output = Json::writeString(writer, jsonData);

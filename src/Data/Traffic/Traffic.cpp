@@ -7,6 +7,7 @@
 #include "ONGOV.h"
 #include "DataUtils.h"
 #include "Output.h"
+#include "RestAPI.h"
 #include "rapidxml.hpp"
 #include <chrono>
 #include <json/value.h>
@@ -69,6 +70,27 @@ std::unordered_map<std::string, Camera> mapCameras;
 
 // Static object to store data source for current iteration
 DataSource currentSource;
+
+std::optional<Region> toRegion(const std::string& regionStr) {
+  if(regionStr == "Syracuse" || regionStr == "syracuse")
+    return Region::Syracuse;
+  if(regionStr == "Rochester" || regionStr == "Rochester")
+    return Region::Rochester;
+  if(regionStr == "Buffalo" || regionStr == "buffalo")
+    return Region::Buffalo;
+  if(regionStr == "Albany" || regionStr == "albany")
+    return Region::Albany;
+  if(regionStr == "Binghamton" || regionStr == "binghamton")
+    return Region::Binghamton;
+  if(regionStr == "Toronto" || regionStr == "toronto")
+    return Region::Toronto;
+  if(regionStr == "Ottawa" || regionStr == "ottawa")
+    return Region::Ottawa;
+  if(regionStr == "Montreal" || regionStr == "montreal")
+    return Region::Montreal;
+
+  return std::nullopt;
+}
 
 // Get events from all URLs
 void fetchEvents() {
@@ -437,15 +459,31 @@ void deleteEvents(std::vector<std::string> keys) {
 }
 
 // Serialize all traffic events into Json objects
-Json::Value serializeEventsToJSON(){
+Json::Value serializeEventsToJSON(const std::vector<std::pair<std::string, std::string>>& queryParams) {
   // Create an array to hold all events
   Json::Value eventsArray(Json::arrayValue);
+  // Create optional filter values
+  std::optional<Region> filterRegion;
+
+  // Extract filter parameters
+  auto regionParam = RestAPI::findQueryParam(queryParams, "region");
+  if(regionParam) {
+    // Set the filter value
+    filterRegion = toRegion(*regionParam);
+  }
+
+  // TODO: Add other filter parameters
   
   // Serialize the data
   // Lock the map to this thread for reading
   std::lock_guard<std::mutex> lock(eventsMutex);    // Must be locked before entering the loop to prevent iterator invalidation
   // And read the map
   for(const auto& [key, event] : mapEvents) {
+    // Check if we have a region filter
+    if(filterRegion && event.getRegion() != filterRegion)
+      continue;
+    // Else we either aren't filtering, or filter matches, so we want to add
+    
     // Create a json item from the event
     Json::Value item;
     event.serializeToJSON(item);
@@ -456,6 +494,7 @@ Json::Value serializeEventsToJSON(){
 
   return eventsArray;
 }
+
 
 void Event::serializeToJSON(Json::Value& item) const {
   // Store fields in JSON

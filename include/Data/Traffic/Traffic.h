@@ -30,6 +30,7 @@ enum class Region {
   UNKNOWN
 };
 std::ostream& operator<<(std::ostream& out, const Region& region);
+std::optional<Region> toRegion(const std::string& regionStr);
 
 enum class DataSource {
   NYSDOT,
@@ -146,7 +147,7 @@ Location getLocation(const Json::Value& parsedEvent);
 bool isIncident(const Json::Value& parsedEvent);
 std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent);
 void deleteEvents(std::vector<std::string> keys);
-Json::Value serializeEventsToJSON();
+Json::Value serializeEventsToJSON(const std::vector<std::pair<std::string, std::string>>& queryParams);
 
 // Define a template function for clearing events from the map
 template<typename T>
