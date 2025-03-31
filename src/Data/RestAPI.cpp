@@ -14,6 +14,7 @@
 #include <Poco/ThreadPool.h>
 #include <Poco/Logger.h>
 #include <Poco/Util/ServerApplication.h>
+#include <Poco/URI.h>
 #include <json/writer.h>
 #include <sys/types.h>
 #include <vector>
@@ -23,12 +24,17 @@
 namespace RestAPI{
 
 void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response) {
-  std::string contentType { "text/plain" };
-  std::string output { "" };
+  std::string contentType { "text/plain" }; // set default content-type
+  std::string output { "" };  // set null output
   // Check if the request method is GET
   if (request.getMethod() == Poco::Net::HTTPRequest::HTTP_GET) {
     Poco::Net::HTTPResponse::HTTPStatus status = Poco::Net::HTTPResponse::HTTP_OK;
-    std::string endpoint = request.getURI();
+    // Parse the URI
+    Poco::URI uri(request.getURI());
+    // Extract the request path
+    std::string path = uri.getPath();
+
+    if(path.find("/events") == 0) {
 
 
     // TODO: Add query handling:
@@ -37,9 +43,8 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
     // This means we need to create a global structure for event objects
     // This may involve some further processing of string values to get data types where we want them.
 
-    if(endpoint == "/events") {
       // Serialize and output events here
-      std::cout << Output::Colors::GREEN << "Request received at: '" << endpoint << "'\n" << Output::Colors::END;
+      std::cout << Output::Colors::GREEN << "Request received at: '" << uri.toString() << "'\n" << Output::Colors::END;
       // Serialize to JSON body
       Json::Value jsonData = Traffic::serializeEventsToJSON();
       // Convert to a string
@@ -51,7 +56,7 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
     } else {
       status = Poco::Net::HTTPResponse::HTTP_NOT_FOUND;
       output = "Invalid request.";
-      std::cout << Output::Colors::RED << "Request received at: '" << endpoint << "'\n" << Output::Colors::END;
+      std::cout << Output::Colors::RED << "Request received at: '" << uri.toString() << "'\n" << Output::Colors::END;
     }
     response.setStatus(status);
     response.setContentType(contentType);
