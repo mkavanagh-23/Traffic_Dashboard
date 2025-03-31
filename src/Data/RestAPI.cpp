@@ -57,11 +57,11 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
         // Set the content type
         contentType = "application/json";
       } else {
-        status = Poco::Net::HTTPResponse::HTTP_BAD_REQUEST;
+        status = Poco::Net::HTTPResponse::HTTP_NOT_FOUND;
         output = "Invalid query parameters.";
       }
     } else {
-      status = Poco::Net::HTTPResponse::HTTP_NOT_FOUND;
+      status = Poco::Net::HTTPResponse::HTTP_BAD_REQUEST;
       output = "Invalid request path.";
       std::cout << Output::Colors::RED << "Request received at: '" << uri.toString() << "'\n" << Output::Colors::END;
     }

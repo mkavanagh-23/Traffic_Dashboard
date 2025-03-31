@@ -471,8 +471,9 @@ std::optional<Json::Value> serializeEventsToJSON(const std::vector<std::pair<std
     // Set the filter value
     filterRegion = toRegion(*regionParam);
     if(filterRegion && *filterRegion == Region::UNKNOWN)
-      return std::nullopt;
-  }
+      return eventsArray;
+  } else if(!queryParams.empty())
+    return std::nullopt;
 
   // TODO: Add other filter parameters
   
