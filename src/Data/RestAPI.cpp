@@ -41,17 +41,28 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
       std::vector<std::pair<std::string, std::string>> queryParams = uri.getQueryParameters();
       
       // Serialize the data based on the params
-      Json::Value jsonData = Traffic::serializeEventsToJSON(queryParams);
+      auto jsonData = Traffic::serializeEventsToJSON(queryParams);
+      if(jsonData) {
+        // Create the writer
+        Json::StreamWriterBuilder writer;
+        
+        // Set up minification opts
+        writer["indentation"] = "";
+        writer["commentStyle"] = "None";
+        writer["precision"] = 6;
+        writer["emitUTF8"] = true;
 
-      // Convert to a string
-      Json::StreamWriterBuilder writer;
-      output = Json::writeString(writer, jsonData);
-      // Set the content type
-      contentType = "application/json";
-
+        // Write the data string
+        output = Json::writeString(writer, *jsonData);
+        // Set the content type
+        contentType = "application/json";
+      } else {
+        status = Poco::Net::HTTPResponse::HTTP_BAD_REQUEST;
+        output = "Invalid query parameters.";
+      }
     } else {
       status = Poco::Net::HTTPResponse::HTTP_NOT_FOUND;
-      output = "Invalid request.";
+      output = "Invalid request path.";
       std::cout << Output::Colors::RED << "Request received at: '" << uri.toString() << "'\n" << Output::Colors::END;
     }
     response.setStatus(status);

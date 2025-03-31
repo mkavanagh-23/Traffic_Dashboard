@@ -74,7 +74,7 @@ DataSource currentSource;
 std::optional<Region> toRegion(const std::string& regionStr) {
   if(regionStr == "Syracuse" || regionStr == "syracuse")
     return Region::Syracuse;
-  if(regionStr == "Rochester" || regionStr == "Rochester")
+  if(regionStr == "Rochester" || regionStr == "rochester")
     return Region::Rochester;
   if(regionStr == "Buffalo" || regionStr == "buffalo")
     return Region::Buffalo;
@@ -89,7 +89,7 @@ std::optional<Region> toRegion(const std::string& regionStr) {
   if(regionStr == "Montreal" || regionStr == "montreal")
     return Region::Montreal;
 
-  return std::nullopt;
+  return Region::UNKNOWN;
 }
 
 // Get events from all URLs
@@ -459,17 +459,19 @@ void deleteEvents(std::vector<std::string> keys) {
 }
 
 // Serialize all traffic events into Json objects
-Json::Value serializeEventsToJSON(const std::vector<std::pair<std::string, std::string>>& queryParams) {
+std::optional<Json::Value> serializeEventsToJSON(const std::vector<std::pair<std::string, std::string>>& queryParams) {
   // Create an array to hold all events
   Json::Value eventsArray(Json::arrayValue);
   // Create optional filter values
-  std::optional<Region> filterRegion;
+  std::optional<Region> filterRegion{std::nullopt};
 
   // Extract filter parameters
   auto regionParam = RestAPI::findQueryParam(queryParams, "region");
   if(regionParam) {
     // Set the filter value
     filterRegion = toRegion(*regionParam);
+    if(filterRegion && *filterRegion == Region::UNKNOWN)
+      return std::nullopt;
   }
 
   // TODO: Add other filter parameters
@@ -480,10 +482,10 @@ Json::Value serializeEventsToJSON(const std::vector<std::pair<std::string, std::
   // And read the map
   for(const auto& [key, event] : mapEvents) {
     // Check if we have a region filter
-    if(filterRegion && event.getRegion() != filterRegion)
+    if(filterRegion && event.getRegion() != *filterRegion)
       continue;
-    // Else we either aren't filtering, or filter matches, so we want to add
     
+    // Else we either aren't filtering, or filter matches, so we want to add
     // Create a json item from the event
     Json::Value item;
     event.serializeToJSON(item);
@@ -544,7 +546,7 @@ void Event::serializeToJSON(Json::Value& item) const {
       item["source"] = "MCNY";
       break;
     case DataSource::ONMT:
-      item["source"] = "ONTM";
+      item["source"] = "ONMT";
       break;
     case DataSource::OTT:
       item["source"] = "OTT";
