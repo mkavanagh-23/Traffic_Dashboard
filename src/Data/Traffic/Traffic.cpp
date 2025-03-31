@@ -71,7 +71,7 @@ std::unordered_map<std::string, Camera> mapCameras;
 // Static object to store data source for current iteration
 DataSource currentSource;
 
-std::optional<Region> toRegion(const std::string& regionStr) {
+Region toRegion(const std::string& regionStr) {
   if(regionStr == "Syracuse" || regionStr == "syracuse")
     return Region::Syracuse;
   if(regionStr == "Rochester" || regionStr == "rochester")
@@ -90,6 +90,23 @@ std::optional<Region> toRegion(const std::string& regionStr) {
     return Region::Montreal;
 
   return Region::UNKNOWN;
+}
+
+DataSource toSource(const std::string& sourceStr) {
+  if(sourceStr == "NYSDOT" || sourceStr == "nysdot" || sourceStr == "511ny" || sourceStr == "511NY")
+    return DataSource::NYSDOT;
+  if(sourceStr == "ONGOV" || sourceStr == "ongov" || sourceStr == "Onondaga911" || sourceStr == "onondaga911")
+    return DataSource::ONGOV;
+  if(sourceStr == "MCNY" || sourceStr == "mcny" || sourceStr == "Monroe911" || sourceStr == "monroe911")
+    return DataSource::MCNY;
+  if(sourceStr == "ONMT" || sourceStr == "onmt" || sourceStr == "511on" || sourceStr == "511ON")
+    return DataSource::ONMT;
+  if(sourceStr == "Ottawa" || sourceStr == "ottawa" || sourceStr == "OTT" || sourceStr == "ott")
+    return DataSource::OTT;
+  if(sourceStr == "MTL" || sourceStr == "mtl" || sourceStr == "Montreal" || sourceStr == "montreal")
+    return DataSource::MTL;
+
+  return DataSource::UNKNOWN;
 }
 
 // Get events from all URLs
@@ -464,18 +481,23 @@ std::optional<Json::Value> serializeEventsToJSON(const std::vector<std::pair<std
   Json::Value eventsArray(Json::arrayValue);
   // Create optional filter values
   std::optional<Region> filterRegion{std::nullopt};
+  std::optional<DataSource> filterSource{std::nullopt};
 
   // Extract filter parameters
   auto regionParam = RestAPI::findQueryParam(queryParams, "region");
+  auto sourceParam = RestAPI::findQueryParam(queryParams, "source");
+  // Error out if we have invalid keys
+  if(!(regionParam || sourceParam || queryParams.empty()))
+    return std::nullopt;
   if(regionParam) {
     // Set the filter value
     filterRegion = toRegion(*regionParam);
-    if(filterRegion && *filterRegion == Region::UNKNOWN)
-      return eventsArray;
-  } else if(!queryParams.empty())
-    return std::nullopt;
+  } 
+  if(sourceParam) {
+    // Set the filter value
+    filterSource = toSource(*sourceParam);
+  }
 
-  // TODO: Add other filter parameters
   
   // Serialize the data
   // Lock the map to this thread for reading
@@ -483,7 +505,7 @@ std::optional<Json::Value> serializeEventsToJSON(const std::vector<std::pair<std
   // And read the map
   for(const auto& [key, event] : mapEvents) {
     // Check if we have a region filter
-    if(filterRegion && event.getRegion() != *filterRegion)
+    if((filterRegion && event.getRegion() != *filterRegion) || (filterSource && event.getSource() != *filterSource))
       continue;
     
     // Else we either aren't filtering, or filter matches, so we want to add

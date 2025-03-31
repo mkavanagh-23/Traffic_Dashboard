@@ -30,7 +30,7 @@ enum class Region {
   UNKNOWN
 };
 std::ostream& operator<<(std::ostream& out, const Region& region);
-std::optional<Region> toRegion(const std::string& regionStr);
+Region toRegion(const std::string& regionStr);
 
 enum class DataSource {
   NYSDOT,
@@ -42,6 +42,7 @@ enum class DataSource {
   UNKNOWN
 };
 std::ostream& operator<<(std::ostream& os, const DataSource& dataSource);
+DataSource toSource(const std::string& sourceStr);
 
 extern DataSource currentSource;
 
