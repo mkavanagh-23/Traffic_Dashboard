@@ -1,0 +1,4 @@
+    "description": "Thorncliff-Northside closed between Robertson-Thorncliff-Northside-Auburn due to firefighting support operations. Duration is unknown.",
+    "description": "Ray Wilson closed between Yorks Corners and Gregoire due to flooding. Duration is unknown. Avoid area.",
+    "description": "Thorncliff-Northside closed between Robertson-Thorncliff-Northside-Auburn due to firefighting support operations. Duration is unknown.",
+    "description": "Ray Wilson closed between Yorks Corners and Gregoire due to flooding. Duration is unknown. Avoid area.",
