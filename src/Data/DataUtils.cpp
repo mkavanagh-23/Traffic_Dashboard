@@ -13,6 +13,7 @@
 #include <curl/curl.h>
 #include <json/json.h>
 #include <rapidxml.hpp>
+#include <iconv.h>
 
 // Helper function to remove spaces and special characters from a string
 std::string sanitizeString(const std::string& input) {
@@ -23,6 +24,45 @@ std::string sanitizeString(const std::string& input) {
     }
   }
   return result;
+}
+
+// Convert string encoding using iconv
+// ISO-8859-1 to UTF-8
+std::string convertEncoding(const std::string& input, const char* from_encoding, const char* to_encoding) {
+  // Get a conversion descriptor
+  iconv_t cDescriptor = iconv_open(to_encoding, from_encoding);
+  // Check for any errors
+  if(cDescriptor == (iconv_t) - 1){
+    // Process any errors
+    // Errors can be accessed via 'errno' (system error codes)
+    // Early return
+    return "";
+  }
+
+  // Create input buffer from string object
+  char* inputBuffer = const_cast<char*>(input.c_str());
+  size_t inputLeft = input.size();
+
+  // Create output buffer  
+  // Buffer size must be a multiple of the input buffer size to prevent overflow
+  std::vector<char> output(input.size() * 4);
+  char* outputBuffer = output.data();
+  size_t outputLeft = output.size();
+
+  // Convert the string
+  size_t result = iconv(cDescriptor, &inputBuffer, &inputLeft, &outputBuffer, &outputLeft);
+  iconv_close(cDescriptor);
+
+  // Check for errors
+  if(result == (size_t) - 1) {
+    // Process any errors
+    // Errors can be accessed via 'errno' (system error codes)
+    // Early return
+    return "";
+  }
+
+  // Return the output data string
+  return std::string(output.data(), output.size() - outputLeft);
 }
 
 namespace cURL {

@@ -210,6 +210,9 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
     auto parsedData = JSON::parseData(data);  // Returns a Json::Value object
     parseEvents(parsedData);
   } else if(contentType.find("text/xml") != std::string::npos) {
+    // Convert encoding for MTL data
+    if(currentSource == DataSource::MTL)
+      data = convertEncoding(data, "ISO-8859-1", "UTF-8");
     auto parsedData = XML::parseData(data);  // Returns a unique_ptr to an xml_document<> into the responseStr
     // Check for parsing success
     if(!parsedData) {
