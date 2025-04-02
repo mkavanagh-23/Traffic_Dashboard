@@ -1,12 +1,17 @@
 #!/bin/bash
 
+# List of sources and corresponding filenames
+sources=("NYSDOT" "ONGOV" "MCNY" "ONMT" "OTT" "MTL")
+filenames=("nysdot.txt" "ongov.txt" "mcny.txt" "onmt.txt" "ott.txt" "mtl.txt")
+
 while true
 do
-    curl -v "localhost:6969/events?source=NYSDOT" | jq | grep description >> nysdot.txt
-    curl -v "localhost:6969/events?source=ONGOV" | jq | grep description >> ongov.txt
-    curl -v "localhost:6969/events?source=MCNY" | jq | grep description >> mcny.txt
-    curl -v "localhost:6969/events?source=ONMT" | jq | grep description >> onmt.txt
-    curl -v "localhost:6969/events?source=OTT" | jq | grep description >> ott.txt
-    curl -v "localhost:6969/events?source=MTL" | jq | grep description >> mtl.txt
+    # Loop through each source
+    for ((i=0; i<${#sources[@]}; i++))
+    do
+        curl -v "localhost:6969/events?source=${sources[i]}" | jq | grep description >> ${filenames[i]}
+        sort ${filenames[i]} | uniq > temp.txt && mv temp.txt ${filenames[i]}
+    done
+    
     sleep 120
 done
