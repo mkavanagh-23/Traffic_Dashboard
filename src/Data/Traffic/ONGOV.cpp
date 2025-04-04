@@ -1,7 +1,6 @@
 #include "ONGOV.h"
 #include "Output.h"
 #include <gumbo.h>
-#include <iostream>
 #include <string>
 #include <vector>
 #include <utility>
@@ -23,7 +22,7 @@ std::optional<std::vector<HTML::Event>>parseData(const std::string& htmlData) {
   HTML::GumboOutputWrapper output(htmlData);
 
   if(!output) {
-    std::cerr << Output::Colors::RED << "[HTML] ERROR: Failed to parse HTML content\n" << Output::Colors::END;
+    Output::logger.log(Output::LogLevel::WARN, "HTML", "Failed to parse document");
     return std::nullopt;
   }
 
@@ -31,7 +30,7 @@ std::optional<std::vector<HTML::Event>>parseData(const std::string& htmlData) {
 
   // Check for valid HTML root node
   if(rootNode->type != GUMBO_NODE_ELEMENT) {
-    std::cerr << Output::Colors::RED << "[HTML] ERROR: Root node is not an element node\n" << Output::Colors::END;
+    Output::logger.log(Output::LogLevel::WARN, "HTML", "Root node is not an element node");
     return std::nullopt;
   }
 
@@ -39,11 +38,11 @@ std::optional<std::vector<HTML::Event>>parseData(const std::string& htmlData) {
 
   // Verify that <html> is the root element
   if(rootElement->tag != GUMBO_TAG_HTML) {
-    std::cerr << Output::Colors::RED << "[HTML] ERROR: Root tag is not <html>\n" << Output::Colors::END;
+    Output::logger.log(Output::LogLevel::WARN, "HTML", "Root tag is not '<html>'");
     return std::nullopt;
   }
   // Else Parsing Success!
-  std::cout << Output::Colors::GREEN << "[HTML] HTML Parsing Success!\n" << Output::Colors::END;
+  Output::logger.log(Output::LogLevel::INFO, "HTML", "Successfully parsed document");
 
   // Find the table with class "dataTableEx" and store them in a tables vector
   std::vector<GumboNode*> tables;
@@ -51,7 +50,7 @@ std::optional<std::vector<HTML::Event>>parseData(const std::string& htmlData) {
 
   // Check that we found a matching table
   if(tables.empty()) {
-    std::cerr << Output::Colors::RED << "[HTML] ERROR: No matching tables found\n" << Output::Colors::END;
+    Output::logger.log(Output::LogLevel::WARN, "HTML", "No matching tables found");
     return std::nullopt;
   }
 
@@ -79,7 +78,7 @@ void searchForTable(GumboNode* rootNode, const std::string& targetClass, std::ve
         std::string value = attr->value;
         if (attribute == "class" && value == targetClass) {
           // If we find a match, store the table node
-          std::cout << Output::Colors::GREEN << "[HTML] Found a matching table!\n" << Output::Colors::END;
+          Output::logger.log(Output::LogLevel::INFO, "HTML", "Found a matching table");
           tables.push_back(rootNode);
           return;  // Stop searching since we found the target table
         }
@@ -259,8 +258,8 @@ std::optional<addressDir> processAddress(const std::string& address) {
     else
       return std::make_pair(matches[2], std::nullopt);
   }
-  
-  std::cerr << Output::Colors::RED << "[REGEX] ERROR: ONGOV main street does not match: " << address << '\n' << Output::Colors::END;
+  std::string errMsg = "ONGOV main street does not match (\"" + address + "\")";
+  Output::logger.log(Output::LogLevel::WARN, "REGEX", errMsg);
   return std::nullopt;
 }
 
@@ -287,8 +286,9 @@ std::optional<std::pair<addressDir, std::optional<std::string>>> processCrossAsA
         return std::make_pair(*mainStreet, std::nullopt);
     }
   }
-  
-  std::cerr << Output::Colors::RED << "[REGEX] ERROR: ONGOV cross street does not match" << address << '\n' << Output::Colors::END;
+
+  std::string errMsg = "ONGOV cross street does not match (\"" + address + "\")";
+  Output::logger.log(Output::LogLevel::WARN, "REGEX", errMsg);
   return std::nullopt;
 }
 

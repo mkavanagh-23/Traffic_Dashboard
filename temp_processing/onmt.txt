@@ -1,4 +1,5 @@
     "description": "Collision on HWY 400 Northbound RAMP at AURORA RD., Kettleby. Left lane closed.",
+    "description": "Collision on HWY 401 Eastbound  at SALEM ROAD, Ajax. Left shoulder and 1 left lane closed.",
     "description": "Collision on HWY 401 Eastbound COLLECTOR at LESLIE STREET, Toronto. Left shoulder and 2 left lanes closed.",
     "description": "Collision on HWY 401 Eastbound COLLECTOR at LESLIE STREET, Toronto. Left shoulder and left lane closed.",
     "description": "Collision on HWY 401 Eastbound COLLECTOR at MAVIS ROAD, Mississauga. Right lane and right shoulder closed.",
@@ -42,6 +43,7 @@
     "description": "Disabled Vehicle on HWY 401 Westbound  at DIXON RD/MARTIN GROVE RD, Toronto. Left shoulder and 1 left lane closed.",
     "description": "Disabled Vehicle on HWY 401 Westbound COLLECTOR at McCOWAN ROAD, Toronto. Right lane and right shoulder closed.",
     "description": "Disabled Vehicle on HWY 401 Westbound COLLECTOR RAMP at 400, Toronto. Right lane and right shoulder closed.",
+    "description": "Disabled Vehicle on HWY 401 Westbound EXPRESS at HWY 400, Toronto. 1 right lane closed.",
     "description": "Disabled Vehicle on HWY 401 Westbound EXPRESS at HWY 400, Toronto. Left shoulder and 1 left lane closed.",
     "description": "Disabled Vehicle on HWY 401 Westbound EXPRESS at LESLIE STREET, Toronto. Right lane and right shoulder closed.",
     "description": "Disabled Vehicle on HWY 401 Westbound EXPRESS at MISSISSAUGA RD, Mississauga. Right lane and right shoulder closed.",

@@ -9,8 +9,6 @@
 #include <algorithm>
 #include <cctype>
 #include <regex>
-#include <filesystem>
-#include <system_error>
 #include <chrono>
 #include <curl/curl.h>
 #include <json/json.h>
@@ -96,7 +94,7 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
   
   // Check for successful initialization
   if(!curl) {
-    std::cerr << Output::Colors::RED << "[cURL] Failed to initialize cURL." << Output::Colors::END << '\n';
+    Output::logger.log(Output::LogLevel::ERROR, "cURL", "Failed to initialize cURL");
     return { Result::INIT_FAILED, "", {} };
   }
   
@@ -115,7 +113,9 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
 
   // Check for errors
   if(res != CURLE_OK) {
-    std::cerr << Output::Colors::RED << "[cURL] Error retrieving data: " << curl_easy_strerror(res) << ".\n";
+    std::string err = curl_easy_strerror(res);
+    std::string errMsg = "Error retrieving data (\"" + err + "\")";
+    Output::logger.log(Output::LogLevel::WARN, "cURL", errMsg);
     
     if(res == CURLE_UNSUPPORTED_PROTOCOL)
       return { Result::UNSUPPORTED_PROTOCOL, "", {} };
@@ -137,7 +137,7 @@ std::tuple<Result, std::string, std::vector<std::string>> postData(const std::st
   
   // Check for successful initialization
   if(!curl) {
-    std::cerr << Output::Colors::RED << "[cURL] Failed to initialize cURL." << Output::Colors::END << '\n';
+    Output::logger.log(Output::LogLevel::ERROR, "cURL", "Failed to initialize cURL");
     return { Result::INIT_FAILED, "", {} };
   }
   
@@ -161,7 +161,9 @@ std::tuple<Result, std::string, std::vector<std::string>> postData(const std::st
   
   // Check for errors
   if(res != CURLE_OK) {
-    std::cerr << Output::Colors::RED << "[cURL] Error POSTing data: " << curl_easy_strerror(res) << ".\n";
+    std::string err = curl_easy_strerror(res);
+    std::string errMsg = "Error sending data (\"" + err + "\")";
+    Output::logger.log(Output::LogLevel::WARN, "cURL", errMsg);
     
     if(res == CURLE_UNSUPPORTED_PROTOCOL)
       return { Result::UNSUPPORTED_PROTOCOL, "", {} };
@@ -206,13 +208,12 @@ Json::Value parseData(const std::string& jsonData) {
   // Parse the string into the root Value object
   if(!Json::parseFromStream(builder, data, &root, &errs)) {
     // If initial parsing fails, send an error message
-    std::cerr << Output::Colors::RED << "[JSON] Parsing error (is it a valid stream?): " << errs 
-              << '.' << Output::Colors::END << '\n';
+    std::string errMsg = "Parsing error (\"" + errs + "\")";
+    Output::logger.log(Output::LogLevel::WARN, "JSON", errMsg);
     // TODO: Throw an exception if we do not parse from stream
     // Should also throw an exception in the underlying/preceding curl function
   }
-  std::cout << Output::Colors::GREEN << "[JSON] Successfully parsed objects from data stream." 
-            << Output::Colors::END << '\n';
+  Output::logger.log(Output::LogLevel::INFO, "JSON", "Successfully parsed data stream");
   return root; // Return the parsed root of objects
 }
 } // namespace JSON
@@ -228,8 +229,7 @@ std::unique_ptr<rapidxml::xml_document<>> parseData(std::string& xmlData) {
   // Set up XML document object to hold the parsed data
   auto parsedData = std::make_unique<rapidxml::xml_document<>>();
   parsedData->parse<0>(xmlData.data());
-  std::cout << Output::Colors::GREEN << "[XML] Successfully parsed document from data stream." 
-            << Output::Colors::END << '\n';
+  Output::logger.log(Output::LogLevel::INFO, "XML", "Successfully parsed data stream");
   return parsedData;
 }
 

@@ -1,6 +1,5 @@
 #include "OTT.h"
 #include "DataUtils.h"
-#include "Output.h"
 #include <optional>
 #include <iostream>
 #include <sstream>
@@ -24,19 +23,16 @@ std::optional<std::pair<double, double>> parseLocation(const std::string& coordi
 
   // Extract the first double
   if(!(ss >> longitude)) {
-    std::cerr << Output::Colors::RED << "Failed parsing first coordinate.\n" << Output::Colors::END;
     return std::nullopt;
   }
 
   // Pass over delimiter
   if(!(ss >> delimit) || delimit != ',') {
-    std::cerr << Output::Colors::RED << "Comma delimiter not found.\n" << Output::Colors::END;
     return std::nullopt;
   }
 
   // Extract the second double
   if(!(ss >> latitude)) {
-    std::cerr << Output::Colors::RED << "Failed parsing second coordinate.\n" << Output::Colors::END;
     return std::nullopt;
   }
 

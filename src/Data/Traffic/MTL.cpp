@@ -29,7 +29,7 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
   // And the ID
   std::string id = extractID(url);
   if(id.empty()) {
-    std::cerr << "[MTL] Error parsing event ID. Not adding to the map.\n";
+    Output::logger.log(Output::LogLevel::WARN, "MTL", "Error parsing event ID");
     return false;
   }
   
@@ -46,7 +46,7 @@ std::string extractID(const std::string& url) {
   // Extract the ID from the URL
   size_t startPos = url.find("id=");
   if(startPos == std::string::npos) {
-    std::cerr << Output::Colors::RED << "[MTL] Error: no id element found in link field.\n" << Output::Colors::END;
+    Output::logger.log(Output::LogLevel::WARN, "MTL", "No id element found in link field");
     return "";
   }
   // Increment the iterator to the start of the id

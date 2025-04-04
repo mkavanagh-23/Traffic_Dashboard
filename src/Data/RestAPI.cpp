@@ -38,7 +38,6 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
     if(path.find("/events") == 0) {
       std::string msg = "Request received at: '" + uri.toString() + '\'';
       Output::logger.log(Output::LogLevel::INFO, "REST API", msg);
-      Output::logger.flush();
 
       // Parse the queries
       std::vector<std::pair<std::string, std::string>> queryParams = uri.getQueryParameters();
@@ -66,8 +65,7 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
     } else {
       status = Poco::Net::HTTPResponse::HTTP_BAD_REQUEST;
       output = "Invalid request path";
-      std::string errMsg = "Request received at: '" + uri.toString() + '\''
-        + "\n  " + output;
+      std::string errMsg = "Request received at: '" + uri.toString() + "' (\"" + output + "\")";
       Output::logger.log(Output::LogLevel::WARN, "REST API", errMsg);
     }
     response.setStatus(status);
@@ -77,8 +75,7 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
   } else {
     response.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
     output = "Method not allowed!";
-    std::string errMsg = "Invalid request to: '" + request.getURI() + '\''
-      + "\n  " + output;
+    std::string errMsg = "Invalid request to: '" + request.getURI() + "' (\"" + output + "\")";
     Output::logger.log(Output::LogLevel::WARN, "REST API", errMsg);
     response.setContentType(contentType);
     std::ostream& ostr = response.send();

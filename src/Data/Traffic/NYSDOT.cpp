@@ -21,9 +21,9 @@ void getEnv() {
   // Check for valid sourcing
   if(API_KEY) {
     NYSDOT::API_KEY = API_KEY;
-    std::cout << Output::Colors::GREEN << "[ENV] Successfully sourced API key from local environment.\n" << Output::Colors::END;
+    Output::logger.log(Output::LogLevel::INFO, "ENV", "Successfully sourced 'NYSDOT_API_KEY' from local environment");
   } else
-    std::cerr << Output::Colors::RED << "[ENV] Failed to retrieve 'NYSDOT_API_KEY'.\nBe sure you have it set.\n" << Output::Colors::END;
+    Output::logger.log(Output::LogLevel::WARN, "ENV", "Failed to retrieve 'NYSDOT_API_KEY'");
 }
 
 // Check if the parsed event is within an NYSDOT region

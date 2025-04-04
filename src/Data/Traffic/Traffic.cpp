@@ -111,22 +111,22 @@ DataSource toSource(const std::string& sourceStr) {
 
 // Get events from all URLs
 void fetchEvents() {
-  std::cout << "\nFetching Onondaga County 911 events:\n\n";
+  Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Onondaga County 911 events");
   getEvents(ONGOV::EVENTS_URL);
-  std::cout << "\nFetching NYS 511 events:\n\n";
+  Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching NYS 511 events");
   getEvents(NYSDOT::EVENTS_URL);
-  std::cout << "\nFetching Monroe County 911 events:\n\n";
+  Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Monroe County 911 events");
   getEvents(MCNY::EVENTS_URL);
-  std::cout << "\nFetching Ontario 511 events:\n\n";
+  Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Ontario 511 events");
   getEvents(ONMT::EVENTS_URL);
-  std::cout << "\nFetching Ottawa events:\n\n";
+  Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Ottawa events");
   getEvents(OTT::EVENTS_URL);
-  std::cout << "\nFetching Montreal events:\n\n";
+  Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Montréal events");
   getEvents(MTL::EVENTS_URL);
 }
 
 void fetchCameras() {
-  std::cout << "\nFetching NYS 511 cameras:\n\n";
+  Output::logger.log(Output::LogLevel::INFO, "CAMERAS", "Fetching NYS 511 cameras");
   getCameras(NYSDOT::CAMERAS_URL);
 }
 
@@ -149,7 +149,7 @@ bool getEvents(std::string url) {
     if(NYSDOT::API_KEY.empty()) {
       NYSDOT::getEnv();
       if(NYSDOT::API_KEY.empty()) {
-        std::cerr << Output::Colors::RED << "[Traffic] ERROR: Failed to retrieve NYSDOT API Key from local environment.\n" << Output::Colors::END;
+        Output::logger.log(Output::LogLevel::ERROR, "ENV", "Failed to retrieve NYSDOT API Key from local environment");
         return false;
       }
     }
@@ -169,7 +169,7 @@ bool getEvents(std::string url) {
     currentSource = DataSource::MTL;
   else {
     currentSource = DataSource::UNKNOWN;
-    std::cerr << Output::Colors::RED << "[Traffic] ERROR: Source domain does not match program data requirements.\n" << Output::Colors::END;
+    Output::logger.log(Output::LogLevel::WARN, "EVENTS", "Source domain does not match program data requirements");
     return false;
   }
 
@@ -182,17 +182,17 @@ bool getEvents(std::string url) {
     if(!data.empty()) {
       processData(data, headers);
     } else {
-      // Error out and exit if empty string returned  
-      std::cerr << Output::Colors::RED << "[cURL]: Retrieved data string empty.\n" << Output::Colors::END;
+      // Error out and exit if empty string returned
+      Output::logger.log(Output::LogLevel::WARN, "cURL", "Retrieved empty data string");
       return false;
     }
   } else {
     switch(result) {
       case cURL::Result::TIMEOUT:
-        std::cerr << Output::Colors::RED << "[cURL] Timed out retrieving data from remote stream. Retrying in 60 seconds...\n" << Output::Colors::END;
+        Output::logger.log(Output::LogLevel::WARN, "cURL", "Timed out retrieving data from remote stream. Retrying in 60 seconds");
         break;
       default:
-        std::cerr << Output::Colors::RED << "[cURL] Critical error retrieiving data from remote stream. Terminating program.\n" << Output::Colors::END;
+        Output::logger.log(Output::LogLevel::ERROR, "cURL", "Critical error retrieiving data from remote stream. Terminating program");
         return false;
     }
   }
@@ -216,7 +216,7 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
     auto parsedData = XML::parseData(data);  // Returns a unique_ptr to an xml_document<> into the responseStr
     // Check for parsing success
     if(!parsedData) {
-      std::cerr << Output::Colors::RED << "[JSON] Error: parsing failed.\n" << Output::Colors::END;
+      Output::logger.log(Output::LogLevel::WARN, "JSON", "Failed to parse data stream");
       return false;
     }
     // Parse the events
@@ -225,13 +225,14 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
     auto parsedData = ONGOV::Gumbo::parseData(data);
     // Check for parsing success
     if(!parsedData) {
-      std::cerr << Output::Colors::RED << "[HTML] Error: parsing failed.\n" << Output::Colors::END;
+      Output::logger.log(Output::LogLevel::WARN, "HTML", "Failed to parse data stream");
       return false;
     }
     parseEvents(*parsedData);
   } else {
     // Error and exit if invalid type returned
-    std::cerr << Output::Colors::RED << "[cURL] ERROR: Unsupported \"Content-Type\": '" <<  contentType << '\n' << Output::Colors::END;
+    std::string errMsg = "Unsupported \"Content-Type\": '" + contentType + "'";
+    Output::logger.log(Output::LogLevel::WARN, "cURL", errMsg);
     return false;
   }
   return true;
@@ -247,7 +248,7 @@ bool parseEvents(const Json::Value& parsedData) {
     } else if(element.isArray()) {
       parseEvents(element); // Recursively parse through arrays
     } else {
-      std::cerr << Output::Colors::RED << "[JSON] Failed parsing event (is the JSON valid?)\n" << Output::Colors::END;
+      Output::logger.log(Output::LogLevel::WARN, "JSON", "Failed parsing event (is the JSON valid?)");
       continue;
     }
   }
@@ -336,7 +337,8 @@ bool processEvent(const Json::Value& parsedEvent) {
     }
     // Update the event
     event->second = parsedEvent;
-    std::cout << Output::Colors::MAGENTA << "[JSON] Updated event: " << key << Output::Colors::END << '\n';
+    std::string msg = "Updated event: " + key;
+    Output::logger.log(Output::LogLevel::INFO, "JSON", msg);
   }
   return true;
 }
@@ -345,7 +347,7 @@ bool processEvent(const Json::Value& parsedEvent) {
 bool containsEvent(const Json::Value& events, const std::string& key) {
   for(const auto& event : events) {
     if(!event.isObject() || !(event.isMember("ID") || event.isMember("id"))) {
-      std::cerr << Output::Colors::RED << "[JSON] Parsed event not a valid object!\n" << Output::Colors::END;
+      Output::logger.log(Output::LogLevel::WARN, "JSON", "Parsed event is not a valid object");
       continue;
     }
 
@@ -474,7 +476,8 @@ std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent){
 void deleteEvents(std::vector<std::string> keys) {
   for(const auto& key : keys) {
     mapEvents.erase(key);
-    std::cout << Output::Colors::RED << "[Traffic] Deleted event: " << key << Output::Colors::END << '\n'; 
+    std::string msg = "Deleted event: " + key;
+    Output::logger.log(Output::LogLevel::INFO, "EVENTS", msg);
   }
 }
 
@@ -714,8 +717,7 @@ Event::Event(const Json::Value& parsedEvent)
         URL = "https://511ny.org/";
         region = NYSDOT::getRegion(parsedEvent["RegionName"].asString());
         if(region == Region::UNKNOWN)
-          std::cerr << Output::Colors::RED << "[JSON Event] Error: Failed to source dataSource member during construction\n"
-                    << Output::Colors::END;
+          Output::logger.log(Output::LogLevel::WARN, "JSON", "Failed to parse dataSource member during construction");
         if(parsedEvent.isMember("PrimaryLocation"))
           crossStreet = parsedEvent["PrimaryLocation"].asString();
         if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
@@ -738,14 +740,10 @@ Event::Event(const Json::Value& parsedEvent)
         break;
       // Error out in all other cases
       default:
-        std::cerr << Output::Colors::RED << "[JSON Event] Error: Tried to construct JSON object from invalid data source\n"
-                  << Output::Colors::END;
+        Output::logger.log(Output::LogLevel::WARN, "JSON", "Tried to construct JSON object from invalid data source");
         break;
       }
   }
-  
-  std::cout << Output::Colors::YELLOW << "\n[JSON Event] Constructed event: " << ID << "  |  " << region 
-            << '\n' << Output::Colors::END << description << '\n';
 }
 
 // Construct an event from a Rochester XML object
@@ -784,9 +782,6 @@ Event::Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std:
     std::string parsedLong = longitude->value();
     location = { std::stof(parsedLat.substr(1)), std::stof(parsedLong.substr(1)) * -1 };
   }   
-  
-  std::cout << Output::Colors::YELLOW << "\n[XML Event] Constructed event: " << ID << "  |  " << region
-            << '\n' << Output::Colors::END << description << '\n';
 }
 
 // Construct an event from a Montreal XML object
@@ -859,8 +854,6 @@ Event::Event(const rapidxml::xml_node<>* parsedEvent)
       timeReported = *timeOpt;
   }
 
-  std::cout << Output::Colors::YELLOW << "\n[XML Event] Constructed event: " << ID << "  |  " << region
-            << '\n' << Output::Colors::END << description << '\n';
 }
 
 // Construct an event from an HTML event
@@ -924,9 +917,6 @@ Event::Event(const HTML::Event& parsedEvent)
   }
 
   description = std::move(descStr);
-  
-  std::cout << Output::Colors::YELLOW << "\n[HTML Event] Constructed event: " << ID
-            << '\n' << Output::Colors::END << description << '\n';
 }
 
 // Move constructor for an event object
@@ -945,8 +935,6 @@ Event::Event(Event&& other) noexcept
   timeReported(std::move(other.timeReported)),
   timeUpdated(std::move(other.timeUpdated))
 {
-  std::cout << Output::Colors::BLUE << "[Event] Moved event: " << ID  << "  |  " << region
-            << '\n' << Output::Colors::END << description << '\n';
 
 }
 
@@ -968,8 +956,6 @@ Event& Event::operator=(Event&& other) noexcept {
     timeReported = std::move(other.timeReported);
     timeUpdated = std::move(other.timeUpdated);
   }
-  std::cout << Output::Colors::BLUE << "[Event] Invoked move assignment: " << ID << "  |  " << region
-            << '\n' << Output::Colors::END << description << '\n';
   return *this;
 }
 
@@ -1002,16 +988,16 @@ bool getCameras(std::string url){
       parseCameras(data);
     } else {
       // Error out and exit if empty string returned  
-      std::cerr << Output::Colors::RED << "[cURL]: Retrieved data string empty.\n" << Output::Colors::END;
+//      std::cerr << Output::Colors::RED << "[cURL]: Retrieved data string empty.\n" << Output::Colors::END;
       return false;
     }
   } else {
     switch(result) {
       case cURL::Result::TIMEOUT:
-        std::cerr << Output::Colors::RED << "[cURL] Timed out retrieving data from remote stream. Retrying in 60 seconds..." << Output::Colors::END;
+//        std::cerr << Output::Colors::RED << "[cURL] Timed out retrieving data from remote stream. Retrying in 60 seconds..." << Output::Colors::END;
         break;
       default:
-        std::cerr << Output::Colors::RED << "[cURL] Critical error retrieiving data from remote stream. Terminating program." << Output::Colors::END;
+//        std::cerr << Output::Colors::RED << "[cURL] Critical error retrieiving data from remote stream. Terminating program." << Output::Colors::END;
         return false;
     }
   }
@@ -1023,18 +1009,18 @@ bool parseCameras(const std::string& data) {
   auto parsedData = JSON::parseData(data);
   for(const auto& camera : parsedData) {
     if(!camera.isObject()) {
-      std::cerr << Output::Colors::RED << "[NYSDOT] Failed parsing camera (is the JSON valid?)\n" << Output::Colors::END;
+//      std::cerr << Output::Colors::RED << "[NYSDOT] Failed parsing camera (is the JSON valid?)\n" << Output::Colors::END;
       return false; // Or do we want to continue here?
     } else
       processCamera(camera);
   }
-  std::cout << Output::Colors::GREEN << "\n[JSON] Successfully parsed root tree.\n" << Output::Colors::END;
+//  std::cout << Output::Colors::GREEN << "\n[JSON] Successfully parsed root tree.\n" << Output::Colors::END;
   return true;
 }
 
 bool processCamera(const Json::Value& parsedCamera) {
   if(!parsedCamera.isMember("ID")) {
-    std::cerr << Output::Colors::RED << "[JSON] Error: No 'ID' member present in JSON event.\n" << Output::Colors::END;
+//    std::cerr << Output::Colors::RED << "[JSON] Error: No 'ID' member present in JSON event.\n" << Output::Colors::END;
     return false;
   }
 
@@ -1051,7 +1037,7 @@ bool processCamera(const Json::Value& parsedCamera) {
       return false;
     }
     camera->second = parsedCamera;
-    std::cout << Output::Colors::MAGENTA << "[JSON] Updated event: " << key << Output::Colors::END << '\n';
+//    std::cout << Output::Colors::MAGENTA << "[JSON] Updated event: " << key << Output::Colors::END << '\n';
   }
   return true;
 }
@@ -1079,8 +1065,6 @@ Camera::Camera(const Json::Value& parsedCamera)
   if(parsedCamera.isMember("Latitude") && parsedCamera.isMember("Latitude"))
     location = { parsedCamera["Latitude"].asDouble(), parsedCamera["Longitude"].asDouble() }; 
   
-  std::cout << Output::Colors::YELLOW << "\n[JSON Camera] Constructed camera: " << ID << "  |  " << region 
-            << '\n' << Output::Colors::END << description << '\n';
 }
 
 Camera::Camera(Camera&& other) noexcept
@@ -1095,8 +1079,7 @@ Camera::Camera(Camera&& other) noexcept
   direction(std::move(other.direction)),
   location(other.location)
 {
-  std::cout << Output::Colors::BLUE << "[Camera] Moved camera: " << ID  << "  |  " << region
-            << '\n' << Output::Colors::END << description << '\n';
+
 }
 
 Camera& Camera::operator=(Camera&& other) noexcept
@@ -1113,8 +1096,7 @@ Camera& Camera::operator=(Camera&& other) noexcept
     direction = std::move(other.direction);
     location = other.location;
   }
-  std::cout << Output::Colors::BLUE << "[Camera] Invoked move assignment: " << ID << "  |  " << region
-            << '\n' << Output::Colors::END << description << '\n';
+
   return *this;
 }
 

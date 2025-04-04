@@ -3,7 +3,6 @@
 #include "Traffic.h"
 
 #include <string>
-#include <iostream>
 #include <regex>
 #include <tuple>
 
@@ -24,7 +23,8 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
   if(!inserted) {
     if(event->second.getStatus() != status) {
       event->second = Event(parsedEvent, description);
-      std::cout << Output::Colors::MAGENTA << "[XML] Updated event: " << key << Output::Colors::END << '\n';
+      std::string msg = "Updated event: " + key;
+      Output::logger.log(Output::LogLevel::INFO, "MCNY", msg);
       return true;
     }
     return false;
@@ -98,7 +98,8 @@ std::optional<std::tuple<std::string, std::string, std::optional<std::string>, s
         return std::make_tuple(matches[1], streetName, std::nullopt, std::nullopt); 
     }
   }
-  std::cerr << Output::Colors::RED << "[REGEX] ERROR: MCNY title does not match: " << matches[0] << '\n' << Output::Colors::END;
+  std::string errMsg = "MCNY title does not match (\"" + title + "\")";
+  Output::logger.log(Output::LogLevel::WARN, "REGEX", errMsg);
   return std::nullopt;
 }
 }

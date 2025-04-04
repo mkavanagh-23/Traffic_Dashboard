@@ -164,7 +164,8 @@ void clearEvents(T& events) {
       // Check for matching key
       if(!containsEvent(events, key)) {
         keysToDelete.push_back(key);
-        std::cout << Output::Colors::YELLOW << "[Events] Marked event for deletion: " << key << Output::Colors::END << '\n'; 
+        std::string msg = "Marked event fo deletion: " + key;
+        Output::logger.log(Output::LogLevel::INFO, "EVENTS", msg);
       }
     }
   }
