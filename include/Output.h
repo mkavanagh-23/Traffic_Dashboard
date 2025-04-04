@@ -1,8 +1,8 @@
 #ifndef OUTPUT_H
 #define OUTPUT_H
 
-#include "DataUtils.h"
 #include <ctime>
+#include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <mutex>
@@ -11,6 +11,13 @@
 
 namespace Output {
 
+enum class LogLevel {
+  INFO,
+  ERROR,
+  WARN,
+  DEBUG,
+  OTHER
+};
 
 std::string toString(const LogLevel& level);
 bool createDirIfMissing(const std::string& filePath);
@@ -20,9 +27,8 @@ private:
   std::string path;
   std::ofstream logFile;
   std::mutex logMutex;
-  std::string category;
 public:
-  Logger(const::std::string& fileName, const std::string& type);
+  Logger(const::std::string& fileName);
   ~Logger();
   
   // Prevent copying to avoid multiple objects managing the same file
@@ -32,7 +38,7 @@ public:
   void flush();
 
   template<typename T>
-  void log(LogLevel level, const T& message) {
+  void log(const LogLevel level, const std::string& type, const T& message) {
     std::lock_guard<std::mutex> lock(logMutex);
     if(!logFile.is_open() || !logFile) {
       // Handle error case
@@ -49,17 +55,19 @@ public:
     ss << "[" << toString(level) << "] ";
 
     // Log the current time
-    auto time = Time::currentTime_t();
+    auto time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     ss << std::put_time(std::localtime(&time), "[%Y-%m-%d %H:%M:%S] ");
 
     // Log the message
-    ss << category << ": " << message << '\n';
+    ss << type << ": " << message << '\n';
 
     // Push the stream to the file
     std::string logMessage = ss.str();
     logFile << logMessage;
   }
 };
+
+extern Logger logger;
 
 namespace Colors {
   const std::string RED = "\033[31m";

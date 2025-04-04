@@ -5,6 +5,8 @@
 #include <ios>
 
 namespace Output {
+Logger logger("log.txt");
+
 std::string toString(const LogLevel& level) {
   switch(level) {
     case LogLevel::INFO:
@@ -36,11 +38,11 @@ bool createDirIfMissing(const std::string& filePath) {
   return !ec; // Returns true if no error occurred
 }
 
-Logger::Logger(const std::string& fileName, const std::string& type) 
-: path{fileName}, category{type}
+Logger::Logger(const std::string& fileName) 
+: path{fileName}
 {
   // Check if path exists
-  createDirIfMissing(fileName);
+  createDirIfMissing(path);
   // Open the logfile for writing
   logFile.open(path, std::ios::app);
 }

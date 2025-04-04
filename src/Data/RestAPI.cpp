@@ -1,7 +1,6 @@
 #include "RestAPI.h"
 #include "Output.h"
 #include "Traffic.h"
-#include "DataUtils.h"
 #include <json/json.h>
 
 #include <Poco/Net/HTTPRequest.h>
@@ -24,7 +23,6 @@
 
 namespace RestAPI{
 
-Output::Logger RESTLogger("logs/restapi.log", "RESTAPI");
 
 void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response) {
   std::string contentType { "text/plain" }; // set default content-type
@@ -38,10 +36,9 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
     std::string path = uri.getPath();
 
     if(path.find("/events") == 0) {
-      std::string errMsg = "Request received at: '" + uri.toString() + "'\n";
-      RESTLogger.log(LogLevel::INFO, errMsg);
-      RESTLogger.flush();
-      std::cout << Output::Colors::GREEN << "Request received at: '" << uri.toString() << "'\n" << Output::Colors::END;
+      std::string msg = "Request received at: '" + uri.toString() + '\'';
+      Output::logger.log(Output::LogLevel::INFO, "REST API", msg);
+      Output::logger.flush();
 
       // Parse the queries
       std::vector<std::pair<std::string, std::string>> queryParams = uri.getQueryParameters();
@@ -68,8 +65,10 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
       }
     } else {
       status = Poco::Net::HTTPResponse::HTTP_BAD_REQUEST;
-      output = "Invalid request path.";
-      std::cout << Output::Colors::RED << "Request received at: '" << uri.toString() << "'\n" << Output::Colors::END;
+      output = "Invalid request path";
+      std::string errMsg = "Request received at: '" + uri.toString() + '\''
+        + "\n  " + output;
+      Output::logger.log(Output::LogLevel::WARN, "REST API", errMsg);
     }
     response.setStatus(status);
     response.setContentType(contentType);
@@ -77,9 +76,13 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
     ostr << output;
   } else {
     response.setStatus(Poco::Net::HTTPResponse::HTTP_METHOD_NOT_ALLOWED);
+    output = "Method not allowed!";
+    std::string errMsg = "Invalid request to: '" + request.getURI() + '\''
+      + "\n  " + output;
+    Output::logger.log(Output::LogLevel::WARN, "REST API", errMsg);
     response.setContentType(contentType);
     std::ostream& ostr = response.send();
-    ostr << "Method Not Allowed!";
+    ostr << output;
   }
 }
 
@@ -106,6 +109,8 @@ int ServerApp::main(const std::vector<std::string>& args) {
   Poco::Net::HTTPServer server(new RequestHandlerFactory, socket, new Poco::Net::HTTPServerParams);
   // Start the server
   server.start();
+  std::string msg = "Starting REST API server on port 6969"; 
+  Output::logger.log(Output::LogLevel::INFO, "REST API", msg);
   std::cout << "API server running on port 6969...\n";
   waitForTerminationRequest();
   return Application::EXIT_OK;    
