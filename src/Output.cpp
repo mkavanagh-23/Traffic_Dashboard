@@ -1,0 +1,59 @@
+#include "Output.h"
+#include <filesystem>
+#include <system_error>
+#include <string>
+#include <ios>
+
+namespace Output {
+std::string toString(const LogLevel& level) {
+  switch(level) {
+    case LogLevel::INFO:
+      return "INFO";
+    case LogLevel::ERROR:
+      return "ERROR";
+    case LogLevel::WARN:
+      return "WARN";
+    case LogLevel::DEBUG:
+      return "DEBUG";
+    default:
+      return "N/A";
+  }
+}
+
+bool createDirIfMissing(const std::string& filePath) {
+  std::filesystem::path path(filePath);
+  auto dir = path.parent_path();
+
+  if (dir.empty()) {
+    return true; // No directory part, just a filename
+  }
+
+  std::error_code ec;
+  if (!std::filesystem::exists(dir, ec)) {
+    return std::filesystem::create_directories(dir, ec);
+  }  
+  
+  return !ec; // Returns true if no error occurred
+}
+
+Logger::Logger(const std::string& fileName, const std::string& type) 
+: path{fileName}, category{type}
+{
+  // Check if path exists
+  createDirIfMissing(fileName);
+  // Open the logfile for writing
+  logFile.open(path, std::ios::app);
+}
+
+Logger::~Logger() {
+  if(logFile.is_open())
+    logFile.close();
+}
+
+void Logger::flush() {
+  std::lock_guard<std::mutex> lock(logMutex);
+  if(logFile.is_open())
+    logFile.flush();
+}
+
+}

@@ -13,6 +13,13 @@
 #include <chrono>
 #include <ctime>
 
+enum class LogLevel {
+  INFO,
+  ERROR,
+  WARN,
+  DEBUG,
+  OTHER
+};
 
 // This file holds all functionality for retrieving and filtering basic data from CURL in XML and JSON formats
 std::string sanitizeString(const std::string& input);

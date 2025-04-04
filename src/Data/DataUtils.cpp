@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <cctype>
 #include <regex>
+#include <filesystem>
+#include <system_error>
 #include <chrono>
 #include <curl/curl.h>
 #include <json/json.h>
@@ -64,6 +66,7 @@ std::string convertEncoding(const std::string& input, const char* from_encoding,
   // Return the output data string
   return std::string(output.data(), output.size() - outputLeft);
 }
+
 
 namespace cURL {
 

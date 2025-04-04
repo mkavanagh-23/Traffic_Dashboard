@@ -1,6 +1,7 @@
 #include "RestAPI.h"
 #include "Output.h"
 #include "Traffic.h"
+#include "DataUtils.h"
 #include <json/json.h>
 
 #include <Poco/Net/HTTPRequest.h>
@@ -23,6 +24,8 @@
 
 namespace RestAPI{
 
+Output::Logger RESTLogger("logs/restapi.log", "RESTAPI");
+
 void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response) {
   std::string contentType { "text/plain" }; // set default content-type
   std::string output { "" };  // set null output
@@ -35,6 +38,9 @@ void RequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::
     std::string path = uri.getPath();
 
     if(path.find("/events") == 0) {
+      std::string errMsg = "Request received at: '" + uri.toString() + "'\n";
+      RESTLogger.log(LogLevel::INFO, errMsg);
+      RESTLogger.flush();
       std::cout << Output::Colors::GREEN << "Request received at: '" << uri.toString() << "'\n" << Output::Colors::END;
 
       // Parse the queries
