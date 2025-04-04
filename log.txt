@@ -1,5 +1,0 @@
-[INFO] [2025-04-04 12:53:49] REST API: Starting REST API server on port 6969
-[INFO] [2025-04-04 12:53:58] REST API: Request received at: '/events?region=syracuse'
-[WARN] [2025-04-04 12:54:14] REST API: Request received at: '/event'
-  Invalid request path
-[INFO] [2025-04-04 12:54:18] REST API: Request received at: '/events'
