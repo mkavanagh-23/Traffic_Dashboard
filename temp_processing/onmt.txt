@@ -66,4 +66,5 @@
     "description": "Flooding on HWY 427 Northbound RAMP at REXDALE BLVD / DERRY ROAD, Toronto. Right lane and right shoulder closed.",
     "description": "Flooding on QEW Fort Erie bound RAMP at HWY 10/HURONTARIO, Mississauga. Right lane and right shoulder closed.",
     "description": "Flooding on QEW Toronto bound  at HWY 10/HURONTARIO, Mississauga. Left shoulder and left lane closed.",
+    "description": "Highway Maintenance on HWY 403 MISSISSAUGA Eastbound  at ERIN MILLS PKWY, Mississauga. Right lane closed.",
     "description": "Road Conditions on HWY 401 Westbound ON-RAMP at WESTON ROAD, Toronto. All lanes closed.",

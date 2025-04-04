@@ -38,6 +38,7 @@
     "description": "Crash on NY 26 both directions between Evans Road (Eaton) and Bradley Brook Road all lanes blocked",
     "description": "Crash on NY 38B both directions between Zimmer Rd. (Newark Valley) and Sherry Lipe Rd. all lanes of 3 lanes closed Tioga 911 called in 3 car MVA on 38B between Zimmer rd. and Sherry Lipe rd. ny 38b closed",
     "description": "Crash on NY 417 eastbound Exit - US 15 (Erwin) to Exit - Addison Road; Ramp (Erwin) All lanes open",
+    "description": "Crash on Route 198 East at Grant St in Buffalo. The right lane is closed. Reported 2:41 pm. (ID# 25040400006)",
     "description": "Crash ,on the on ramp on I-90 - NYS Thruway westbound at After Exit 47 (I-90) - Rochester - LeRoy (I-490 - Rte 19) starting 9:36 AM, 04/04/2025 [CARS CAD-250940115]",
     "description": "Crash ,right lane blocked on I-90 - NYS Thruway westbound at After Exit 60 (I-90) - Westfield (Rte 394) starting 6:03 PM, 04/02/2025 [CARS CAD-250920310]",
     "description": "Culvert repairs on I-86 eastbound between Exit 26 - NY 16 Connector (Olean) and Exit 27 - NY 16 (Hinsdale), Tuesday April 1st, 2025 thru Friday May 2nd, 2025, Sunday thru Saturday, 07:00 AM thru 03:00 PM All lanes closed",
