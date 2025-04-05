@@ -21,6 +21,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <thread>
 
 namespace RestAPI{
 
