@@ -54,8 +54,10 @@ Logger::Logger(const std::string& fileName)
 }
 
 Logger::~Logger() {
-  if(logFile.is_open())
+  if(logFile.is_open()) {
+    logFile.flush();
     logFile.close();
+  }
 }
 
 void Logger::flush() {

@@ -6,6 +6,8 @@
 #include <ctime>
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <thread>
 
 // Atomic flag for program end
@@ -34,8 +36,13 @@ void getTrafficData() {
 
 // Cleanup function to join the thread
 void cleanupThread(std::thread& t) {
-    if (t.joinable()) 
-      t.join();
+  if (t.joinable()) { 
+    std::stringstream ss;
+    ss << t.get_id();
+    std::string msg = "Joined thread: " + ss.str();
+    Output::logger.log(Output::LogLevel::INFO, "END", msg);
+    t.join();
+  }
 }
 
 // Display main menu
@@ -72,39 +79,49 @@ void regionChoice() {
     Output::clearConsole();
     regionMenu();
     std::cin >> choice;
+    std::string inMsg = "Region choice input: " + std::to_string(choice);
+    Output::logger.log(Output::LogLevel::INFO, "MENU", inMsg);
 
     // Process choice
     switch(choice) {
       // Handle regional cases
       case 1:
+        Output::logger.log(Output::LogLevel::INFO, "PRINT", "Print Syracuse events");
         Traffic::printEvents(Traffic::Region::Syracuse);
         waitForEnter();
         break;
       case 2:
+        Output::logger.log(Output::LogLevel::INFO, "PRINT", "Print Rochester events");
         Traffic::printEvents(Traffic::Region::Rochester);
         waitForEnter();
         break;
       case 3:
+        Output::logger.log(Output::LogLevel::INFO, "PRINT", "Print Buffalo events");
         Traffic::printEvents(Traffic::Region::Buffalo);
         waitForEnter();
         break;
       case 4:
+        Output::logger.log(Output::LogLevel::INFO, "PRINT", "Print Albany events");
         Traffic::printEvents(Traffic::Region::Albany);
         waitForEnter();
         break;
       case 5:
+        Output::logger.log(Output::LogLevel::INFO, "PRINT", "Print Binghamton events");
         Traffic::printEvents(Traffic::Region::Binghamton);
         waitForEnter();
         break;
       case 6:
+        Output::logger.log(Output::LogLevel::INFO, "PRINT", "Print Toronto events");
         Traffic::printEvents(Traffic::Region::Toronto);
         waitForEnter();
         break;
       case 7:
+        Output::logger.log(Output::LogLevel::INFO, "PRINT", "Print Montreal events");
         Traffic::printEvents(Traffic::Region::Montreal);
         waitForEnter();
         break;
       case 8:
+        Output::logger.log(Output::LogLevel::INFO, "PRINT", "Print Ottawa events");
         Traffic::printEvents(Traffic::Region::Ottawa);
         waitForEnter();
         break;
@@ -112,6 +129,7 @@ void regionChoice() {
         // Return to program
         return;
       default:
+        Output::logger.log(Output::LogLevel::WARN, "MENU", "Invalid region choice");
         std::cout << "Invalid choice! Try again.";
         waitForEnter();
         break;
@@ -127,11 +145,14 @@ void debugConsole() {
     Output::clearConsole();
     displayMenu();
     std::cin >> choice;
+    std::string inMsg = "Menu choice input: " + std::to_string(choice);
+    Output::logger.log(Output::LogLevel::INFO, "MENU", inMsg);
     
     // Process choice
     switch(choice) {
       case 1:
         // Print all events
+        Output::logger.log(Output::LogLevel::INFO, "PRINT", "Print all events");
         Traffic::printEvents();
         waitForEnter();
         break;
@@ -141,10 +162,12 @@ void debugConsole() {
         break;
       case 3:
         // Terminate program
+        Output::logger.log(Output::LogLevel::INFO, "PRINT", "Begin program termination");
         std::cout << "Terminating program!\n";
         programEnd = true;
         return;
       default:
+        Output::logger.log(Output::LogLevel::WARN, "MENU", "Invalid region choice");
         std::cout << "Invalid choice! Try again.";
         waitForEnter();
         break;
@@ -156,8 +179,17 @@ int main() {
 
   // Spin up the data processing thread
   std::thread dataThread(getTrafficData);
+  std::stringstream dataID;
+  dataID << dataThread.get_id();
+  std::string dataMsg = "Started thread: " + dataID.str();
+  Output::logger.log(Output::LogLevel::INFO, "START", dataMsg);
+  
   // Spin up the api thread
   std::thread apiThread(RestAPI::startApiServer);
+  std::stringstream apiID;
+  apiID << apiThread.get_id();
+  std::string apiMsg = "Started thread: " + apiID.str();
+  Output::logger.log(Output::LogLevel::INFO, "START", apiMsg);
 
   // Wait a bit for services to start
   std::cout << "Staring services...\n";
