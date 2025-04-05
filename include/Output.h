@@ -59,8 +59,16 @@ public:
     auto time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     ss << std::put_time(std::localtime(&time), "[%Y-%m-%d %H:%M:%S] ");
 
+    // Create a type string
+    std::string typeStr = '[' + type + ']';
+    int typeLen = typeStr.length();
+    if(typeLen < 10) {
+      for(int i = 0; i < (10 - typeLen); i++)
+        typeStr += ' ';
+    }
+
     // Log the message
-    ss << type << ": " << message << '\n';
+    ss << typeStr << ' ' << message << '\n';
 
     // Push the stream to the file
     std::string logMessage = ss.str();
