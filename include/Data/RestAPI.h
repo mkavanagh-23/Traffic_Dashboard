@@ -24,11 +24,12 @@ public:
   Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest& request) override;
 };
 
-class ServerApp : public Poco::Util::ServerApplication {
-protected:
-  int main(const std::vector<std::string>& args) override;
-};
+//class ServerApp : public Poco::Util::ServerApplication {
+//protected:
+//  int main(const std::vector<std::string>& args) override;
+//};
 
+void startApiServer();
 std::optional<std::string> findQueryParam(const std::vector<std::pair<std::string, std::string>>& queryParams, const std::string& param);
 
 } // namespace RestAPI

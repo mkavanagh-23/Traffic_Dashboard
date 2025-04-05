@@ -134,6 +134,7 @@ extern std::unordered_map<std::string, Event> mapEvents;
 void fetchEvents();
 void fetchCameras();
 void printEvents();
+void printEvents(Region region);
 bool getEvents(std::string url);
 bool processData(std::string& data, const std::vector<std::string>& headers);   // XML must be able to manipulate data
 bool parseEvents(const Json::Value& parsedData);

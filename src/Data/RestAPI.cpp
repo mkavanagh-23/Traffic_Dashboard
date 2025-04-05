@@ -1,6 +1,7 @@
 #include "RestAPI.h"
 #include "Output.h"
 #include "Traffic.h"
+#include "main.h"
 #include <json/json.h>
 
 #include <Poco/Net/HTTPRequest.h>
@@ -88,30 +89,33 @@ Poco::Net::HTTPRequestHandler* RequestHandlerFactory::createRequestHandler(const
   return new RequestHandler;
 }
 
-//void startApiServer() {
-//  Poco::Net::ServerSocket socket(6969);
-//  Poco::Net::HTTPServer server(new RequestHandlerFactory, socket, new Poco::Net::HTTPServerParams);
-//  server.start();
-//  std::cout << "API Server running on port 8080..." << std::endl;
-//  while (true) {
-//      std::this_thread::sleep_for(std::chrono::seconds(1));
-//  }
-//}
-
-int ServerApp::main(const std::vector<std::string>& args) {
-  (void)args;
-  // Create a socket for the server to listen on
-  Poco::Net::ServerSocket socket(6969);
-  // Create a server bound to a new request handler and our socket
+void startApiServer() {
+  int serverPort{6969};
+  Poco::Net::ServerSocket socket(serverPort);
   Poco::Net::HTTPServer server(new RequestHandlerFactory, socket, new Poco::Net::HTTPServerParams);
-  // Start the server
   server.start();
-  std::string msg = "Starting REST API server on port 6969"; 
+  std::string msg = "Starting REST API server on port " + std::to_string(serverPort);
   Output::logger.log(Output::LogLevel::INFO, "REST API", msg);
-  std::cout << "API server running on port 6969...\n";
-  waitForTerminationRequest();
-  return Application::EXIT_OK;    
+  std::cout << "API server running on port " << serverPort << "...\n";
+  while (!programEnd) {
+      std::this_thread::sleep_for(std::chrono::seconds(5));
+  }
 }
+
+//int ServerApp::main(const std::vector<std::string>& args) {
+//  (void)args;
+//  // Create a socket for the server to listen on
+//  Poco::Net::ServerSocket socket(6969);
+//  // Create a server bound to a new request handler and our socket
+//  Poco::Net::HTTPServer server(new RequestHandlerFactory, socket, new Poco::Net::HTTPServerParams);
+//  // Start the server
+//  server.start();
+//  std::string msg = "Starting REST API server on port 6969"; 
+//  Output::logger.log(Output::LogLevel::INFO, "REST API", msg);
+//  std::cout << "API server running on port 6969...\n";
+//  waitForTerminationRequest();
+//  return Application::EXIT_OK;    
+//}
 
 // Check for a query parameter by key
 std::optional<std::string> findQueryParam(const std::vector<std::pair<std::string, std::string>>& queryParams, const std::string& param) {

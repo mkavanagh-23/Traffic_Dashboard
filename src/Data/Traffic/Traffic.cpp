@@ -135,7 +135,15 @@ void printEvents() {
   // Lock the map for reading
   std::lock_guard<std::mutex> lock(eventsMutex);
   for(auto& [key, event] : mapEvents) {
-    if(!event.hasPrinted()) {
+    event.print();
+  }
+}
+
+void printEvents(Region region) {
+  // Lock the map for reading
+  std::lock_guard<std::mutex> lock(eventsMutex);
+  for(auto& [key, event] : mapEvents) {
+    if(event.getRegion() == region) {
       event.print();
     }
   }

@@ -21,6 +21,7 @@ enum class LogLevel {
 
 std::string toString(const LogLevel& level);
 bool createDirIfMissing(const std::string& filePath);
+void clearConsole();
 
 class Logger {
 private:

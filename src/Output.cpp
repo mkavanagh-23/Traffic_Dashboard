@@ -3,6 +3,7 @@
 #include <system_error>
 #include <string>
 #include <ios>
+#include <iostream>
 
 namespace Output {
 Logger logger("log.txt");
@@ -36,6 +37,11 @@ bool createDirIfMissing(const std::string& filePath) {
   }  
   
   return !ec; // Returns true if no error occurred
+}
+
+void clearConsole() {
+  // ANSI escape code to clear screen and move cursor to home position
+  std::cout << "\033[2J\033[1;1H";
 }
 
 Logger::Logger(const std::string& fileName) 
