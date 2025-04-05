@@ -40,11 +40,12 @@ void cleanupThread(std::thread& t) {
 
 // Display main menu
 void displayMenu() {
-  std::cout << "\n***** Traffic Events *****\n"
+  std::cout << "\n***** Traffic Events *****\n\n"
             << "1. Print all events\n"
             << "2. Print events for region\n"
-            << "3. End program\n";
+            << "3. End program\n\n";
 
+  std::cout << "Found " << Traffic::mapEvents.size() << " matching events!\n";
   std::cout << "\n\nEnter a choice: ";
 }
 
