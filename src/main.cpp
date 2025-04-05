@@ -2,11 +2,9 @@
 #include "Output.h"
 #include "RestAPI.h"
 #include "Traffic.h"
-#include "DataUtils.h"
 #include <atomic>
 #include <ctime>
 #include <cstdlib>
-#include <iomanip>
 #include <iostream>
 #include <thread>
 
@@ -22,13 +20,13 @@ void waitForEnter() {
 
 // Get all traffic data
 void getTrafficData() {
+  int interval_seconds = 5;
+  int sleep_seconds = 60;
+  int sleep_intervals = sleep_seconds / interval_seconds;
   while(!programEnd) {
     Traffic::fetchEvents();
     Output::logger.flush();
     // Sleep in intervals
-    int interval_seconds = 5;
-    int sleep_seconds = 60;
-    int sleep_intervals = sleep_seconds / interval_seconds;
     for(int i = 0; i < sleep_intervals && !programEnd; i++)
       std::this_thread::sleep_for(std::chrono::seconds(interval_seconds));
   }
