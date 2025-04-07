@@ -114,7 +114,7 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
   // Check for errors
   if(res != CURLE_OK) {
     std::string err = curl_easy_strerror(res);
-    std::string errMsg = "Error retrieving data (\"" + err + "\")";
+    std::string errMsg = "Error retrieving data (" + err + ")";
     Output::logger.log(Output::LogLevel::WARN, "cURL", errMsg);
     
     if(res == CURLE_UNSUPPORTED_PROTOCOL)
@@ -162,7 +162,7 @@ std::tuple<Result, std::string, std::vector<std::string>> postData(const std::st
   // Check for errors
   if(res != CURLE_OK) {
     std::string err = curl_easy_strerror(res);
-    std::string errMsg = "Error sending data (\"" + err + "\")";
+    std::string errMsg = "Error sending data (" + err + ")";
     Output::logger.log(Output::LogLevel::WARN, "cURL", errMsg);
     
     if(res == CURLE_UNSUPPORTED_PROTOCOL)

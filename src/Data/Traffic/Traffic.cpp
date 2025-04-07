@@ -31,7 +31,7 @@
  *        Add logic to account for multiple pages
  *          Probably need to modify to POST request and investigate payloads in-browser
  *          Do we need to establish a session and maintain state?
- *      Modify cleanup to only run if we get valid table data
+ *      Modify cleanup to only run if we get valid table data??
  *      Create an async function which can be run every few minutes to set geo-coordinates
  *        If we use openstreetmap we are limited to one request per second.
  *        Setup an atomic timer!
@@ -52,13 +52,6 @@
  *      Create an async function which can be run every few minutes to set geo-coordinates
  *        If we use openstreetmap we are limited to one request per second.
  *        Setup an atomic timer!
- * 
- * DATA INTERFACE
- *    
- *    Serializing to JSON:
- *      We should serialize time to an ISO6801-formatted string
- *    Serve serialized JSON via RESTful endpoints
- *    Implement robust filtering via query params
  */
 
 namespace Traffic {
@@ -137,16 +130,20 @@ void printEvents() {
   for(auto& [key, event] : mapEvents) {
     event.print();
   }
+  std::cout << "\nFound " << mapEvents.size() << " matching events.\n";
 }
 
 void printEvents(Region region) {
+  int count{0};
   // Lock the map for reading
   std::lock_guard<std::mutex> lock(eventsMutex);
   for(auto& [key, event] : mapEvents) {
     if(event.getRegion() == region) {
       event.print();
+      count++;
     }
   }
+  std::cout << "\nFound " << count << " matching events.\n";
 }
 
 // Retrieve all events from the URL
@@ -239,7 +236,7 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
     parseEvents(*parsedData);
   } else {
     // Error and exit if invalid type returned
-    std::string errMsg = "Unsupported \"Content-Type\": '" + contentType + "'";
+    std::string errMsg = "Unsupported \"Content-Type\": " + contentType;
     Output::logger.log(Output::LogLevel::WARN, "cURL", errMsg);
     return false;
   }
@@ -310,7 +307,7 @@ bool parseEvents(const std::vector<HTML::Event>& parsedData) {
 // Process a parsed JSON event for storage
 bool processEvent(const Json::Value& parsedEvent) {
 
-  // Extract the key and confiorm we have a valid event
+  // Extract the key and confirm we have a valid event
   std::string key{""};
   if(parsedEvent.isMember("ID"))
     key = parsedEvent["ID"].asString();
@@ -810,6 +807,7 @@ Event::Event(const rapidxml::xml_node<>* parsedEvent)
     ID = id;
 
   // Set the Title and main street
+  // TODO: Redo and fix parsing of roadway and title
   if(rapidxml::xml_node<>* title = parsedEvent->first_node("title")){
     auto parsedTitle = MTL::parseTitle(title->value());
     if(parsedTitle) {
