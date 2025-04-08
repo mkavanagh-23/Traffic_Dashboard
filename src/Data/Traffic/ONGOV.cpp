@@ -150,10 +150,14 @@ void processRow(GumboElement* tableRow, std::vector<HTML::Event>& eventsVector) 
     if(spanID.empty())  // Check for valid span id extraction
       continue;
     if(spanID.find("text6") != std::string::npos) { // Extract the agency element
+      // text6 - Seems to be always empty
+      // text7 - Responding agency
       getData(cell, event.agency);
       continue;
     }
     if(spanID.find("text12") != std::string::npos) { // Extract the date/time element
+      // text12 - seems to be always empty
+      // textActiveevents_mmdd1 - date and time string (mm/dd/yy HH::mm)
       getData(cell, event.date);
       continue;
     }
@@ -162,6 +166,17 @@ void processRow(GumboElement* tableRow, std::vector<HTML::Event>& eventsVector) 
       continue;
     }
     if(spanID.find("textActiveevents_edirpre1") != std::string::npos) { // Extract the address element
+      // TODO:
+      // Further parse each individual string instead of concatenating
+      // look at getData() to see how this can be achieved
+      // textActiveevents_edirpre1 - direction prefix
+      // textActiveevents_efeanme1 - Main street name
+      // textActiveevents_efeatyp1 - Street suffix
+      // textActiveevents_edirsuf1 - Direction suffix
+      // textActiveevents_ecompl1 - Business name/details?
+
+      // Need to define:
+      // getAddressData(cell, event.address);
       getData(cell, event.address);
       continue;
     }
@@ -170,6 +185,14 @@ void processRow(GumboElement* tableRow, std::vector<HTML::Event>& eventsVector) 
       continue;
     }
     if(spanID.find("textActiveevents_xstreet11") != std::string::npos) { // Extract the cross street element
+      // TODO:
+      // Further parse each individual string
+      // textActiveevents_xstreet11 - x-street 1 (main if adress is empty!)
+      // text3 - conjunction
+      // textActiveevents_xstreet21 - x-street 2
+
+      //Need to define:
+      // getCrossData(cell, event.xstreet);
       getData(cell, event.xstreet);
       continue;
     }
@@ -237,6 +260,7 @@ void getData(GumboElement* tableData, std::string& element) {
 } // namespace Gumbo
 
 // Process Address into and street name and (optional) direction
+// TODO: Fix parsing of main street
 std::optional<addressDir> processAddress(const std::string& address) {
   std::string cleanedAddress = address.substr(1);
     
