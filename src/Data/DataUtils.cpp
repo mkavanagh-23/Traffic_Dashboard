@@ -15,6 +15,14 @@
 #include <rapidxml.hpp>
 #include <iconv.h>
 
+// Remove leading and trailing whitespace from a string
+void trim(std::string& str) {
+  // Remove leading space if present
+  str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+  // Remove trailing space if present
+  str.erase(std::find_if(str.rbegin(), str.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), str.end());
+}
+
 // Helper function to remove spaces and special characters from a string
 std::string sanitizeString(const std::string& input) {
   std::string result;

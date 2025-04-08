@@ -14,6 +14,7 @@
 #include <ctime>
 
 // This file holds all functionality for retrieving and filtering basic data from CURL in XML and JSON formats
+void trim(std::string& str);
 std::string sanitizeString(const std::string& input);
 std::string convertEncoding(const std::string& input, const char* from_encoding, const char* to_encoding);
 
@@ -68,36 +69,17 @@ std::unique_ptr<rapidxml::xml_document<>> parseData(std::string& xmlData);
 namespace HTML {
 
 struct Event {
-  std::string ID{"N/A"};
-  std::string agency{"N/A"};
-  std::string date{"N/A"};
-  std::string title{"N/A"};
-  std::string address{"N/A"};
-  std::string region{"N/A"};
-  std::string xstreet{"N/A"};
-  void createID();
-};
-
-struct Event2 {
-  std::string ID{"N/A"};
-  std::string agency{"N/A"};
-  std::string date{"N/A"};
-  std::string title{"N/A"};
-
-  std::string address{"N/A"};
-  std::string addressPre{}; // prefix direction
-  std::string addressMain{}; // main street name
-  std::string addressSuff{}; // main street suffix
-  std::string addressPost{}; // postfix direction
-  std::string details{}; // Further details such as business name
-
-  std::string region{"N/A"};
-
-  std::string xstreet{"N/A"};
-  std::string xstreet1{}; // cross street 1
-  std::string xstreetJoin{}; // conjunction
-  std::string xtreet2{}; // cross street 2
-
+  std::string ID{""};
+  std::string agency{""};
+  std::string date{""};
+  std::string title{""};
+  std::string address{""};
+  std::string direction{""};
+  std::string details{""};
+  std::string region{""};
+  std::string xstreet{""};
+  std::string xstreet1{""};
+  std::string xstreet2{""};
   void createID();
 };
 

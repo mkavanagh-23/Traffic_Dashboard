@@ -867,61 +867,48 @@ Event::Event(const HTML::Event& parsedEvent)
 : ID{ parsedEvent.ID }, URL{ "https://911events.ongov.net/CADInet/app/events.jsp" }, dataSource{ DataSource::ONGOV },
   region{ Region::Syracuse }, location{ Location(43.0495, -76.1474) }, timeUpdated{ Time::currentTime() }
 {
-  bool hasMain{ false };    // Flag to check if main address exists
   std::string descStr{ "" };    // Create a string to build and hold the description
 
-  if(parsedEvent.title != "N/A") {
+  if(parsedEvent.title != "") {
     // Process the event title
     title = parsedEvent.title;
     // Add the title to the string followed by " at "
-    descStr += parsedEvent.title + " at ";
+    descStr += title + " at ";
   }
-  if(parsedEvent.address != "N/A") {
+  if(parsedEvent.address != "") {
     // Process the main street
-    auto parsedAddress = ONGOV::processAddress(parsedEvent.address);
-    if(parsedAddress) {
-      auto [parsedStreet, parsedDir] = *parsedAddress;
-      if(parsedDir)
-        direction = *parsedDir;
-      mainStreet = parsedStreet;
-    }
-    // Add the address to the string followed by
-    descStr += parsedEvent.address + ' ';
-    hasMain = true;
+    mainStreet = parsedEvent.address;
+  } else {              // Cross street 1 is main street
+    if(parsedEvent.xstreet1 != "")
+      mainStreet = parsedEvent.xstreet1;
   }
-  if(parsedEvent.xstreet != "N/A") {
-    if(!hasMain) {
-      // Process cross street as main
-      auto parsedCross = ONGOV::processCrossAsAddress(parsedEvent.xstreet); // Returns an optional pair of an addressDir and a crossStreet
-      if(parsedCross) {
-        auto [mainRoadDir, crossRoad] = *parsedCross;
+  descStr += mainStreet + ' ';
 
-        mainStreet = mainRoadDir.first;
-        std::optional<std::string>dir = mainRoadDir.second;
-
-        if(dir) {
-          direction = *dir;        }
-
-        if(crossRoad)
-          crossStreet = *crossRoad;
-      }
+  if(parsedEvent.xstreet != "") {
+    if(parsedEvent.address == "") {
+      // Cross 2 is cross sreet
+      crossStreet = parsedEvent.xstreet2;
     } else {
-      // Process cross street as cross
+      // Full cross street is cross
       crossStreet = parsedEvent.xstreet;
     }
     // Add the cross street to the string
-    descStr += "( X: " + parsedEvent.xstreet + " ) ";
+    descStr += "(X: " + crossStreet + ") ";
   }
-  if(parsedEvent.date != "N/A") {
+  if(parsedEvent.direction != "") {
+    direction = parsedEvent.direction;
+    descStr += direction + ' ';
+  }
+  if(parsedEvent.date != "") {
     // Prevent crashes! check for strlength
     if(parsedEvent.date.length() == 14) {
       // Process the event date
       timeReported = Time::MMDDYYHHMM::toChrono(parsedEvent.date);
     }
-    // Add the date to the string
-    descStr += "[ " + parsedEvent.date + " ]";
   }
-
+  if(parsedEvent.details != "") {
+    descStr += '[' + parsedEvent.details + ']';
+  }
   description = std::move(descStr);
 }
 

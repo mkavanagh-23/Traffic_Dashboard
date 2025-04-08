@@ -3,9 +3,7 @@
 #include <gumbo.h>
 #include <string>
 #include <vector>
-#include <utility>
 #include <optional>
-#include <regex>
 
 namespace Traffic {
 namespace ONGOV {
@@ -167,18 +165,8 @@ void processRow(GumboElement* tableRow, std::vector<HTML::Event>& eventsVector) 
       continue;
     }
     if(spanID.find("textActiveevents_edirpre1") != std::string::npos) { // Extract the address element
-      // TODO:
-      // Further parse each individual string instead of concatenating
-      // look at getData() to see how this can be achieved
-      // textActiveevents_edirpre1 - direction prefix
-      // textActiveevents_efeanme1 - Main street name
-      // textActiveevents_efeatyp1 - Street suffix
-      // textActiveevents_edirsuf1 - Direction suffix
-      // textActiveevents_ecompl1 - Business name/details?
-
-      // Need to define:
-      // getAddressData(cell, event.address);
-      getData(cell, event.address);
+      getAddressData(cell, event);
+      //getData(cell, event.address);
       continue;
     }
     if(spanID.find("textActiveevents_mun2") != std::string::npos) { // Extract the region element
@@ -186,21 +174,14 @@ void processRow(GumboElement* tableRow, std::vector<HTML::Event>& eventsVector) 
       continue;
     }
     if(spanID.find("textActiveevents_xstreet11") != std::string::npos) { // Extract the cross street element
-      // TODO:
-      // Further parse each individual string
-      // textActiveevents_xstreet11 - x-street 1 (main if adress is empty!)
-      // text3 - conjunction
-      // textActiveevents_xstreet21 - x-street 2
-
-      //Need to define:
-      // getCrossData(cell, event.xstreet);
-      getData(cell, event.xstreet);
+      getCrossData(cell, event);
+      //getData(cell, event.xstreet);
       continue;
     }
 
   }
   // Check if the row contained data cells
-  if(event.title != "N/A") {
+  if(event.title != "") {
     // Create an ID
     event.createID();
     eventsVector.push_back(event);
@@ -253,69 +234,128 @@ void getData(GumboElement* tableData, std::string& element) {
     }
   }
   if(!data.empty()) {
+    // Trim whitespace
+    trim(data);
     // Store the extracted string in the data element
     element = data;
   }
 }
 
-} // namespace Gumbo
+// Parse an address table data element into its sub-elements
+void getAddressData(GumboElement* tableData, HTML::Event& event) {
+  std::string dirPre, name, suff, dirPost, details;
+  // Iterate through each child (<span>) object of our table data
+  for(size_t i = 0; i < tableData->children.length; ++i) {
+    GumboNode* spanNode = static_cast<GumboNode*>(tableData->children.data[i]);
+    if(!(spanNode->type == GUMBO_NODE_ELEMENT))
+      continue;
 
-// Process Address into and street name and (optional) direction
-// TODO: Fix parsing of main street
-std::optional<addressDir> processAddress(const std::string& address) {
-  std::string cleanedAddress = address.substr(1);
+    GumboElement* span = &spanNode->v.element;
+                  
+    // Check if our element is a span
+    if(!(span->tag == GUMBO_TAG_SPAN))
+      continue;
     
-  // Replace double spaces with single spaces first
-  std::regex multipleSpace("\\s{2,}");
-  cleanedAddress = std::regex_replace(cleanedAddress, multipleSpace, " ");
-   
-  // Define the matching pattern
-  std::regex pattern("(?:(EB|WB|NB|SB)\\s*)?((?:ROUTE\\s+\\d+)|(?:I\\s+\\d+)|(?:[^\\s].*?\\s+(?:LN|ST|AVE|DR|CT|PL|CANALWAY|PATH|BLVD|TER|KING|CIR|RD|STREET|ROWE|FARM|TRAIL|TRL|TPKE|PKWY|CRSE|WAY)))(\\s+.*)?");
-  std::smatch matches;
-  /*
-   *    matches[1] = Direction (Optional)
-   *    matches[2] = Road Name
-   */
-  // And match our regex
-  if(std::regex_search(cleanedAddress, matches, pattern)) {
-    if(matches[1].matched && !matches[1].str().empty())  // if we extracted a direction
-      return std::make_pair(matches[2], matches[1]);
-    else
-      return std::make_pair(matches[2], std::nullopt);
-  }
-  std::string errMsg = "ONGOV main street does not match (\"" + address + "\")";
-  Output::logger.log(Output::LogLevel::WARN, "REGEX", errMsg);
-  return std::nullopt;
-}
+    // Extract text from the cell
+    for(size_t j = 0; j < span->children.length; ++j) {
+      GumboNode* textNode = static_cast<GumboNode*>(span->children.data[j]);
+      // Check for text object                
+      if(!(textNode->type == GUMBO_NODE_TEXT))
+        continue;
 
-// Process cross street value into main street and (optional) cross street
-// TODO: Modify to take (opyional) Direction input string before main street
-// SAMPLE: "SB I 81 & OLD LIVERPOOL RD TO SB I 81 RAMP"
-std::optional<std::pair<addressDir, std::optional<std::string>>> processCrossAsAddress(const std::string& address) {
-  // Define the matching pattern
-  std::regex pattern("^(.*?)\\s*&\\s*(.*)?$");
-  std::smatch matches;
-  /*
-   *            string start    = ^
-   *            matches[1]      = (.*?)
-   *            " & "           = \s*&\s*
-   * (optional) matches[2]      = (.*)?
-   *            string end      = $
-   */
-  if(std::regex_search(address, matches, pattern)) {
-    auto mainStreet = processAddress(matches[1]);
-    if(mainStreet) {
-      if(matches[2].matched)
-        return std::make_pair(*mainStreet, matches[2]);
+      // Check the current span to determine which string to extract to
+      GumboAttribute* idAttr = gumbo_get_attribute(&span->attributes, "id");
+      std::string attribute = idAttr->value;
+      if(attribute.find("edirpre1") != std::string::npos)
+        dirPre = textNode->v.text.text;
+      else if(attribute.find("efeanme1") != std::string::npos)
+        name = textNode->v.text.text;
+      else if(attribute.find("efeatyp1") != std::string::npos)
+        suff = textNode->v.text.text;
+      else if(attribute.find("edirsuf1") != std::string::npos)
+        dirPost = textNode->v.text.text;
+      else if(attribute.find("ecompl1") != std::string::npos)
+        details = textNode->v.text.text;
       else
-        return std::make_pair(*mainStreet, std::nullopt);
+        Output::logger.log(Output::LogLevel::ERROR, "HTML", "Failed parsing ONGOV address (invalid <span> attribute)");
     }
   }
-
-  std::string errMsg = "ONGOV cross street does not match (\"" + address + "\")";
-  Output::logger.log(Output::LogLevel::WARN, "REGEX", errMsg);
-  return std::nullopt;
+  // Check for successful extraction and store in HTML event
+  if(!(dirPre.empty() || dirPre == " ")) {
+    trim(dirPre);
+    event.address += dirPre + ' ';
+  }
+  if(!(name.empty() || name == " ")) {
+    trim(name);
+    event.address += name;
+    if(!(suff.empty() || suff == " ")) {
+      trim(suff);
+      event.address += ' ' + suff;
+    }
+  }
+  if(!(dirPost.empty() || dirPost == " ")) {
+    trim(dirPost);
+    event.direction = dirPost;
+  }
+  if(!(details.empty() || details == " ")) {
+    trim(details);
+    event.details = details;
+  }
 }
+
+// Parse an cross street table data element into its sub-elements
+void getCrossData(GumboElement* tableData, HTML::Event& event) {
+  std::string street1, street2, join;
+  // Iterate through each child (<span>) object of our table data
+  for(size_t i = 0; i < tableData->children.length; ++i) {
+    GumboNode* spanNode = static_cast<GumboNode*>(tableData->children.data[i]);
+    if(!(spanNode->type == GUMBO_NODE_ELEMENT))
+      continue;
+
+    GumboElement* span = &spanNode->v.element;
+                  
+    // Check if our element is a span
+    if(!(span->tag == GUMBO_TAG_SPAN))
+      continue;
+    
+    // Extract text from the cell
+    for(size_t j = 0; j < span->children.length; ++j) {
+      GumboNode* textNode = static_cast<GumboNode*>(span->children.data[j]);
+      // Check for text object                
+      if(!(textNode->type == GUMBO_NODE_TEXT))
+        continue;
+
+      // Check the current span to determine which string to extract to
+      GumboAttribute* idAttr = gumbo_get_attribute(&span->attributes, "id");
+      std::string attribute = idAttr->value;
+      if(attribute.find("xstreet11") != std::string::npos)
+        street1 = textNode->v.text.text;
+      else if(attribute.find("xstreet21") != std::string::npos)
+        street2 = textNode->v.text.text;
+      else if(attribute.find("text3") != std::string::npos)
+        join = textNode->v.text.text;
+      else
+        Output::logger.log(Output::LogLevel::ERROR, "HTML", "Failed parsing ONGOV address (invalid <span> attribute)");
+    }
+  }
+  // Check for successful extraction and store in HTML event
+  if(!(street1.empty() || street1 == " ")) {
+    trim(street1);
+    event.xstreet1 += street1;
+    event.xstreet += street1;
+  }
+  if(!(street2.empty() || street2 == " ")) {
+    trim(street2);
+    event.xstreet += ' ';
+    if(!(join.empty() || join == " ")) {
+      trim(join);
+      event.xstreet += join + ' ';
+    }
+    event.xstreet2 += street2;
+    event.xstreet += street2;
+  }
+}
+} // namespace Gumbo
 
 } // namespace ONGOV
 } // namespace Traffic

@@ -26,12 +26,9 @@ void processRow(GumboElement* tableRow, std::vector<HTML::Event>& eventsVector);
 std::string getFirstSpanId(GumboElement* tableData);
 // Extract data from the table data element into the reference string
 void getData(GumboElement* tableData, std::string& element);
+void getAddressData(GumboElement* tableData, HTML::Event& event);
+void getCrossData(GumboElement* tableData, HTML::Event& event);
 }
-
-// Process Address into and street name and (optional) direction
-std::optional<addressDir> processAddress(const std::string& address);
-// Process cross street value into main street and (optional) cross street
-std::optional<std::pair<addressDir, std::optional<std::string>>> processCrossAsAddress(const std::string& address);
 
 }
 }
