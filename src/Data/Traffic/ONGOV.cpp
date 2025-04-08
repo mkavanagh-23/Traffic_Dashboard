@@ -1,12 +1,21 @@
 #include "ONGOV.h"
 #include "Output.h"
+#include "Traffic.h"
+#include <cassert>
 #include <gumbo.h>
+#include <regex>
 #include <string>
+#include <utility>
 #include <vector>
 #include <optional>
 
 namespace Traffic {
 namespace ONGOV {
+
+std::vector<std::string> payloads {
+  "form1%3AtableEx1%3Aweb1__pagerWeb=0&form1%3AtableEx1%3Agoto1__pagerGoText=2&form1=form1",    // Page 1
+  "form1%3AtableEx1%3Aweb1__pagerWeb=1&form1%3AtableEx1%3Agoto1__pagerGoText=1&form1=form1"     // Page 2
+};
 
 // TODO:
 // Check for IP/origin restrictions on cURL requests
@@ -14,6 +23,40 @@ namespace ONGOV {
 // Investigate HERE traffic API for potential integration
 
 extern const std::string EVENTS_URL{ "https://911events.ongov.net/CADInet/app/events.jsp" };
+
+std::optional<std::pair<int, int>> getPageNumbers(const std::string& htmlData) {
+  std::regex pattern(R"(Page (\d+) of (\d+))");
+  std::smatch matches;
+
+  if(std::regex_search(htmlData, matches, pattern)){
+    return std::make_pair(std::stoi(matches[1].str()), std::stoi(matches[2].str()));
+  } else {
+    return std::nullopt;
+  }
+}
+
+// Get data for all pages
+bool postRequest(const std::string& url, int numPages) {
+  assert(numPages <= payloads.size && "Number of HTML pages exceeds request payload size");
+  std::string msg = "Found " + std::to_string(numPages) + " ONGOV HTML pages";
+  Output::logger.log(Output::LogLevel::INFO, "cURL", msg);
+  // Iterate over each page
+  for(int i = 0; i < numPages; i++) {
+    std::string loopMsg = "POST request to ONGOV page " + std::to_string(i + 1) + " of " + std::to_string(numPages);
+    // Issue the POST request
+    auto [result, data, headers] = cURL::postData(url, payloads[i], currentCookie);
+    Output::logger.log(Output::LogLevel::INFO, "cURL", loopMsg);
+    // Process the data
+    // Check for successful extraction
+    if(result == cURL::Result::SUCCESS) {
+      // Make sure response data isnt empty
+      if(!data.empty()) {
+        processData(data, headers);
+      }
+    }
+  }
+  return true;
+}
 
 namespace Gumbo {
 // Parse data from HTML string

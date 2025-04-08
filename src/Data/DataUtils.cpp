@@ -94,7 +94,7 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* out
 }
 
 // Fetch a data string from a remote source
-std::tuple<Result, std::string, std::vector<std::string>> getData(const std::string& url){
+std::tuple<Result, std::string, std::vector<std::string>> getData(const std::string& url, const std::string& cookiesFile){
   Handle curl;   // cURL malloc (Initialize an object via RAII)
   std::string responseData;         // Create a string to hold the data
   std::vector<std::string> headers; // Create a vector to hold the response headers
@@ -111,6 +111,10 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
   curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &responseData);     // Set the data to write
   curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, 10L); // Set a 10 second timeout
   curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
+  
+  // Set the location for storing cookies
+  curl_easy_setopt(curl.get(), CURLOPT_COOKIEJAR, cookiesFile.c_str());      // Set the file to store cookies
+  
   // Set up header handling
   curl_easy_setopt(curl.get(), CURLOPT_HEADERFUNCTION, HeaderCallback); // Custom function to capture headers
   curl_easy_setopt(curl.get(), CURLOPT_HEADERDATA, &headers);           // Pass headers vector to function
@@ -137,7 +141,7 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
 }
 
 // POST data to a remote endpoint
-std::tuple<Result, std::string, std::vector<std::string>> postData(const std::string& url, const std::string& postData) {
+std::tuple<Result, std::string, std::vector<std::string>> postData(const std::string& url, const std::string& postData, const std::string& cookiesFile) {
   Handle curl;   // cURL malloc (RAII object)
   std::string responseData;         // Create a string to hold the data
   std::vector<std::string> headers; // Create a vector to hold the response headers
@@ -155,6 +159,9 @@ std::tuple<Result, std::string, std::vector<std::string>> postData(const std::st
   curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, 10L); // Set a 10 second timeout
   curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
   
+  // Set the loaction to load cookies from
+  curl_easy_setopt(curl.get(), CURLOPT_COOKIEFILE, cookiesFile.c_str());     // Set the file to load cookies from
+
   // Write the callback data 
   curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, WriteCallback); // Set the write function
   curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &responseData);     // Set the data to write

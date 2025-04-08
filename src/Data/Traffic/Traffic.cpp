@@ -24,6 +24,7 @@
  *
  * DATA COLLECTION & PROCESSING
  *
+ *
  *    ONGOV:
  *      Investigate REST API
  *        Possible workarounds for geo-restriction
@@ -63,6 +64,7 @@ std::unordered_map<std::string, Camera> mapCameras;
 
 // Static object to store data source for current iteration
 DataSource currentSource;
+std::string currentCookie;
 
 Region toRegion(const std::string& regionStr) {
   if(regionStr == "Syracuse" || regionStr == "syracuse")
@@ -85,6 +87,33 @@ Region toRegion(const std::string& regionStr) {
   return Region::UNKNOWN;
 }
 
+std::string toString(const DataSource& dataSource) {
+  std::string sourceStr{""};
+  switch(dataSource) {
+    case DataSource::NYSDOT:
+      sourceStr = "nysdot";
+      break;
+    case DataSource::ONGOV:
+      sourceStr = "ongov";
+      break;
+    case DataSource::MCNY:
+      sourceStr = "mcny";
+      break;
+    case DataSource::MTL:
+      sourceStr = "mtl";
+      break;
+    case DataSource::ONMT:
+      sourceStr = "onmt";
+      break;
+    case DataSource::OTT:
+      sourceStr = "ott";
+      break;
+    default:
+      break;
+  }
+  return sourceStr;
+}
+
 DataSource toSource(const std::string& sourceStr) {
   if(sourceStr == "NYSDOT" || sourceStr == "nysdot" || sourceStr == "511ny" || sourceStr == "511NY")
     return DataSource::NYSDOT;
@@ -100,6 +129,12 @@ DataSource toSource(const std::string& sourceStr) {
     return DataSource::MTL;
 
   return DataSource::UNKNOWN;
+}
+
+// Set the current source and session cookie
+void setSource(const DataSource source) {
+  currentSource = source;
+  currentCookie = "cookies/" + toString(source) + ".txt";
 }
 
 // Get events from all URLs
@@ -160,18 +195,18 @@ bool getEvents(std::string url) {
     }
     url += NYSDOT::API_KEY;
     // Set current Data Source
-    currentSource = DataSource::NYSDOT;
+    setSource(DataSource::NYSDOT);
   } 
   else if(url.find("511on.ca") != std::string::npos)
-    currentSource = DataSource::ONMT;
+    setSource(DataSource::ONMT);
   else if(url.find("monroecounty.gov") != std::string::npos)
-    currentSource = DataSource::MCNY;
+    setSource(DataSource::MCNY);
   else if(url.find("ongov.net") != std::string::npos)
-    currentSource = DataSource::ONGOV;
+    setSource(DataSource::ONGOV);
   else if(url.find("ottawa.ca") != std::string::npos)
-    currentSource = DataSource::OTT;
+    setSource(DataSource::OTT);
   else if(url.find("quebec511.info") != std::string::npos)
-    currentSource = DataSource::MTL;
+    setSource(DataSource::MTL);
   else {
     currentSource = DataSource::UNKNOWN;
     Output::logger.log(Output::LogLevel::WARN, "EVENTS", "Source domain does not match program data requirements");
@@ -179,13 +214,22 @@ bool getEvents(std::string url) {
   }
 
   // Retrieve data with cURL
-  auto [result, data, headers] = cURL::getData(url);
+  auto [result, data, headers] = cURL::getData(url, currentCookie);
 
   // Check for successful extraction
   if(result == cURL::Result::SUCCESS) {
     // Make sure response data isnt empty
     if(!data.empty()) {
-      processData(data, headers);
+      if(currentSource == DataSource::ONGOV) {
+        auto pageData = ONGOV::getPageNumbers(data);
+        if(pageData) {
+          auto [currentPage, totalPages] = *pageData;
+          ONGOV::postRequest(url, totalPages);
+        } else {
+          processData(data, headers);
+        }
+      } else
+        processData(data, headers);
     } else {
       // Error out and exit if empty string returned
       Output::logger.log(Output::LogLevel::WARN, "cURL", "Retrieved empty data string");
@@ -204,6 +248,7 @@ bool getEvents(std::string url) {
 
   return true;
 }
+
 
 // Process retrieved data string and headers
 bool processData(std::string& data, const std::vector<std::string>& headers) {
@@ -300,7 +345,7 @@ bool parseEvents(const std::vector<HTML::Event>& parsedData) {
     mapEvents.try_emplace(parsedEvent.ID, parsedEvent);
   }
   // Clean up cleared events while our data is still in scope
-  clearEvents(parsedData);
+  //clearEvents(parsedData);
   return true;
 }
 
@@ -971,7 +1016,7 @@ bool getCameras(std::string url){
   currentSource = DataSource::NYSDOT;
   
   // Retrieve data with cURL
-  auto [result, data, headers] = cURL::getData(url);
+  auto [result, data, headers] = cURL::getData(url, currentCookie);
   
   // Check for successful extraction
   if(result == cURL::Result::SUCCESS) {

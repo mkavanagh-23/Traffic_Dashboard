@@ -42,9 +42,12 @@ enum class DataSource {
   UNKNOWN
 };
 std::ostream& operator<<(std::ostream& os, const DataSource& dataSource);
+std::string toString(const DataSource& dataSource);
 DataSource toSource(const std::string& sourceStr);
+void setSource(const DataSource source);
 
 extern DataSource currentSource;
+extern std::string currentCookie;
 
 class Camera {
 private:

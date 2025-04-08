@@ -1,5 +1,6 @@
 .cache
 build/
+cookies/
 Traffic_Dashboard*
 mtl-*
 ottawa-*
