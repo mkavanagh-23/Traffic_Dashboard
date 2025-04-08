@@ -27,7 +27,6 @@ std::string sanitizeString(const std::string& input) {
 }
 
 // Convert string encoding using iconv
-// ISO-8859-1 to UTF-8
 std::string convertEncoding(const std::string& input, const char* from_encoding, const char* to_encoding) {
   // Get a conversion descriptor
   iconv_t cDescriptor = iconv_open(to_encoding, from_encoding);

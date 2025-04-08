@@ -13,6 +13,7 @@ namespace ONGOV {
 // TODO:
 // Check for IP/origin restrictions on cURL requests
 // Geo-blocked? Data center traffic?
+// Investigate HERE traffic API for potential integration
 
 extern const std::string EVENTS_URL{ "https://911events.ongov.net/CADInet/app/events.jsp" };
 
