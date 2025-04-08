@@ -1,0 +1,52 @@
+Request for Page 1:
+POST /CADInet/app/events.jsp HTTP/1.1
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.9
+Cache-Control: max-age=0
+Connection: keep-alive
+Content-Length: 87
+Content-Type: application/x-www-form-urlencoded
+Cookie: JSESSIONID=A830669ED09890C7242A27AFD5B3F84E
+DNT: 1
+Host: 911events.ongov.net
+Origin: https://911events.ongov.net
+Referer: https://911events.ongov.net/CADInet/app/events.jsp
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: same-origin
+Sec-Fetch-User: ?1
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0
+sec-ch-ua: "Microsoft Edge";v="135", "Not-A.Brand";v="8", "Chromium";v="135"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Windows"
+
+payload: form1%3AtableEx1%3Aweb1__pagerWeb=0&form1%3AtableEx1%3Agoto1__pagerGoText=2&form1=form1
+
+
+Request for Page 2:
+POST /CADInet/app/events.jsp HTTP/1.1
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: en-US,en;q=0.9
+Cache-Control: max-age=0
+Connection: keep-alive
+Content-Length: 87
+Content-Type: application/x-www-form-urlencoded
+Cookie: JSESSIONID=A830669ED09890C7242A27AFD5B3F84E
+DNT: 1
+Host: 911events.ongov.net
+Origin: https://911events.ongov.net
+Referer: https://911events.ongov.net/CADInet/app/events.jsp
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: same-origin
+Sec-Fetch-User: ?1
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0
+sec-ch-ua: "Microsoft Edge";v="135", "Not-A.Brand";v="8", "Chromium";v="135"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Windows"
+
+payload: form1%3AtableEx1%3Aweb1__pagerWeb=1&form1%3AtableEx1%3Agoto1__pagerGoText=1&form1=form1
