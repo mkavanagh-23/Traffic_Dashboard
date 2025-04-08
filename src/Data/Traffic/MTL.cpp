@@ -1,5 +1,6 @@
 #include "MTL.h"
 #include "Traffic.h"
+#include "Output.h"
 #include <rapidxml.hpp>
 #include <string>
 #include <regex>
@@ -32,6 +33,8 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
     Output::logger.log(Output::LogLevel::WARN, "MTL", "Error parsing event ID");
     return false;
   }
+
+  processedKeys.push_back(id);
   
   // Add the event to the map
   // Try to insert a new Event at event, inserted = false if it already exists

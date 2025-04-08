@@ -2,7 +2,6 @@
 #define TRAFFIC_H
 
 #include "DataUtils.h"
-#include "Output.h"
 #include <iostream>
 #include <memory>
 #include <json/json.h>
@@ -133,6 +132,9 @@ public:
 extern std::mutex eventsMutex;
 extern std::unordered_map<std::string, Event> mapEvents;
 
+// And deletion data
+extern std::vector<std::string> processedKeys;
+
 // Get events from all sources
 void fetchEvents();
 void fetchCameras();
@@ -144,38 +146,13 @@ bool parseEvents(const Json::Value& parsedData);
 bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData);
 bool parseEvents(const std::vector<HTML::Event>& parsedData);
 bool processEvent(const Json::Value& parsedEvent);
-bool containsEvent(const Json::Value& events, const std::string& key);
-bool containsEvent(rapidxml::xml_document<>& events, const std::string& key);
-bool containsEvent(const std::vector<HTML::Event>& events, const std::string& key);
 bool inMarket(const Json::Value& parsedEvent);
 Location getLocation(const Json::Value& parsedEvent);
 bool isIncident(const Json::Value& parsedEvent);
 std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent);
-void deleteEvents(std::vector<std::string> keys);
+void clearEvents();
+void deleteEvents(const std::vector<std::string>& keys);
 std::optional<Json::Value> serializeEventsToJSON(const std::vector<std::pair<std::string, std::string>>& queryParams);
-
-// Define a template function for clearing events from the map
-template<typename T>
-void clearEvents(T& events) {
-  // Create a vector to store the keys to be deleted
-  std::vector<std::string> keysToDelete;
-  // Lock the map for processing
-  std::lock_guard<std::mutex> lock(eventsMutex);
-  // Iterate through the event map
-  for(const auto& [key, event] : mapEvents) {
-    // Only match with current source events
-    if(event.getSource() == currentSource) {
-      // Check for matching key
-      if(!containsEvent(events, key)) {
-        keysToDelete.push_back(key);
-        std::string msg = "Marked event fo deletion: " + key;
-        Output::logger.log(Output::LogLevel::INFO, "EVENTS", msg);
-      }
-    }
-  }
-  deleteEvents(keysToDelete);
-  currentSource = DataSource::UNKNOWN;
-}
 
 } // namespace Traffic
 

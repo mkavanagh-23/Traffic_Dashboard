@@ -16,6 +16,7 @@ bool processEvent(rapidxml::xml_node<>* parsedEvent) {
   // Extract Status and ID as a pair
   std::pair<std::string, std::string> description = parseDescription(parsedEvent->first_node("description"));
   auto& [status, key] = description;
+  processedKeys.push_back(key);
 
   // Try to insert a new Event at event, inserted = false if it already exists
   auto [event, inserted] = mapEvents.try_emplace(key, parsedEvent, description);

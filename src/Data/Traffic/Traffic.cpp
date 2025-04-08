@@ -9,6 +9,7 @@
 #include "Output.h"
 #include "RestAPI.h"
 #include "rapidxml.hpp"
+#include <algorithm>
 #include <chrono>
 #include <json/value.h>
 #include <optional>
@@ -24,15 +25,10 @@
  *
  * DATA COLLECTION & PROCESSING
  *
- *
  *    ONGOV:
  *      Investigate REST API
  *        Possible workarounds for geo-restriction
  *          Do we need to proxy requests locally on client?
- *        Add logic to account for multiple pages
- *          Probably need to modify to POST request and investigate payloads in-browser
- *          Do we need to establish a session and maintain state?
- *      Modify cleanup to only run if we get valid table data??
  *      Create an async function which can be run every few minutes to set geo-coordinates
  *        If we use openstreetmap we are limited to one request per second.
  *        Setup an atomic timer!
@@ -61,6 +57,7 @@ namespace Traffic {
 std::mutex eventsMutex;
 std::unordered_map<std::string, Event> mapEvents;
 std::unordered_map<std::string, Camera> mapCameras;
+std::vector<std::string> processedKeys;
 
 // Static object to store data source for current iteration
 DataSource currentSource;
@@ -151,6 +148,8 @@ void fetchEvents() {
   getEvents(OTT::EVENTS_URL);
   Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Montréal events");
   getEvents(MTL::EVENTS_URL);
+
+  clearEvents();
 }
 
 void fetchCameras() {
@@ -302,10 +301,6 @@ bool parseEvents(const Json::Value& parsedData) {
       continue;
     }
   }
-  
-  // Clean up cleared events while our data is still in scope
-  if(parsedData.isArray() && !parsedData.empty() && parsedData[0].isObject())   // Since we are recursive, need to only delete if we are at the event array
-    clearEvents(parsedData);
   return true;
 }
 
@@ -327,10 +322,6 @@ bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
     else if(currentSource == DataSource::MTL)
       MTL::processEvent(event);
   }
-  
-  // Clean up cleared events while our data is still in scope
-  clearEvents(events);  // NOTE: Make sure to pass the dereferenced events data here as parsedData is invalid
-  
   return true;
 }
 
@@ -338,7 +329,8 @@ bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
 bool parseEvents(const std::vector<HTML::Event>& parsedData) {
   // Iterate through each parsed event in the vector
   for(const auto& parsedEvent : parsedData) {
-    // Lock the maop here
+    processedKeys.push_back(parsedEvent.ID);
+    // Lock the map here
     std::lock_guard<std::mutex> lock(eventsMutex);
     // Try to insert it on the vector
     // Will not add if it already exists
@@ -372,6 +364,9 @@ bool processEvent(const Json::Value& parsedEvent) {
   if(!isIncident(parsedEvent)) {
     return false;
   }
+  
+  // Mark the key as processed
+  processedKeys.push_back(key);
 
   // Lock the map before inserting
   std::lock_guard<std::mutex> lock(eventsMutex);
@@ -391,79 +386,6 @@ bool processEvent(const Json::Value& parsedEvent) {
     Output::logger.log(Output::LogLevel::INFO, "JSON", msg);
   }
   return true;
-}
-
-// Check if retrieved JSON data contains an event with given key
-bool containsEvent(const Json::Value& events, const std::string& key) {
-  for(const auto& event : events) {
-    if(!event.isObject() || !(event.isMember("ID") || event.isMember("id"))) {
-      Output::logger.log(Output::LogLevel::WARN, "JSON", "Parsed event is not a valid object");
-      continue;
-    }
-
-    std::string id;
-    // Check for matching key value
-    if(event.isMember("ID"))
-      id = event["ID"].asString();
-    else if(event.isMember("id"))
-      id = event["id"].asString();
-    
-    if(id == key)
-      return true;
-    else
-      continue;
-  }
-  return false;
-}
-
-// Check if retrieved XML data contains an event with given key
-bool containsEvent(rapidxml::xml_document<>& events, const std::string& key) {
-  rapidxml::xml_node<>* root = events.first_node("rss"); // Define root entry point
-  rapidxml::xml_node<>* channel = root->first_node("channel"); // Navigate to channel
-
-  // Iterate through the XML document
-  // Process for MCNY
-  if(currentSource == DataSource::MCNY) {
-    for(rapidxml::xml_node<>* event = channel->first_node("item"); event; event = event->next_sibling()) {
-      // Extract key from description
-      std::pair<std::string, std::string> description = MCNY::parseDescription(event->first_node("description"));
-      auto& [status, parsedKey] = description;
-      // Check for matching key value
-      if(parsedKey == key)
-        return true;
-      else
-        continue;
-    }
-    // Process for MTL
-  } else if(currentSource == DataSource::MTL) {
-    for(rapidxml::xml_node<>* event = channel->first_node("item"); event; event = event->next_sibling()) {
-      // Extract the url
-      std::string url;
-      if(rapidxml::xml_node<>* link = event->first_node("link")){
-        url = link->value();
-      }
-      // And the ID
-      std::string id = MTL::extractID(url);
-      if(id.empty()) {
-        continue;
-      }
-      // Check for matching key value
-      if(id == key)
-        return true;
-      else
-        continue;
-    }
-  }
-  return false;
-}
-
-// Check if parsed HTML events contains an event with the given key
-bool containsEvent(const std::vector<HTML::Event>& events, const std::string& key) {
-  for(const auto& event : events) {
-    if(event.ID == key)
-      return true;
-  }
-  return false;
 }
 
 // Check if an event is both in market and of valid type
@@ -520,10 +442,31 @@ std::chrono::system_clock::time_point getTime(const Json::Value& parsedEvent){
   return Time::DDMMYYYYHHMMSS::toChrono(time);
 }
 
+// Clear all events from the map which we didn't process this loop
+void clearEvents() {
+  std::vector<std::string> keysToDelete;
+  // Lock the map for processing
+  std::lock_guard<std::mutex> lock(eventsMutex);
+  // Iterate through the events map
+  for(const auto& [key, event] : mapEvents) {
+    // Search for the current key in the vector of processed keys
+    auto it = std::find(processedKeys.begin(), processedKeys.end(), key);
+    if(it == processedKeys.end()) { // If we did not find the key on the vector
+      // Mark the key for deletion
+      keysToDelete.push_back(key);
+      std::string msg = "Marked event fo deletion: " + key;
+      Output::logger.log(Output::LogLevel::INFO, "EVENTS", msg);
+    }
+  }
+  deleteEvents(keysToDelete);
+  processedKeys.clear();
+  keysToDelete.clear();
+  currentSource = DataSource::UNKNOWN;
+}
+
 // Delete all events that match given keys from the map
-// Called by templated "Clean Events" function
 // NOTE: Locking already implemented within clearEvents, our map is already locked at this point
-void deleteEvents(std::vector<std::string> keys) {
+void deleteEvents(const std::vector<std::string>& keys) {
   for(const auto& key : keys) {
     mapEvents.erase(key);
     std::string msg = "Deleted event: " + key;
