@@ -27,6 +27,7 @@ void getTrafficData() {
   int sleep_intervals = sleep_seconds / interval_seconds;
   while(!programEnd) {
     Traffic::fetchEvents();
+    Traffic::clearEvents();
     Output::logger.flush();
     // Sleep in intervals
     for(int i = 0; i < sleep_intervals && !programEnd; i++)

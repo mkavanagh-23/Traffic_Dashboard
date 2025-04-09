@@ -148,8 +148,6 @@ void fetchEvents() {
   getEvents(OTT::EVENTS_URL);
   Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Montréal events");
   getEvents(MTL::EVENTS_URL);
-
-  clearEvents();
 }
 
 void fetchCameras() {
@@ -713,6 +711,11 @@ Event::Event(const Json::Value& parsedEvent)
           Output::logger.log(Output::LogLevel::WARN, "JSON", "Failed to parse dataSource member during construction");
         if(parsedEvent.isMember("PrimaryLocation"))
           crossStreet = parsedEvent["PrimaryLocation"].asString();
+        if(parsedEvent.isMember("EventSubType")) {
+          std::string subType = parsedEvent["EventSubType"].asString();
+          if(!subType.empty())
+            title = subType + " (" + title + ")";
+        }
         if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
           timeReported = Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["Reported"].asString());
           timeUpdated = Time::DDMMYYYYHHMMSS::toChrono(parsedEvent["LastUpdated"].asString());
