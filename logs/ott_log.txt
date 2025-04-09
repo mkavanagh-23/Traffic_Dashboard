@@ -1,4 +1,4 @@
 [eventType] INCIDENT
-[status] ACTIVE
-[message] Ray Wilson closed between Yorks Corners and Gregoire due to flooding. Duration is unknown. Avoid area.
 [headline] Ray Wilson between Yorks Corners and Gregoire
+[message] Ray Wilson closed between Yorks Corners and Gregoire due to flooding. Duration is unknown. Avoid area.
+[status] ACTIVE

@@ -1,19 +1,17 @@
+[Description] Collision on HWY 401 Eastbound COLLECTOR RAMP at NEILSON ROAD, Toronto. Left lane closed.
+[Description] Collision on HWY 427 Northbound EXPRESS at BLOOR STREET, Toronto. Right lane closed.
+[Description] Collision on HWY 427 Northbound TRANSFER at Dundas Collector to Express, Toronto. Right lane closed.
 [Description] Construction on HWY 400 Southbound  at SERVICE CENTRE MAPLE ONROUTE SOUTHBOUND, Vaughan. 3 right lanes closed.
-[Description] Construction on HWY 400 Southbound RAMP at TESTON ROAD, Vaughan. All lanes closed.
-[Description] Construction on HWY 400 Southbound ON-RAMP at CITYVIEW BLVD, Vaughan. All lanes closed.
-[Description] Emergency Roadwork on HWY 401 Westbound ON-RAMP at KENNEDY RD -SCARBOROUGH, Toronto. All lanes closed.
-[Description] Construction on HWY 404 Southbound  at STOUFFVILLE ROAD, Stouffville-Richmondhill. Right lane closed.
-[Description] Maintenance on HWY 400 Northbound  at HWY 88, Bradford. 2 left lanes closed.
 [Description] Construction on HWY 400 Southbound COLLECTOR at LANGSTAFF ROAD, Vaughan. All lanes closed.
+[Description] Construction on HWY 400 Southbound ON-RAMP at CITYVIEW BLVD, Vaughan. All lanes closed.
+[Description] Construction on HWY 400 Southbound RAMP at TESTON ROAD, Vaughan. All lanes closed.
+[Description] Construction on HWY 401 Eastbound COLLECTOR at 404/DVP, Toronto. 1 right lane closed.
+[Description] Construction on HWY 401 Eastbound ON-RAMP at VICTORIA PARK AVE, Toronto. All lanes closed.
+[Description] Construction on HWY 401 Eastbound ON-RAMP at WARDEN AVE, Toronto. All lanes closed.
 [Description] Construction on HWY 401 Westbound  at LAKE RIDGE ROAD, Whitby. Right lane closed.
 [Description] Construction on HWY 401 Westbound ON-RAMP at LAKE RIDGE ROAD, Whitby. All lanes closed.
-[Description] Construction on HWY 401 Westbound ON-RAMP at LAKE RIDGE ROAD, Whitby. All lanes closed.
-[Description] Collision on HWY 427 Northbound EXPRESS at BLOOR STREET, Toronto. Right lane closed.
-[Description] Collision on HWY 401 Eastbound COLLECTOR RAMP at NEILSON ROAD, Toronto. Left lane closed.
-[Description] Collision on HWY 427 Northbound TRANSFER at Dundas Collector to Express, Toronto. Right lane closed.
-[Description] Construction on HWY 401 Eastbound ON-RAMP at VICTORIA PARK AVE, Toronto. All lanes closed.
-[Description] Construction on HWY 401 Eastbound ON-RAMP at VICTORIA PARK AVE, Toronto. All lanes closed.
-[Description] Construction on HWY 401 Eastbound ON-RAMP at WARDEN AVE, Toronto. All lanes closed.
-[Description] Construction on HWY 401 Eastbound ON-RAMP at WARDEN AVE, Toronto. All lanes closed.
-[Description] Construction on HWY 401 Eastbound COLLECTOR at 404/DVP, Toronto. 1 right lane closed.
+[Description] Construction on HWY 404 Southbound  at STOUFFVILLE ROAD, Stouffville-Richmondhill. Right lane closed.
+[Description] Disabled Vehicle on HWY 401 Eastbound COLLECTOR RAMP at HWY 2/ KINGSTON RD, Toronto. Left lane closed.
 [Description] Disabled Vehicle on HWY 401 Eastbound COLLECTOR at KENNEDY RD -SCARBOROUGH, Toronto. 1 left lane closed.
+[Description] Emergency Roadwork on HWY 401 Westbound ON-RAMP at KENNEDY RD -SCARBOROUGH, Toronto. All lanes closed.
+[Description] Maintenance on HWY 400 Northbound  at HWY 88, Bradford. 2 left lanes closed.

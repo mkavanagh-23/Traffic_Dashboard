@@ -29,6 +29,9 @@ void getTrafficData() {
     Traffic::fetchEvents();
     Traffic::clearEvents();
     Output::logger.flush();
+    Output::mtlLog.flush();
+    Output::ottLog.flush();
+    Output::ontLog.flush();
     // Sleep in intervals
     for(int i = 0; i < sleep_intervals && !programEnd; i++)
       std::this_thread::sleep_for(std::chrono::seconds(interval_seconds));

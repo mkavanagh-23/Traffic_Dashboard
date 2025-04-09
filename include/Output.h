@@ -97,7 +97,6 @@ public:
     // Push the stream to the file
     std::string logMessage = ss.str();
     logFile << logMessage;
-    flush();
   }
 };
 
