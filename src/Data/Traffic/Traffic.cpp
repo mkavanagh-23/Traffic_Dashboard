@@ -61,7 +61,7 @@ std::vector<std::string> processedKeys;
 
 // Static object to store data source for current iteration
 DataSource currentSource;
-std::string currentCookie;
+//std::string currentCookie;
 
 Region toRegion(const std::string& regionStr) {
   if(regionStr == "Syracuse" || regionStr == "syracuse")
@@ -131,7 +131,7 @@ DataSource toSource(const std::string& sourceStr) {
 // Set the current source and session cookie
 void setSource(const DataSource source) {
   currentSource = source;
-  currentCookie = "cookies/" + toString(source) + ".txt";
+  //currentCookie = "cookies/" + toString(source) + ".txt";
 }
 
 // Get events from all URLs
@@ -211,7 +211,7 @@ bool getEvents(std::string url) {
   }
 
   // Retrieve data with cURL
-  auto [result, data, headers] = cURL::getData(url, currentCookie);
+  auto [result, data, headers] = cURL::getData(url);
 
   // Check for successful extraction
   if(result == cURL::Result::SUCCESS) {
@@ -962,7 +962,7 @@ bool getCameras(std::string url){
   currentSource = DataSource::NYSDOT;
   
   // Retrieve data with cURL
-  auto [result, data, headers] = cURL::getData(url, currentCookie);
+  auto [result, data, headers] = cURL::getData(url);
   
   // Check for successful extraction
   if(result == cURL::Result::SUCCESS) {

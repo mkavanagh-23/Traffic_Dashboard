@@ -44,7 +44,7 @@ bool postRequest(const std::string& url, int numPages) {
   for(int i = 0; i < numPages; i++) {
     std::string loopMsg = "POST request to ONGOV page " + std::to_string(i + 1) + " of " + std::to_string(numPages);
     // Issue the POST request
-    auto [result, data, headers] = cURL::postData(url, payloads[i], currentCookie);
+    auto [result, data, headers] = cURL::postData(url, payloads[i]);
     Output::logger.log(Output::LogLevel::INFO, "cURL", loopMsg);
     // Process the data
     // Check for successful extraction

@@ -46,7 +46,7 @@ DataSource toSource(const std::string& sourceStr);
 void setSource(const DataSource source);
 
 extern DataSource currentSource;
-extern std::string currentCookie;
+//extern std::string currentCookie;
 
 class Camera {
 private:

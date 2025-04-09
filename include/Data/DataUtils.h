@@ -50,9 +50,9 @@ size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata);
 // Callback function for writing the result data
 size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output);
 // Fetch and process data from remote url (Result, Data, Headers)
-std::tuple<Result, std::string, std::vector<std::string>> getData(const std::string& url, const std::string& cookiesFile);
+std::tuple<Result, std::string, std::vector<std::string>> getData(const std::string& url);
 // POST data to a remote endpoint (Result, Data, Headers)
-std::tuple<Result, std::string, std::vector<std::string>> postData(const std::string& url, const std::string& postData, const std::string& cookiesFile);
+std::tuple<Result, std::string, std::vector<std::string>> postData(const std::string& url, const std::string& postData);
 // Extract the content type from the response headers
 std::string getContentType(const std::vector<std::string>& headers);
 
