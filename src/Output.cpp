@@ -8,6 +8,7 @@
 namespace Output {
 Logger logger("log.txt");
 Logger mtlLog("logs/mtl_log.txt");
+Logger mtlDetailLog("logs/mtl_details.txt");
 Logger ontLog("logs/ont_log.txt");
 Logger ottLog("logs/ott_log.txt");
 

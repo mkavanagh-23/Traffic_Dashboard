@@ -134,6 +134,7 @@ extern std::unordered_map<std::string, Event> mapEvents;
 
 // And deletion data
 extern std::vector<std::string> processedKeys;
+extern std::vector<DataSource> extractedSources;
 
 // Get events from all sources
 void fetchEvents();

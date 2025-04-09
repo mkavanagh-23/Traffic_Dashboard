@@ -9,7 +9,6 @@
 #include "Output.h"
 #include "RestAPI.h"
 #include "rapidxml.hpp"
-#include <algorithm>
 #include <chrono>
 #include <json/value.h>
 #include <optional>
@@ -36,16 +35,15 @@
  *    ONMT: 
  *      Normalize data for Ontario events
  *        Need to extract optional side road if it exists, rest seems to be parsing fine
- *        Check reported time against current time to filter out future (planned) events
  *
  *    OTT:
  *      Fix parsing against more test cases
  *        Need to gather more data to test against!
  *        Should we parse against the headline or the full description?
+ *        Headline seems to be fine in most cases, still collecting data
  *
  *    MTL: 
  *      Use REGEX to parse description
- *      Redefine global cleanup to work with Montreal events
  *      Create an async function which can be run every few minutes to set geo-coordinates
  *        If we use openstreetmap we are limited to one request per second.
  *        Setup an atomic timer!
@@ -58,6 +56,7 @@ std::mutex eventsMutex;
 std::unordered_map<std::string, Event> mapEvents;
 std::unordered_map<std::string, Camera> mapCameras;
 std::vector<std::string> processedKeys;
+std::vector<DataSource> extractedSources;
 
 // Static object to store data source for current iteration
 DataSource currentSource;
@@ -255,6 +254,8 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
   // Check for valid JSON, XML, or HTML response and parse
   if(contentType.find("application/json") != std::string::npos) {
     auto parsedData = JSON::parseData(data);  // Returns a Json::Value object
+    // Mark JSON source as success
+    extractedSources.push_back(currentSource);
     parseEvents(parsedData);
   } else if(contentType.find("text/xml") != std::string::npos) {
     // Convert encoding for MTL data
@@ -266,6 +267,8 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
       Output::logger.log(Output::LogLevel::WARN, "JSON", "Failed to parse data stream");
       return false;
     }
+    // Mark XML source as success
+    extractedSources.push_back(currentSource);
     // Parse the events
     parseEvents(std::move(parsedData)); //  NOTE: parsedData has now been invalidated, attmpting to access will result in UB
   } else if(contentType.find("text/html") != std::string::npos) {
@@ -275,6 +278,8 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
       Output::logger.log(Output::LogLevel::WARN, "HTML", "Failed to parse data stream");
       return false;
     }
+    // Mark HTML source as success
+    extractedSources.push_back(currentSource);
     parseEvents(*parsedData);
   } else {
     // Error and exit if invalid type returned
@@ -445,20 +450,28 @@ void clearEvents() {
   std::vector<std::string> keysToDelete;
   // Lock the map for processing
   std::lock_guard<std::mutex> lock(eventsMutex);
-  // Iterate through the events map
-  for(const auto& [key, event] : mapEvents) {
-    // Search for the current key in the vector of processed keys
-    auto it = std::find(processedKeys.begin(), processedKeys.end(), key);
-    if(it == processedKeys.end()) { // If we did not find the key on the vector
-      // Mark the key for deletion
-      keysToDelete.push_back(key);
-      std::string msg = "Marked event fo deletion: " + key;
-      Output::logger.log(Output::LogLevel::INFO, "EVENTS", msg);
+  // Iterate through ONLY markets we extracted this run
+  for(const auto& source : extractedSources) {
+    // Iterate through the events map
+    for(const auto& [key, event] : mapEvents) {
+      // Check the region
+      if(event.getSource() == source) {
+        // Search for the current key in the vector of processed keys
+        auto it = std::find(processedKeys.begin(), processedKeys.end(), key);
+        if(it == processedKeys.end()) { // If we did not find the key on the vector
+          // Mark the key for deletion
+          keysToDelete.push_back(key);
+          std::string msg = "Marked event fo deletion: " + key;
+          Output::logger.log(Output::LogLevel::INFO, "EVENTS", msg);
+        }
+      }
     }
   }
+
   deleteEvents(keysToDelete);
   processedKeys.clear();
   keysToDelete.clear();
+  extractedSources.clear();
   currentSource = DataSource::UNKNOWN;
 }
 
@@ -830,8 +843,11 @@ Event::Event(const rapidxml::xml_node<>* parsedEvent)
         details = cdataNode->value();
       }
     }
-    if(!details.empty())
+    if(!details.empty()) {
       this->description = details;
+      std::string msg = details + "\n\n****************\n\n";
+      Output::mtlDetailLog.writeLine("CDATA", msg);
+    }
     // TODO:
     // Parse description into several elements
     // Or do we want to just sanitize newline chars and store as descritpion
