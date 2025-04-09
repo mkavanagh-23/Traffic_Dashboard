@@ -643,12 +643,18 @@ Event::Event(const Json::Value& parsedEvent)
     region = Region::Ottawa;
     if(parsedEvent.isMember("id"))
       ID = parsedEvent["id"].asString();
-    if(parsedEvent.isMember("eventType"))
+    if(parsedEvent.isMember("eventType")) {
       title = parsedEvent["eventType"].asString();
-    if(parsedEvent.isMember("status"))
+      Output::ottLog.writeLine("eventType", title);
+    }
+    if(parsedEvent.isMember("status")) {
       status = parsedEvent["status"].asString();
-    if(parsedEvent.isMember("message"))
+      Output::ottLog.writeLine("status", status);
+    }
+    if(parsedEvent.isMember("message")) {
       description = parsedEvent["message"].asString();
+      Output::ottLog.writeLine("message", description);
+    }
 
     // Extract the location
     if(parsedEvent.isMember("geodata")) {
@@ -674,6 +680,7 @@ Event::Event(const Json::Value& parsedEvent)
 //  We need more test cases
 
     if(parsedEvent.isMember("headline")) {
+      Output::ottLog.writeLine("headline", parsedEvent["headline"].asString());
       auto parsedHeadline = OTT::parseHeadline(parsedEvent["headline"].asString());
       if(parsedHeadline) {
         auto [road, dir, cross] = *parsedHeadline;
@@ -723,6 +730,7 @@ Event::Event(const Json::Value& parsedEvent)
         break;
       // Construct members for ONMT
       case DataSource::ONMT:
+        Output::ontLog.writeLine("Description", description);
         URL = "https://511on.ca/";
         // Determine the region
         if(ONMT::regionToronto.contains(location))
@@ -800,6 +808,7 @@ Event::Event(const rapidxml::xml_node<>* parsedEvent)
   // Set the Title and main street
   // TODO: Redo and fix parsing of roadway and title
   if(rapidxml::xml_node<>* title = parsedEvent->first_node("title")){
+    Output::mtlLog.writeLine("<title>", title->value());
     auto parsedTitle = MTL::parseTitle(title->value());
     if(parsedTitle) {
       auto [roadway, eventType] = *parsedTitle;

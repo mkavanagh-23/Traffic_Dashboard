@@ -74,9 +74,37 @@ public:
     std::string logMessage = ss.str();
     logFile << logMessage;
   }
+
+  template<typename T>
+  void writeLine(const std::string& label, const T& message) {
+    std::lock_guard<std::mutex> lock(logMutex);
+    if(!logFile.is_open() || !logFile) {
+      // Handle error case
+      if(!createDirIfMissing(path))
+        return;
+      else
+        logFile.open(path, std::ios::app);
+    }
+
+    // Create a stringstream to hold the message
+    std::stringstream ss;
+    
+    // Log the level
+    ss << "[" << label << "] ";
+    // Log the message
+    ss <<  message << '\n';
+    
+    // Push the stream to the file
+    std::string logMessage = ss.str();
+    logFile << logMessage;
+    flush();
+  }
 };
 
 extern Logger logger;
+extern Logger mtlLog;
+extern Logger ontLog;
+extern Logger ottLog;
 
 namespace Colors {
   const std::string RED = "\033[31m";
