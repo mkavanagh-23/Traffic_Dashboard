@@ -24,7 +24,8 @@ RUN apt-get install -y \
     sudo \
     curl \
     bash \
-    git
+    git \
+    jq
 
 # Install project build dependencies
 RUN apt-get install -y \
