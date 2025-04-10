@@ -22,9 +22,9 @@
 /* 
  TODO:
  *
- * CURL Cookie handlking
- *  If we set cookieFile to "", and remove our cookieJar, curl can handle cookies in memory
- *  Session cookies persist for the lifetime of our cURL::Handle object, we likely want to create a new one each run
+ *  NYS Thruway:
+ *    https://www.thruway.ny.gov/xml/netdata/events.xml
+ *    Need to parse XML, should be very easy loks very refined already
  *
  *  ONGOV:
  *    Investigate REST API
