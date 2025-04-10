@@ -25,6 +25,20 @@
  *  NYS Thruway:
  *    https://www.thruway.ny.gov/xml/netdata/events.xml
  *    Need to parse XML, should be very easy loks very refined already
+        For each <event> we need to extract the following tags
+          category="incident" 
+          eventid="CAD-251000205" 
+          updatetime="4/10/2025 1:40 PM" 
+          orgid="NYS Thruway Authority" 
+          eventtype="crash" 
+          latitude="42.62905" 
+          longitude="-73.77875" 
+          milepost="141.6" 
+          route="I-87 - NYS Thruway" 
+          region="AL" 
+          direction="northbound" 
+          eventdesc="crash I-87 - NYS Thruway northbound between exit 22 and exit 23 " 
+          expirationdatetime="Until further notice"
  *
  *  ONGOV:
  *    Investigate REST API
