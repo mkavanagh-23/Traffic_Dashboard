@@ -22,28 +22,21 @@
 /* 
  TODO:
  *
- * DATA COLLECTION & PROCESSING
+ *  ONGOV:
+ *    Investigate REST API
+ *      Possible workarounds for geo-restriction
+ *        Do we need to proxy requests locally on client?
  *
- *    ONGOV:
- *      Investigate REST API
- *        Possible workarounds for geo-restriction
- *          Do we need to proxy requests locally on client?
- *      Create an async function which can be run every few minutes to set geo-coordinates
- *        If we use openstreetmap we are limited to one request per second.
- *        Setup an atomic timer!
+ *  OTT:
+ *    Fix parsing against more test cases
+ *      Should we parse against the headline or the full description?
+ *      Headline seems to be fine in most cases, still collecting data
+ *      Perhaps we want to try to extract the event title at the end?
  *
- *    OTT:
- *      Fix parsing against more test cases
- *        Need to gather more data to test against!
- *        Should we parse against the headline or the full description?
- *        Headline seems to be fine in most cases, still collecting data
- *        Perhaps we want to try to extract the event title at the end?
- *
- *    MTL: 
- *      Use REGEX to parse description
- *      Create an async function which can be run every few minutes to set geo-coordinates
- *        If we use openstreetmap we are limited to one request per second.
- *        Setup an atomic timer!
+ *  MTL: 
+ *    Use REGEX to parse description
+ *    Need to collect more data to test against first
+ *    May take a while...
  */
 
 namespace Traffic {
@@ -859,7 +852,7 @@ Event::Event(const rapidxml::xml_node<>* parsedEvent)
     // Or do we want to just sanitize newline chars and store as descritpion
     // Only use values parsed from the title instead (much easier)
     //
-    // Elements are delimited via new line so should be relatively simple
+    // Elements are delimited via new line or a '<br>' so should be relatively simple
     //auto parsedDescription = parseDescription(details);
     /*
      * Line 1       Town name
