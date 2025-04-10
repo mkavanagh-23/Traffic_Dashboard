@@ -15,7 +15,7 @@ using addressDir = std::pair<std::string, std::optional<std::string>>;
 extern const std::string EVENTS_URL;
 extern std::vector<std::string> payloads;   // A list of data payloads for each page of the HTML
 std::optional<std::pair<int, int>> getPageNumbers(const std::string& htmlData);
-bool postRequest(const std::string& url, int numPages);
+bool postRequest(const std::string& url, int numPages, cURL::Handle& curlHandle);
 
 namespace Gumbo {
 // Parse data from HTML string

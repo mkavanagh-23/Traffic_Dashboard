@@ -75,7 +75,7 @@ std::string convertEncoding(const std::string& input, const char* from_encoding,
 
 namespace cURL {
 
-const std::string cookiesFile{"cookies.txt"};
+//const std::string cookiesFile{"cookies.txt"};
 
 // Write the header data
 size_t HeaderCallback(char* buffer, size_t size, size_t nitems, void* userdata) {
@@ -96,8 +96,7 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* out
 }
 
 // Fetch a data string from a remote source
-std::tuple<Result, std::string, std::vector<std::string>> getData(const std::string& url){
-  Handle curl;   // cURL malloc (Initialize an object via RAII)
+std::tuple<Result, std::string, std::vector<std::string>> getData(const std::string& url, Handle& curl){
   std::string responseData;         // Create a string to hold the data
   std::vector<std::string> headers; // Create a vector to hold the response headers
   
@@ -115,8 +114,7 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
   curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
   
   // Set the cookies location
-  curl_easy_setopt(curl.get(), CURLOPT_COOKIEJAR, cookiesFile.c_str());      // Set the file to store cookies
-  curl_easy_setopt(curl.get(), CURLOPT_COOKIEFILE, cookiesFile.c_str());     // Set the file to load cookies from
+  curl_easy_setopt(curl.get(), CURLOPT_COOKIEFILE, "");     // Enable in-memory cookie management
   
   // Set up header handling
   curl_easy_setopt(curl.get(), CURLOPT_HEADERFUNCTION, HeaderCallback); // Custom function to capture headers
@@ -144,8 +142,7 @@ std::tuple<Result, std::string, std::vector<std::string>> getData(const std::str
 }
 
 // POST data to a remote endpoint
-std::tuple<Result, std::string, std::vector<std::string>> postData(const std::string& url, const std::string& postData) {
-  Handle curl;   // cURL malloc (RAII object)
+std::tuple<Result, std::string, std::vector<std::string>> postData(const std::string& url, const std::string& postData, Handle& curl) {
   std::string responseData;         // Create a string to hold the data
   std::vector<std::string> headers; // Create a vector to hold the response headers
   
@@ -163,8 +160,7 @@ std::tuple<Result, std::string, std::vector<std::string>> postData(const std::st
   curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYPEER, 0L); // Optional, depending on your SSL setup
   
   // Set the cookies location
-  curl_easy_setopt(curl.get(), CURLOPT_COOKIEJAR, cookiesFile.c_str());      // Set the file to store cookies
-  curl_easy_setopt(curl.get(), CURLOPT_COOKIEFILE, cookiesFile.c_str());     // Set the file to load cookies from
+  curl_easy_setopt(curl.get(), CURLOPT_COOKIEFILE, "");     // Enable in-memory cookie management
 
   // Write the callback data 
   curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, WriteCallback); // Set the write function

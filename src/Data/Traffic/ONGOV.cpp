@@ -1,4 +1,5 @@
 #include "ONGOV.h"
+#include "DataUtils.h"
 #include "Output.h"
 #include "Traffic.h"
 #include <cassert>
@@ -36,7 +37,7 @@ std::optional<std::pair<int, int>> getPageNumbers(const std::string& htmlData) {
 }
 
 // Get data for all pages
-bool postRequest(const std::string& url, int numPages) {
+bool postRequest(const std::string& url, int numPages, cURL::Handle& curlHandle) {
   assert(numPages <= payloads.size && "Number of HTML pages exceeds request payload size");
   std::string msg = "Found " + std::to_string(numPages) + " ONGOV HTML pages";
   Output::logger.log(Output::LogLevel::INFO, "cURL", msg);
@@ -44,7 +45,7 @@ bool postRequest(const std::string& url, int numPages) {
   for(int i = 0; i < numPages; i++) {
     std::string loopMsg = "POST request to ONGOV page " + std::to_string(i + 1) + " of " + std::to_string(numPages);
     // Issue the POST request
-    auto [result, data, headers] = cURL::postData(url, payloads[i]);
+    auto [result, data, headers] = cURL::postData(url, payloads[i], curlHandle);
     Output::logger.log(Output::LogLevel::INFO, "cURL", loopMsg);
     // Process the data
     // Check for successful extraction
@@ -160,15 +161,18 @@ std::optional<std::vector<HTML::Event>> processTable(GumboNode* tableNode) {
 
       GumboElement* row = &rowNode->v.element;
       // Check for table row
-      if(row->tag == GUMBO_TAG_TR)
+      if(row->tag == GUMBO_TAG_TR) {
         processRow(row, tableData);
+      }
     }
   }
   // Check if we have data to return
   if(!tableData.empty())
     return tableData;
-  else
+  else {
+    Output::logger.log(Output::LogLevel::WARN, "HTML", "No data rows found in table");
     return std::nullopt;
+  }
 }
 
 // Process a table row into an Event and place on the vector

@@ -22,6 +22,10 @@
 /* 
  TODO:
  *
+ * CURL Cookie handlking
+ *  If we set cookieFile to "", and remove our cookieJar, curl can handle cookies in memory
+ *  Session cookies persist for the lifetime of our cURL::Handle object, we likely want to create a new one each run
+ *
  *  ONGOV:
  *    Investigate REST API
  *      Possible workarounds for geo-restriction
@@ -39,7 +43,7 @@
  *    May take a while...
  */
 
-namespace Traffic {
+namespace Traffic { 
 
 // Data structures
 std::mutex eventsMutex;
@@ -199,8 +203,11 @@ bool getEvents(std::string url) {
     return false;
   }
 
+  // Initialize a new cURL handle for the current source
+  cURL::Handle curlHandle;
+
   // Retrieve data with cURL
-  auto [result, data, headers] = cURL::getData(url);
+  auto [result, data, headers] = cURL::getData(url, curlHandle);
 
   // Check for successful extraction
   if(result == cURL::Result::SUCCESS) {
@@ -210,7 +217,7 @@ bool getEvents(std::string url) {
         auto pageData = ONGOV::getPageNumbers(data);
         if(pageData) {
           auto [currentPage, totalPages] = *pageData;
-          ONGOV::postRequest(url, totalPages);
+          ONGOV::postRequest(url, totalPages, curlHandle); // Reuse the same curlHandle for cookie persistence
         } else {
           processData(data, headers);
         }
@@ -984,9 +991,12 @@ bool getCameras(std::string url){
   url += NYSDOT::API_KEY;
   // Set current Data Source
   currentSource = DataSource::NYSDOT;
+
+  // Create a curl handle for the request
+  cURL::Handle curlHandle;
   
   // Retrieve data with cURL
-  auto [result, data, headers] = cURL::getData(url);
+  auto [result, data, headers] = cURL::getData(url, curlHandle);
   
   // Check for successful extraction
   if(result == cURL::Result::SUCCESS) {
