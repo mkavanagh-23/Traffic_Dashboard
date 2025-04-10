@@ -103,7 +103,6 @@ public:
 extern Logger logger;
 extern Logger mtlLog;
 extern Logger mtlDetailLog;
-extern Logger ontLog;
 extern Logger ottLog;
 
 namespace Colors {

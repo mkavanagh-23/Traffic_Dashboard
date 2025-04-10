@@ -32,15 +32,12 @@
  *        If we use openstreetmap we are limited to one request per second.
  *        Setup an atomic timer!
  *
- *    ONMT: 
- *      Normalize data for Ontario events
- *        Need to extract optional side road if it exists, rest seems to be parsing fine
- *
  *    OTT:
  *      Fix parsing against more test cases
  *        Need to gather more data to test against!
  *        Should we parse against the headline or the full description?
  *        Headline seems to be fine in most cases, still collecting data
+ *        Perhaps we want to try to extract the event title at the end?
  *
  *    MTL: 
  *      Use REGEX to parse description
@@ -715,8 +712,6 @@ Event::Event(const Json::Value& parsedEvent)
       mainStreet = parsedEvent["RoadwayName"].asString();
     if(parsedEvent.isMember("DirectionOfTravel"))
       direction = parsedEvent["DirectionOfTravel"].asString();
-    if(parsedEvent.isMember("Description"))
-      description = parsedEvent["Description"].asString();
     if(parsedEvent.isMember("Latitude") && parsedEvent.isMember("Latitude")) {
       location = { parsedEvent["Latitude"].asDouble(), parsedEvent["Longitude"].asDouble() }; 
     }
@@ -731,6 +726,8 @@ Event::Event(const Json::Value& parsedEvent)
           Output::logger.log(Output::LogLevel::WARN, "JSON", "Failed to parse dataSource member during construction");
         if(parsedEvent.isMember("PrimaryLocation"))
           crossStreet = parsedEvent["PrimaryLocation"].asString();
+        if(parsedEvent.isMember("Description"))
+          description = parsedEvent["Description"].asString();
         if(parsedEvent.isMember("EventSubType")) {
           std::string subType = parsedEvent["EventSubType"].asString();
           if(!subType.empty())
@@ -743,7 +740,6 @@ Event::Event(const Json::Value& parsedEvent)
         break;
       // Construct members for ONMT
       case DataSource::ONMT:
-        Output::ontLog.writeLine("Description", description);
         URL = "https://511on.ca/";
         // Determine the region
         if(ONMT::regionToronto.contains(location))
@@ -753,6 +749,16 @@ Event::Event(const Json::Value& parsedEvent)
         if(parsedEvent.isMember("Reported") && parsedEvent.isMember("LastUpdated")) {
           timeReported = Time::UNIX::toChrono(parsedEvent["Reported"].asDouble(), std::nullopt);
           timeUpdated = Time::UNIX::toChrono(parsedEvent["LastUpdated"].asDouble(), std::nullopt);
+        }
+        // Parse the description value into [Title, Main Street, Secondary Street]
+        if(parsedEvent.isMember("Description")) {
+          description = parsedEvent["Description"].asString();
+          auto parsedDescription = ONMT::parseDescription(description);
+          if(parsedDescription) {
+            auto [eventTitle, eventMain, eventCross] = *parsedDescription;
+            title = eventTitle + " (" + title + ")";
+            crossStreet = eventCross;
+          }
         }
         break;
       // Error out in all other cases
