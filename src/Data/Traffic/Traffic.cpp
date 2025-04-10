@@ -41,6 +41,17 @@
  *    Use REGEX to parse description
  *    Need to collect more data to test against first
  *    May take a while...
+ *
+ *  NITTEC ???????
+ *      https://www.nittec.org/travel_advisories/incidents__alerts/
+ *      Parse HTML returned from NITTEC incidents and alerts endpoint
+ *      <div class="left-column content-alerts cf">
+ *        <ul class="accordion" id="accordion">
+ *          <li class="cf clickable activeDrawer">  // wanted classes: eventType-Incident, eventType-Congestion, eventType-Alert, eventType-Construction
+ *            <ul class = folder> // Only enter the <ul> if it has 'style="display: block;"' set
+ *              Iterate through each <li>, id is contained as the 'id=""' tag
+ *              Main Roadway and direction in <strong> tag of <li>
+ *              Full description (prefaced by " - " on next line between quotes
  */
 
 namespace Traffic { 
