@@ -25,7 +25,7 @@
  *  NYS Thruway:
  *    https://www.thruway.ny.gov/xml/netdata/events.xml
  *    Need to parse XML, should be very easy loks very refined already
-        For each <event> we need to extract the following tags
+        For each <event> we can extract the following attributes
           category="incident" 
           eventid="CAD-251000205" 
           updatetime="4/10/2025 1:40 PM" 
@@ -61,7 +61,7 @@
  *      Parse HTML returned from NITTEC incidents and alerts endpoint
  *      <div class="left-column content-alerts cf">
  *        <ul class="accordion" id="accordion">
- *          <li class="cf clickable activeDrawer">  // wanted classes: eventType-Incident, eventType-Congestion, eventType-Alert, eventType-Construction
+ *          <li class="cf clickable activeDrawer">  // wanted class attributes: eventType-Incident, eventType-Congestion, eventType-Alert, eventType-Construction
  *            <ul class = folder> // Only enter the <ul> if it has 'style="display: block;"' set
  *              Iterate through each <li>, id is contained as the 'id=""' tag
  *              Main Roadway and direction in <strong> tag of <li>
