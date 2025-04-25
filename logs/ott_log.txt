@@ -18,3 +18,15 @@
 [status] ACTIVE
 [message] Colonel By northbound reduced to 1 lane at Rideau due to a disabled vehicle. Duration is unknown.
 [headline] Colonel By N/B at Rideau
+[eventType] INCIDENT
+[status] ACTIVE
+[message] Ray Wilson closed between Yorks Corners and Gregoire due to flooding. Duration is unknown. Access for local traffic maintained.
+[headline] Ray Wilson between Yorks Corners and Gregoire
+[eventType] INCIDENT
+[status] ACTIVE
+[message] Ray Wilson closed between Yorks Corners and Gregoire due to flooding. Duration is unknown. Access for local traffic maintained.
+[headline] Ray Wilson between Yorks Corners and Gregoire
+[eventType] INCIDENT
+[status] ACTIVE
+[message] Hwy 174 closed between Old montreal and Canaan due to a collision. Duration is unknown. Avoid area and use other routes.
+[headline] Hwy 174 between Old montreal and Canaan

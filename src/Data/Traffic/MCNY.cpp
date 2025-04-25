@@ -1,7 +1,7 @@
 #include "MCNY.h"
 #include "Output.h"
 #include "Traffic.h"
-
+#include <rapidxml.hpp>
 #include <string>
 #include <regex>
 #include <tuple>
@@ -9,7 +9,7 @@
 namespace Traffic {
 namespace MCNY {
 
-extern const std::string EVENTS_URL{ "https://www.monroecounty.gov/incidents911.rss" };
+const std::string EVENTS_URL{ "https://www.monroecounty.gov/incidents911.rss" };
 
 // Process an XML event for storage
 bool processEvent(rapidxml::xml_node<>* parsedEvent) {

@@ -1,5 +1,6 @@
 #include "Traffic.h"
 #include "NYSDOT.h"
+#include "NYSTA.h"
 #include "MCNY.h"
 #include "ONMT.h"
 #include "MTL.h"
@@ -23,7 +24,7 @@
  *
  *  NYS Thruway:
  *    https://www.thruway.ny.gov/xml/netdata/events.xml
- *    Need to parse XML, should be very easy loks very refined already
+ *    Need to parse XML, should be very easy looks very refined already
  *      For each <event> we can extract the following attributes
  *        category="incident" 
  *        eventid="CAD-251000205" 
@@ -107,6 +108,9 @@ std::string toString(const DataSource& dataSource) {
     case DataSource::NYSDOT:
       sourceStr = "nysdot";
       break;
+    case DataSource::NYSTA:
+      sourceStr = "nysta";
+      break;
     case DataSource::ONGOV:
       sourceStr = "ongov";
       break;
@@ -131,6 +135,8 @@ std::string toString(const DataSource& dataSource) {
 DataSource toSource(const std::string& sourceStr) {
   if(sourceStr == "NYSDOT" || sourceStr == "nysdot" || sourceStr == "511ny" || sourceStr == "511NY")
     return DataSource::NYSDOT;
+  if(sourceStr == "NYSTA" || sourceStr == "nysta" || sourceStr == "Thruway" || sourceStr == "thruway")
+    return DataSource::NYSTA;
   if(sourceStr == "ONGOV" || sourceStr == "ongov" || sourceStr == "Onondaga911" || sourceStr == "onondaga911")
     return DataSource::ONGOV;
   if(sourceStr == "MCNY" || sourceStr == "mcny" || sourceStr == "Monroe911" || sourceStr == "monroe911")
@@ -153,18 +159,20 @@ void setSource(const DataSource source) {
 
 // Get events from all URLs
 void fetchEvents() {
-  Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Onondaga County 911 events");
-  getEvents(ONGOV::EVENTS_URL);
-  Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching NYS 511 events");
-  getEvents(NYSDOT::EVENTS_URL);
-  Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Monroe County 911 events");
-  getEvents(MCNY::EVENTS_URL);
-  Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Ontario 511 events");
-  getEvents(ONMT::EVENTS_URL);
-  Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Ottawa events");
-  getEvents(OTT::EVENTS_URL);
-  Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Montréal events");
-  getEvents(MTL::EVENTS_URL);
+  //Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Onondaga County 911 events");
+  //getEvents(ONGOV::EVENTS_URL);
+  //Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching NYS 511 events");
+  //getEvents(NYSDOT::EVENTS_URL);
+  Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching NYS Thuruway Authority events");
+  getEvents(NYSTA::EVENTS_URL);
+  //Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Monroe County 911 events");
+  //getEvents(MCNY::EVENTS_URL);
+  //Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Ontario 511 events");
+  //getEvents(ONMT::EVENTS_URL);
+  //Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Ottawa events");
+  //getEvents(OTT::EVENTS_URL);
+  //Output::logger.log(Output::LogLevel::INFO, "EVENTS", "Fetching Montréal events");
+  //getEvents(MTL::EVENTS_URL);
 }
 
 void fetchCameras() {
@@ -210,7 +218,9 @@ bool getEvents(std::string url) {
     url += NYSDOT::API_KEY;
     // Set current Data Source
     setSource(DataSource::NYSDOT);
-  } 
+  }
+  else if(url.find("thruway.ny.gov") != std::string::npos)
+    setSource(DataSource::NYSTA);
   else if(url.find("511on.ca") != std::string::npos)
     setSource(DataSource::ONMT);
   else if(url.find("monroecounty.gov") != std::string::npos)
@@ -278,7 +288,8 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
     // Mark JSON source as success
     extractedSources.push_back(currentSource);
     parseEvents(parsedData);
-  } else if(contentType.find("text/xml") != std::string::npos) {
+  } else if(contentType.find("text/xml") != std::string::npos
+            || contentType.find("application/xml") != std::string::npos) {
     // Convert encoding for MTL data
     if(currentSource == DataSource::MTL)
       data = convertEncoding(data, "ISO-8859-1", "UTF-8");
@@ -291,7 +302,10 @@ bool processData(std::string& data, const std::vector<std::string>& headers) {
     // Mark XML source as success
     extractedSources.push_back(currentSource);
     // Parse the events
-    parseEvents(std::move(parsedData)); //  NOTE: parsedData has now been invalidated, attmpting to access will result in UB
+    if(currentSource == DataSource::NYSTA)
+      parseXMLEvents(std::move(parsedData));
+    else
+      parseRSSEvents(std::move(parsedData)); //  NOTE: parsedData has now been invalidated, attmpting to access will result in UB
   } else if(contentType.find("text/html") != std::string::npos) {
     auto parsedData = ONGOV::Gumbo::parseData(data);
     // Check for parsing success
@@ -328,8 +342,32 @@ bool parseEvents(const Json::Value& parsedData) {
   return true;
 }
 
-// Parse XML events
-bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
+// Parse regular XML events
+bool parseXMLEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
+  // De-reference the document ptr to access its value
+  rapidxml::xml_document<>& events = *parsedData;
+  
+  // Enter into the root document tree for processing
+  rapidxml::xml_node<>* root = events.first_node("events");
+
+  // Get the update time
+  rapidxml::xml_node<>* time = root->first_node("lastupdatetime");
+  std::string timeUpdated{""};
+  if(time) {
+    timeUpdated = time->value();
+  }
+
+  // Iterate through each <event> in the root tree
+  for(rapidxml::xml_node<>* event = root->first_node("event"); event; event = event->next_sibling("event")) {
+    // Lock the map before processing the event
+    std::lock_guard<std::mutex> lock(eventsMutex);
+    NYSTA::processEvent(event, timeUpdated);
+  }
+  return true;
+}
+
+// Parse RSS events
+bool parseRSSEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
   // De-reference the document pointer to access its value
   rapidxml::xml_document<>& events = *parsedData; // NOTE: parsedData is no longer a valid reference
 
@@ -831,6 +869,7 @@ Event::Event(const rapidxml::xml_node<>* item, const std::pair<std::string, std:
   }   
 }
 
+// TODO: Expand functionality to create events from a NYSTA node<>*
 // Construct an event from a Montreal XML object
 Event::Event(const rapidxml::xml_node<>* parsedEvent) 
 : dataSource{ DataSource::MTL }, region{ Region::Montreal }, location{ Location(45.5019, -73.5674) }, timeUpdated{ Time::currentTime() }

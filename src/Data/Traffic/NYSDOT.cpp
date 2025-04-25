@@ -10,9 +10,9 @@ namespace Traffic {
 namespace NYSDOT {
 
 std::string API_KEY{""};
-extern const std::string EVENTS_URL{ "https://511ny.org/api/getevents?format=json&key=" };
-extern const std::string CAMERAS_URL{ "https://511ny.org/api/getcameras?format=json&key=" };
-extern constexpr BoundingBox regionSyracuse{ -76.562, -75.606, 43.553, 42.621 };
+const std::string EVENTS_URL{ "https://511ny.org/api/getevents?format=json&key=" };
+const std::string CAMERAS_URL{ "https://511ny.org/api/getcameras?format=json&key=" };
+constexpr BoundingBox regionSyracuse{ -76.562, -75.606, 43.553, 42.621 };
 
 // Source data from local environment
 void getEnv() {

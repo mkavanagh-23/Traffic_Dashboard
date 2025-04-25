@@ -64,6 +64,7 @@ Json::Value parseData(const std::string& jsonData);
 
 namespace XML {
 std::unique_ptr<rapidxml::xml_document<>> parseData(std::string& xmlData);
+std::string getAttrValue(rapidxml::xml_node<>* node, const char* attr_name);
 } // namespace XML
 
 namespace HTML {

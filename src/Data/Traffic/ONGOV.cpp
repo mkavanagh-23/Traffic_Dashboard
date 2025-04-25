@@ -23,7 +23,7 @@ std::vector<std::string> payloads {
 // Geo-blocked? Data center traffic?
 // Investigate HERE traffic API for potential integration
 
-extern const std::string EVENTS_URL{ "https://911events.ongov.net/CADInet/app/events.jsp" };
+const std::string EVENTS_URL{ "https://911events.ongov.net/CADInet/app/events.jsp" };
 
 std::optional<std::pair<int, int>> getPageNumbers(const std::string& htmlData) {
   std::regex pattern(R"(Page (\d+) of (\d+))");

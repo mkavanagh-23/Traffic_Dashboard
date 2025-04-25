@@ -33,6 +33,7 @@ Region toRegion(const std::string& regionStr);
 
 enum class DataSource {
   NYSDOT,
+  NYSTA,
   ONGOV,
   MCNY,
   ONMT,
@@ -144,7 +145,8 @@ void printEvents(Region region);
 bool getEvents(std::string url);
 bool processData(std::string& data, const std::vector<std::string>& headers);   // XML must be able to manipulate data
 bool parseEvents(const Json::Value& parsedData);
-bool parseEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData);
+bool parseXMLEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData);
+bool parseRSSEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData);
 bool parseEvents(const std::vector<HTML::Event>& parsedData);
 bool processEvent(const Json::Value& parsedEvent);
 bool inMarket(const Json::Value& parsedEvent);

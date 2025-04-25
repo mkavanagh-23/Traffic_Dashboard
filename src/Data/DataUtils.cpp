@@ -247,6 +247,12 @@ std::unique_ptr<rapidxml::xml_document<>> parseData(std::string& xmlData) {
   return parsedData;
 }
 
+std::string getAttrValue(rapidxml::xml_node<>* node, const char* attr_name) {
+  if (!node) { return ""; }  
+  rapidxml::xml_attribute<>* attr = node->first_attribute(attr_name);
+  return attr ? attr->value() : "";
+}
+
 } // namespace XML
 
 // Create a unique key for the event object
@@ -441,6 +447,31 @@ std::optional<system_clock::time_point> toChrono(const std::string& rfc2822){
   return std::nullopt;
 }
 } // namespace RFC2822
+
+namespace MMDDYYYYHHMM {
+// TODO:
+// Need to collect real-time data and determine if any TZ offset is needed to adjust to UTC
+// 4/10/2025 1:40 PM
+system_clock::time_point toChrono(const std::string& timeStr) {
+  std::regex pattern(R"((\d{1,2})/(\d{1,2})/(\d{4}) (\d{1,2}):(\d{2}) (AM|PM))");
+  std::smatch matches;
+  // matches[1] = month
+  // matches[2] = day
+  // matches[3] = year
+  // matches[4] = hours
+  // matches[5] = min
+  // matches[6] = timeOfDay
+  if(std::regex_match(timeStr, matches, pattern)) {
+    int parsedMonth = std::stoi(matches[1]);
+    int parsedDay = std::stoi(matches[2]);
+    int parsedYear = std::stoi(matches[3]);
+    int parsedHours = std::stoi(matches[4]);
+    int parsedMin = std::stoi(matches[5]);
+    std::string parsedAMPM = matches[6];        // NOTE: UTC adjustment here
+  }
+}
+
+}
 
 namespace MMDDYYHHMM {
 
