@@ -351,6 +351,7 @@ bool parseXMLEvents(std::unique_ptr<rapidxml::xml_document<>> parsedData) {
   rapidxml::xml_node<>* root = events.first_node("events");
 
   // Get the update time
+  // Or do we want to use the "updatetime" member of each event object
   rapidxml::xml_node<>* time = root->first_node("lastupdatetime");
   std::string timeUpdated{""};
   if(time) {

@@ -30,3 +30,39 @@
 [status] ACTIVE
 [message] Hwy 174 closed between Old montreal and Canaan due to a collision. Duration is unknown. Avoid area and use other routes.
 [headline] Hwy 174 between Old montreal and Canaan
+[eventType] INCIDENT
+[status] ACTIVE
+[message] Greenland closed between Armitage and Deadend due to flooding. Duration is unknown. Avoid area.
+[headline] Greenland between Armitage and Deadend
+[eventType] INCIDENT
+[status] ACTIVE
+[message] Petrie Island access closed at Tweddle due to flooding. Duration is unknown. Avoid area.
+[headline] Petrie Island access at Tweddle
+[eventType] INCIDENT
+[status] ACTIVE
+[message] Boisé Lane closed due to flooding. Access for local traffic maintained.
+[headline] Boisé Lane
+[eventType] INCIDENT
+[status] ACTIVE
+[message] Armitage closed due to flooding. Duration is unknown. Access for local traffic maintained.
+[headline] Armitage
+[eventType] INCIDENT
+[status] ACTIVE
+[message] HWY 417 Eastbound  [ RICHMOND RD (IC 130)/BAYSHORE DR -  ] - Disabled Vehicle. left shoulder and left lane closed
+[headline] (MTO) HWY 417 Eastbound  [ RICHMOND RD (IC 130)/BAYSHORE DR -  ] - Disabled Vehicle
+[eventType] INCIDENT
+[status] ACTIVE
+[message] Greenland closed between Armitage and Deadend due to flooding. Duration is unknown. Avoid area.
+[headline] Greenland between Armitage and Deadend
+[eventType] INCIDENT
+[status] ACTIVE
+[message] Petrie Island access closed at Tweddle due to flooding. Duration is unknown. Avoid area.
+[headline] Petrie Island access at Tweddle
+[eventType] INCIDENT
+[status] ACTIVE
+[message] Boisé Lane closed due to flooding. Access for local traffic maintained.
+[headline] Boisé Lane
+[eventType] INCIDENT
+[status] ACTIVE
+[message] Armitage closed due to flooding. Duration is unknown. Access for local traffic maintained.
+[headline] Armitage
