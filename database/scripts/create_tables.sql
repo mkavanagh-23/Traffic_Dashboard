@@ -43,7 +43,8 @@ CREATE TABLE `market_regions` (
 
 CREATE TABLE `roadway_suffix` (
   `suffix_id` INT PRIMARY KEY AUTO_INCREMENT,
-  `text` VARCHAR(10)
+  `text` VARCHAR(20) NOT NULL,
+  `abbreviation` VARCHAR(8) NOT NULL
 );
 
 CREATE TABLE `main_roadways` (
@@ -73,7 +74,7 @@ CREATE TABLE `traffic_events` (
   `event_id` VARCHAR(64) PRIMARY KEY,
   `roadway_id` INT NOT NULL,
   `travel_direction` ENUM(
-    'NB', 'SB', 'EB', 'WB', 'Outbound', 'Inbound', 'Outer Loop', 'Inner Loop'
+    'NB', 'SB', 'EB', 'WB', 'Both', 'Outbound', 'Inbound', 'Outer Loop', 'Inner Loop'
   ) NULL,
   `category_id` INT NOT NULL,
   `status_id` INT NOT NULL,
@@ -93,8 +94,8 @@ CREATE TABLE `traffic_events` (
 
 CREATE TABLE `geo_coordinates` (
   `event_id` VARCHAR(64) PRIMARY KEY,
-  `latitude` DECIMAL(8,6) NOT NULL,
-  `longitude` DECIMAL(9,6) NOT NULL,
+  `latitude` DECIMAL(6,4) NOT NULL,
+  `longitude` DECIMAL(7,4) NOT NULL,
   CONSTRAINT `coordinates_fk_events`
     FOREIGN KEY (`event_id`)
     REFERENCES `traffic_events` (`event_id`)
