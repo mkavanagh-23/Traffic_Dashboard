@@ -74,8 +74,8 @@ CREATE TABLE `traffic_events` (
   `event_id` VARCHAR(64) PRIMARY KEY,
   `roadway_id` INT NOT NULL,
   `travel_direction` ENUM(
-    'NB', 'SB', 'EB', 'WB', 'Both', 'Outbound', 'Inbound', 'Outer Loop', 'Inner Loop'
-  ) NULL,
+    'NB', 'SB', 'EB', 'WB', 'Both', 'Outbound', 
+    'Inbound', 'Outer Loop', 'Inner Loop') NULL,
   `category_id` INT NOT NULL,
   `status_id` INT NOT NULL,
   `details` TEXT NOT NULL,

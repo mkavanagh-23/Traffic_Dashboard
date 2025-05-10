@@ -41,13 +41,13 @@ INSERT INTO `main_roadways` VALUES
   (DEFAULT, 1, 'Sackett', 1),
   (DEFAULT, 2, 'North', 1),
   (DEFAULT, 2, 'Calkins', 2),
-  (DEFAULT, 2, 'Rt. 490', NULL)
+  (DEFAULT, 2, 'Rt. 490', NULL),
   (DEFAULT, 2, 'N Greece', 2),
   (DEFAULT, 2, 'Fairport', 2),
   (DEFAULT, 3, 'I-90', NULL),
   (DEFAULT, 2, 'I-90', NULL),
   (DEFAULT, 7, 'Hwy 401', NULL),
-  (DEFAULT, 7, 'Hwy 400', NULL)
+  (DEFAULT, 7, 'Hwy 400', NULL),
   (DEFAULT, 7, 'Queen Elizabeth', 4),
   (DEFAULT, 7, 'Don Valley', 5),
   (DEFAULT, 9, 'Hwy 417', NULL),
@@ -56,7 +56,10 @@ INSERT INTO `main_roadways` VALUES
   (DEFAULT, 8, 'Metropolitan', NULL),
   (DEFAULT, 8, 'Hwy 138', NULL),
   (DEFAULT, 6, 'I-80', NULL),
-  (DEFAULT, 6, 'I-287', NULL);
+  (DEFAULT, 6, 'I-287', NULL),
+  (DEFAULT, 2, 'Rt. 441', NULL),
+  (DEFAULT, 1, 'I-690', NULL),
+  (DEFAULT, 1, 'I-81', NULL);
 
 INSERT INTO `event_categories` VALUES
   (DEFAULT, 'Accident'),
@@ -98,22 +101,25 @@ INSERT INTO `traffic_events` VALUES
   ('PERE2512902200', 9, 'WB', 1, 5, 'at Pittsford Rd [Exit 26 Off-Ramp]', '2025-05-08 14:12:00.000', '2025-05-08 14:39:07.213'),
   ('ONT-29736', 14, 'EB', 2, 1, 'at Mavis Rd [Collector - Off-Ramp]', '2025-05-08 14:07:00.000', '2025-05-08 14:37:03.202'),
   ('ONT-29727', 15, 'NB', 8, 1, 'between Canal Rd and Mapleview Dr', '2025-05-08 14:27:00.000', '2025-05-08 14:38:09.202'),
-  ('ONT-29725', 14, 'EB', 4, 1, 'at Dixie Rd [On-Ramp]', '2025-05-08 14:02:00.000', '2025-05-08 14:51:21.202')
+  ('ONT-29725', 14, 'EB', 4, 1, 'at Dixie Rd [On-Ramp]', '2025-05-08 14:02:00.000', '2025-05-08 14:51:21.202'),
   ('ONT-29721', 16, 'SB', 1, 2, 'at Ford Dr', '2025-05-08 13:56:23.000', '2025-05-08 14:34:29.231'),
   ('ONT-29754', 16, 'NB', 2, 1, 'at Fifty Rd', '2025-05-08 14:56:23.000', '2025-05-08 14:59:28.231'),
   ('ONT-29746', 14, 'EB', 2, 1, 'at Whites Rd', '2025-05-08 14:25:23.000', '2025-05-08 14:43:28.231'),
   ('ONT-29742', 14, 'WB', 2, 1, 'at Kipling Ave', '2025-05-08 14:39:22.000', '2025-05-08 14:51:28.223'),
   ('ONT-29759', 17, 'NB', 2, 1, 'at Lawrence Ave', '2025-05-08 14:23:25.000', '2025-05-08 14:43:29.523'),
-  ('OTT-29716', 18, 'EB', 1, 1, 'at Panmure Rd', '2025-05-08 14:21:29.000', '2025-05-08 14:47:29.523')
-  ('OTT-29715', 18, 'WB', 8, 1, 'at March Rd', '2025-05-07 12:22:29.000', '2025-05-08 14:50:29.523');
+  ('OTT-29716', 18, 'EB', 1, 1, 'at Panmure Rd', '2025-05-08 14:21:29.000', '2025-05-08 14:47:29.523'),
+  ('OTT-29715', 18, 'WB', 8, 1, 'at March Rd', '2025-05-07 12:22:29.000', '2025-05-08 14:50:29.523'),
   ('OTT-28921', 18, 'EB', 2, 5, 'at Rochester St', '2025-05-08 12:22:27.000', '2025-05-08 14:42:29.503'),
-  ('OTT-29699', 19, 'SB', 1, 5, 'at Hunt Club Rd', '2025-05-08 13:45:27.000', '2025-05-08 14:51:27.222')
+  ('OTT-29699', 19, 'SB', 1, 5, 'at Hunt Club Rd', '2025-05-08 13:45:27.000', '2025-05-08 14:51:27.222'),
   ('MTL-3487245', 20, 'SB', 1, 1, 'at Rue Jean-Talon', '2025-05-08 14:22:27.000', '2025-05-08 14:51:29.222'),
   ('MTL-3487253', 21, 'EB', 2, 1, 'at Hwy 15', '2025-05-08 14:34:29.000', '2025-05-08 14:53:55.222'),
   ('MTL-3487266', 22, 'WB', 1, 4, 'at Rue Clement', '2025-05-08 14:27:27.000', '2025-05-08 14:43:22.222'),
-  ('CCT-45933295', 23, 'EB', 1, 1, 'at Parsippany Rd'),
-  ('CCT-45933359', 23, 'EB', 1, 2, 'at Rt. 46 (Denville)'),
-  ('CCT-45935560', 24, 'NB', 1, 5, 'at I-80 (Parsippany)');
+  ('CCT-45933295', 23, 'EB', 1, 1, 'at Parsippany Rd', '2025-05-08 14:27:27.000', '2025-05-08 14:43:22.222'),
+  ('CCT-45933359', 23, 'EB', 1, 2, 'at Rt. 46 (Denville)', '2025-05-08 14:27:27.000', '2025-05-08 14:43:22.222'),
+  ('CCT-45935560', 24, 'NB', 1, 5, 'at I-80 (Parsippany)', '2025-05-08 14:27:27.000', '2025-05-08 14:43:22.222'),
+  ('BRIE2512902261', 25, 'EB', 1, 4, 'at Linden Ave', '2025-05-08 14:31:21.000', '2025-05-08 14:42:12.993'),
+  ('NDOT-5490875', 26, 'EB', 8, 1, 'between I-81 and Teall Ave [Exit 14]', '2024-08-12 09:00:00.000', '2025-03-12 18:31:19.665'),
+  ('NDOT-8324562', 27, 'NB', 8, 1, 'between I-90 [Exit 25A] and US 11 [Exit 26]', '2025-01-01 06:00:00.000', '2025-04-18 14:00:00.000');
 
 INSERT INTO `geo_coordinates` VALUES
   ('ONGOV-ZZVCHI0508251045MADNTSMOTIESWGEWRD', 43.0449, -75.8815),
@@ -147,93 +153,10 @@ INSERT INTO `geo_coordinates` VALUES
   ('OTT-29699', 45.3345, -75.6937),
   ('MTL-3487245', 45.4946, -73.6529),
   ('MTL-3487253', 45.5041, -73.6653),
-  ('MTL-3487266', 45.4340, -73.6502);
-
-<title>MVA / NO INJURIES at RT 441 EB/LINDEN AVE BRI</title>
-<link>https://www.monroecounty.gov/safety-incidents</link>
-<pubDate>Fri, 09 May 2025 15:42:00 -0400</pubDate>
-<description>Status: WAITING, ID: BRIE2512902261</description>
-<guid>https://www.monroecounty.gov/safety-incidents?BRIE2512902261</guid>
-<geo:lat>+43.128</geo:lat>
-<geo:long>-77.5217</geo:long>
-
-<title>DANGEROUS CONDITION-IMMEDIATE THREAT at JEFFERSON RD/LOMB MEMORIAL DR BRI</title>
-<link>https://www.monroecounty.gov/safety-incidents</link>
-<pubDate>Fri, 09 May 2025 15:30:00 -0400</pubDate>
-<description>Status: ENROUTE, ID: BRIE2512902233</description>
-<guid>https://www.monroecounty.gov/safety-incidents?BRIE2512902233</guid>
-<geo:lat>+43.0923</geo:lat>
-<geo:long>-77.6747</geo:long>
-
-<title>MVA / NO INJURIES at EAST AVE/GIBBS ST ROC</title>
-<link>https://www.monroecounty.gov/safety-incidents</link>
-<pubDate>Fri, 09 May 2025 15:27:00 -0400</pubDate>
-<description>Status: ONSCENE, ID: ROCE2512902221</description>
-<guid>https://www.monroecounty.gov/safety-incidents?ROCE2512902221</guid>
-<geo:lat>+43.1569</geo:lat>
-<geo:long>-77.6018</geo:long>
-
-<title>MVA / NO INJURIES at WHITNEY RD E/WATSON RD PER</title>
-<link>https://www.monroecounty.gov/safety-incidents</link>
-<pubDate>Fri, 09 May 2025 16:17:00 -0400</pubDate>
-<description>Status: ENROUTE, ID: PERE2512902383</description>
-<guid>https://www.monroecounty.gov/safety-incidents?PERE2512902383</guid>
-<geo:lat>+43.1083</geo:lat>
-<geo:long>-77.4322</geo:long>
-
-<title>MVA / NO INJURIES at WHITNEY RD E/WATSON RD PER</title>
-<link>https://www.monroecounty.gov/safety-incidents</link>
-<pubDate>Fri, 09 May 2025 16:17:00 -0400</pubDate>
-<description>Status: ENROUTE, ID: PERE2512902383</description>
-<guid>https://www.monroecounty.gov/safety-incidents?PERE2512902383</guid>
-<geo:lat>+43.1083</geo:lat>
-<geo:long>-77.4322</geo:long>
-
-Bridge work on I-690 eastbound between I-81 Northbound Interchange (Syracuse) and Exit 14 - Teall Avenue (Syracuse), Continuous Monday August 12th, 2024 09:00 AM thru Tuesday July 1st, 2025 06:00 PM 1 Right lane of 3 lanes closed
-Start Time	Aug 12 2024, 9:00 AM
-Recurrence	Continuous Monday August 12, 2024 9:00 AM to Tuesday July 1, 2025 6:00 PM, Sunday thru Saturday.
-Last Updated	Mar 12 2025, 6:31 PM
-
-Longterm construction on I-81 northbound between Exit 25A - I-90 (Salina) and Exit 26 - US 11; Mattydale (Salina), Continuous Wednesday January 1st,2025 06:00 AM thru Wednesday December 31st,2025 03:00 PM 1 Right lane of 4 lanes closed northbound,
-Start Time	Jan 1 2025, 6:00 AM
-Recurrence	Continuous Wednesday January 1, 2025 6:00 AM to Wednesday December 31, 2025 3:00 PM, Sunday thru Saturday.
-Last Updated	Apr 18 2025, 2:00 PM
-
-Bridge work on I-81 southbound between Exit 28 - Taft Road; North Syracuse (Cicero) and Exit 27- Syracuse Airport (Salina), Continuous Thursday March 27th,2025 09:00 AM thru Friday May 16th,2025 03:30 PM 1 Left lane of 3 lanes closed southbound,
-Start Time	Mar 27 2025, 9:00 AM
-Recurrence	Continuous Thursday March 27, 2025 9:00 AM to Friday May 16, 2025 3:30 PM, Sunday thru Saturday.
-Last Updated	May 1 2025, 3:30 PM
-
-Construction and road rehabilitation on US 62 both directions Exit - I-290 Youngmann Expressway; Ridge Lea Road (Amherst) to Connecting Boulevard (Wheatfield), Wednesday April 9th, 2025 thru Saturday January 31st, 2026, Sunday thru Saturday, 12:00 AM thru 11:59 PM 1 Right lane of 4 lanes closed
-Start Time	Apr 9 2025, 12:00 AM
-Recurrence	Wednesday April 9, 2025 12:00 AM to Saturday January 31, 2026 11:59 PM, Sunday thru Saturday.
-Last Updated	Apr 9 2025, 12:10 PM
-
-Bridge work on US 20 both directions Leydecker Road (Orchard Park) to Exit - Aurora Expressway (Elma), Thursday April 24th, 2025 thru Friday August 29th, 2025, Sunday thru Saturday, 07:00 AM thru 05:00 PM 1 Right lane of 2 lanes closed
-Start Time	Apr 24 2025, 7:00 AM
-Recurrence	Thursday April 24, 2025 7:00 AM to Friday August 29, 2025 5:00 PM, Sunday thru Saturday.
-Last Updated	Apr 24 2025, 8:42 AM
-
-Crash on I-90 - NYS Thruway eastbound at Before Exit 25 (I-90) - Schenectady (I-890) starting 3:03 PM, 05/09/2025 [CARS CAD-251290226]
-Start Time	May 9 2025, 3:03 PM
-Last Updated	May 9 2025, 3:03 PM
-
-Crash on I-87 Northway northbound before Exit 8; Crescent Road (Halfmoon) right shoulder closed
-Lane Closures	right shoulder closed
-Start Time	May 9 2025, 3:17 PM
-Last Updated	May 9 2025, 3:17 PM
-
-Bridge rehabilitation on I-87 Northway southbound ramp to Exit 7; NY 7 (Colonie), Continuous Sunday April 13th, 2025 12:00 AM thru Tuesday September 30th, 2025 11:59 PM 1 Left lane of 2 lanes closed
-Start Time	Apr 13 2025, 12:00 AM
-Recurrence	Continuous Sunday April 13, 2025 12:00 AM to Tuesday September 30, 2025 11:59 PM, Monday.
-Last Updated	Apr 14 2025, 10:17 AM
-
-Construction on NY 32 southbound at simmons lane (Menands) Lane Shift SB, Monday May 5th, 2025 thru Friday May 9th, 2025, Monday thru Friday, 07:00 AM thru 05:00 PM All lanes open
-Start Time	May 5 2025, 7:00 AM
-Recurrence	Monday May 5, 2025 7:00 AM to Friday May 9, 2025 5:00 PM, Monday thru Friday.
-Last Updated	May 3 2025, 2:44 AM
-
-Long Term Road Construction on I-80 Westbound At Exit 34 - NJ 15 (Wharton) Monday March 31, 2025 01:05 PM thru Wednesday June 25, 2025 12:00 PM, All lanes closed and detoured
-Start Time	Mar 31 2025, 1:05 PM
-Recurrence	Continuous Monday March 31, 2025 1:05 PM to Wednesday June 25, 2025 12:00 PM, Monday.
-Last Updated	Apr 29 2025, 3:43 PM
+  ('MTL-3487266', 45.4340, -73.6502),
+  ('CCT-45933295',),
+  ('CCT-45933359',),
+  ('CCT-45935560',),
+  ('BRIE2512902261', 43.1280, -77.5217),
+  ('NDOT-5490875', 43.0515, -76.1304),
+  ('NDOT-8324562', 43.1035, -76.1536);
