@@ -12,7 +12,7 @@ LEFT JOIN main_roadways
 LEFT JOIN traffic_events
   ON main_roadways.roadway_id = traffic_events.roadway_id
 GROUP BY market_regions.region_id
-HAVING COUNT(traffic_events.event_id) > (
+HAVING COUNT(traffic_events.event_id) > ( -- Filter to groups with more records than the average
   SELECT 		-- Subquery to find the average of the number of events per region
     AVG(region_event_count)
   FROM (
