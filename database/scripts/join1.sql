@@ -1,10 +1,12 @@
+USE mfkavanagh_255;
+
 -- join1.sql
 -- Creates a full join of all events in the database, sorted by market and update date
 -- This would be a good candidate for a view
 
 SELECT
   event_categories.name AS type,
-  CONCAT_WS(' ', main_roadways.name, roadway_suffix.text) AS roadway,
+  CONCAT_WS(' ', main_roadways.name, roadway_suffix.abbreviation) AS roadway,
   travel_direction,
   details,
   CONCAT(market_regions.name, ', ', states_provinces.abbreviation) AS market,
@@ -27,4 +29,4 @@ JOIN event_status
   ON traffic_events.status_id = event_status.status_id
 LEFT JOIN geo_coordinates   -- Outer join to include events without coordinates
   ON traffic_events.event_id = geo_coordinates.event_id
-ORDER BY market_regions.region_id, date_updated ASC;
+ORDER BY market_regions.name ASC, date_updated DESC;
