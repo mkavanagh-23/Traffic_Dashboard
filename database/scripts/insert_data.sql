@@ -79,7 +79,8 @@ INSERT INTO `event_status` VALUES
   (DEFAULT, 'Dispatched'),
   (DEFAULT, 'Pending'),
   (DEFAULT, 'Waiting'),
-  (DEFAULT, 'Cleared');
+  (DEFAULT, 'Cleared'),
+  (DEFAULT, 'Archived');
 
 INSERT INTO `traffic_events` VALUES
   ('ONGOV-ZZVCHI0508251045MADNTSMOTIESWGEWRD', 1, NULL, 1, 1, 'at Sleepy Hollow Rd', '2025-05-08 14:45:00.000', '2025-05-08 14:48:49.338'),
@@ -95,7 +96,7 @@ INSERT INTO `traffic_events` VALUES
   ('ROCE2512801103', 9, 'WB', 1, 1, 'at Ames St [Exit Ramp]', '2025-05-08 14:12:00.000', '2025-05-08 14:23:22.414'),
   ('GREE2512902079', 10, NULL, 1, 1, 'at Latta Rd', '2025-05-08 14:23:03.000', '2025-05-08 14:50:01.224'),
   ('PITE2512902116', 11, 'EB', 3, 2, 'at Washington Rd', '2025-05-08 14:49:23.000', '2025-05-08 14:51:09.213'),
-  ('CAD-251290228', 12, 'EB', 1, 1, 'at After I-190 [Exit 53 - Buffalo (Downtown)]', '2025-05-08 14:23:02.000', '2025-05-08 14:46:22.466'),
+  ('CAD-251290228', 12, 'EB', 1, 5, 'at After I-190 [Exit 53 - Buffalo (Downtown)]', '2025-05-08 14:23:02.000', '2025-05-08 14:46:22.466'),
   ('CAD-251290233', 13, 'WB', 2, 4, 'at Before Rt. 332 [Exit 44 - Canadaigua]', '2025-05-08 09:27:01.000', '2025-05-08 14:48:03.694'),
   ('ROCE2512902210', 9, 'WB', 2, 1, 'at S Winton Rd', '2025-05-08 14:39:00.000', '2025-05-08 14:50:23.666'),
   ('PERE2512902200', 9, 'WB', 1, 5, 'at Pittsford Rd [Exit 26 Off-Ramp]', '2025-05-08 14:12:00.000', '2025-05-08 14:39:07.213'),
