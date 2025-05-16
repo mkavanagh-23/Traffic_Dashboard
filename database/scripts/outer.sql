@@ -1,10 +1,6 @@
 USE mfkavanagh_255;
 
--- outer.sql
--- Validate missing data values
--- List all regions that DO NOT have any events
-
-SELECT
+SELECT DISTINCT
   market_regions.name AS market,
   states_provinces.name AS state
 FROM market_regions

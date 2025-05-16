@@ -1,8 +1,5 @@
 USE mfkavanagh_255;
 
--- logical.sql
--- List all regions that currently contain events that are not "cleared"
-
 SELECT DISTINCT
     CONCAT(market_regions.name, ', ', states_provinces.abbreviation) AS market
 FROM traffic_events

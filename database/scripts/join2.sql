@@ -1,10 +1,5 @@
 USE mfkavanagh_255;
 
--- join2.sql
--- List all roadways by region and state, with a count of events per row
--- Sorted by number of events, then market, then roadway
--- Be sure to include roadways with no events
-
 SELECT
   CONCAT_WS(' ', main_roadways.name, roadway_suffix.abbreviation) AS roadway,
   market_regions.name AS market_region,

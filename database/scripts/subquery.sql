@@ -1,8 +1,5 @@
 USE mfkavanagh_255;
 
--- subquery.sql
--- List the most recently updated event in each region
-
 SELECT
   traffic_events.event_id AS id,
   event_categories.name AS type,
@@ -16,7 +13,7 @@ JOIN event_categories
   ON traffic_events.category_id = event_categories.category_id
 JOIN main_roadways
   ON traffic_events.roadway_id = main_roadways.roadway_id
-LEFT JOIN roadway_suffix    -- Outer join to include roadways without suffixes
+LEFT JOIN roadway_suffix
   ON main_roadways.suffix_id = roadway_suffix.suffix_id
 JOIN market_regions
   ON main_roadways.region_id = market_regions.region_id
