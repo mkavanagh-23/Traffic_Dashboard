@@ -9,8 +9,7 @@ do
     # Loop through each source
     for ((i=0; i<${#sources[@]}; i++))
     do
-        curl -v "localhost:6969/events?source=${sources[i]}" | jq | grep description >> "temp_processing/${filenames[i]}"
-        sort "temp_processing/${filenames[i]}" | uniq > temp.txt && mv temp.txt "temp_processing/${filenames[i]}"
+        curl -v "jellyfin:6969/events?source=${sources[i]}" | jq >> "temp_processing/${filenames[i]}"
     done
     
     sleep 120

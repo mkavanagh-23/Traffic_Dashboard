@@ -1,0 +1,71 @@
+
+<title>DANGEROUS CONDITION-IMMEDIATE THREAT at JEFFERSON RD/LOMB MEMORIAL DR BRI</title>
+<link>https://www.monroecounty.gov/safety-incidents</link>
+<pubDate>Fri, 09 May 2025 15:30:00 -0400</pubDate>
+<description>Status: ENROUTE, ID: BRIE2512902233</description>
+<guid>https://www.monroecounty.gov/safety-incidents?BRIE2512902233</guid>
+<geo:lat>+43.0923</geo:lat>
+<geo:long>-77.6747</geo:long>
+
+<title>MVA / NO INJURIES at EAST AVE/GIBBS ST ROC</title>
+<link>https://www.monroecounty.gov/safety-incidents</link>
+<pubDate>Fri, 09 May 2025 15:27:00 -0400</pubDate>
+<description>Status: ONSCENE, ID: ROCE2512902221</description>
+<guid>https://www.monroecounty.gov/safety-incidents?ROCE2512902221</guid>
+<geo:lat>+43.1569</geo:lat>
+<geo:long>-77.6018</geo:long>
+
+<title>MVA / NO INJURIES at WHITNEY RD E/WATSON RD PER</title>
+<link>https://www.monroecounty.gov/safety-incidents</link>
+<pubDate>Fri, 09 May 2025 16:17:00 -0400</pubDate>
+<description>Status: ENROUTE, ID: PERE2512902383</description>
+<guid>https://www.monroecounty.gov/safety-incidents?PERE2512902383</guid>
+<geo:lat>+43.1083</geo:lat>
+<geo:long>-77.4322</geo:long>
+
+<title>MVA / NO INJURIES at WHITNEY RD E/WATSON RD PER</title>
+<link>https://www.monroecounty.gov/safety-incidents</link>
+<pubDate>Fri, 09 May 2025 16:17:00 -0400</pubDate>
+<description>Status: ENROUTE, ID: PERE2512902383</description>
+<guid>https://www.monroecounty.gov/safety-incidents?PERE2512902383</guid>
+<geo:lat>+43.1083</geo:lat>
+<geo:long>-77.4322</geo:long>
+
+Bridge work on I-81 southbound between Exit 28 - Taft Road; North Syracuse (Cicero) and Exit 27- Syracuse Airport (Salina), Continuous Thursday March 27th,2025 09:00 AM thru Friday May 16th,2025 03:30 PM 1 Left lane of 3 lanes closed southbound,
+Start Time	Mar 27 2025, 9:00 AM
+Recurrence	Continuous Thursday March 27, 2025 9:00 AM to Friday May 16, 2025 3:30 PM, Sunday thru Saturday.
+Last Updated	May 1 2025, 3:30 PM
+
+Construction and road rehabilitation on US 62 both directions Exit - I-290 Youngmann Expressway; Ridge Lea Road (Amherst) to Connecting Boulevard (Wheatfield), Wednesday April 9th, 2025 thru Saturday January 31st, 2026, Sunday thru Saturday, 12:00 AM thru 11:59 PM 1 Right lane of 4 lanes closed
+Start Time	Apr 9 2025, 12:00 AM
+Recurrence	Wednesday April 9, 2025 12:00 AM to Saturday January 31, 2026 11:59 PM, Sunday thru Saturday.
+Last Updated	Apr 9 2025, 12:10 PM
+
+Bridge work on US 20 both directions Leydecker Road (Orchard Park) to Exit - Aurora Expressway (Elma), Thursday April 24th, 2025 thru Friday August 29th, 2025, Sunday thru Saturday, 07:00 AM thru 05:00 PM 1 Right lane of 2 lanes closed
+Start Time	Apr 24 2025, 7:00 AM
+Recurrence	Thursday April 24, 2025 7:00 AM to Friday August 29, 2025 5:00 PM, Sunday thru Saturday.
+Last Updated	Apr 24 2025, 8:42 AM
+
+Crash on I-90 - NYS Thruway eastbound at Before Exit 25 (I-90) - Schenectady (I-890) starting 3:03 PM, 05/09/2025 [CARS CAD-251290226]
+Start Time	May 9 2025, 3:03 PM
+Last Updated	May 9 2025, 3:03 PM
+
+Crash on I-87 Northway northbound before Exit 8; Crescent Road (Halfmoon) right shoulder closed
+Lane Closures	right shoulder closed
+Start Time	May 9 2025, 3:17 PM
+Last Updated	May 9 2025, 3:17 PM
+
+Bridge rehabilitation on I-87 Northway southbound ramp to Exit 7; NY 7 (Colonie), Continuous Sunday April 13th, 2025 12:00 AM thru Tuesday September 30th, 2025 11:59 PM 1 Left lane of 2 lanes closed
+Start Time	Apr 13 2025, 12:00 AM
+Recurrence	Continuous Sunday April 13, 2025 12:00 AM to Tuesday September 30, 2025 11:59 PM, Monday.
+Last Updated	Apr 14 2025, 10:17 AM
+
+Construction on NY 32 southbound at simmons lane (Menands) Lane Shift SB, Monday May 5th, 2025 thru Friday May 9th, 2025, Monday thru Friday, 07:00 AM thru 05:00 PM All lanes open
+Start Time	May 5 2025, 7:00 AM
+Recurrence	Monday May 5, 2025 7:00 AM to Friday May 9, 2025 5:00 PM, Monday thru Friday.
+Last Updated	May 3 2025, 2:44 AM
+
+Long Term Road Construction on I-80 Westbound At Exit 34 - NJ 15 (Wharton) Monday March 31, 2025 01:05 PM thru Wednesday June 25, 2025 12:00 PM, All lanes closed and detoured
+Start Time	Mar 31 2025, 1:05 PM
+Recurrence	Continuous Monday March 31, 2025 1:05 PM to Wednesday June 25, 2025 12:00 PM, Monday.
+Last Updated	Apr 29 2025, 3:43 PM
